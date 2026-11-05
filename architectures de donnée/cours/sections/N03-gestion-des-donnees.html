@@ -1,0 +1,513 @@
+<h2 class="notion" id="n03">N3 — La gestion des données et ses cinq missions</h2>
+
+<h3 id="n03-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> La <strong>gestion des données</strong> est la collecte, le traitement
+      et l'utilisation <strong>sécurisés et efficaces</strong> des données
+      <strong>pour améliorer les résultats de l'entreprise</strong>.</p>
+
+    <p>Elle se décompose en <strong>cinq missions</strong> :</p>
+    <ol>
+      <li><strong>Collecter et intégrer</strong> des sources diverses.</li>
+      <li><strong>Stocker</strong> les données selon les <em>workloads</em> et les contraintes.</li>
+      <li><strong>Gouverner, sécuriser</strong> et contrôler les accès.</li>
+      <li><strong>Gérer le cycle de vie</strong>, la traçabilité et l'observabilité.</li>
+      <li><strong>Fournir des données utilisables</strong> aux métiers, aux analystes, aux data scientists
+        et aux ingénieurs IA.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n03-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Trois mots de cette définition font tout le travail, et on les lit souvent trop vite.</p>
+
+    <p><strong>« Sécurisés ».</strong> La sécurité n'est pas une étape ajoutée après coup, elle qualifie
+      l'activité entière : on ne collecte pas, puis on sécurise ; on collecte <em>de façon sécurisée</em>.
+      <strong>« Efficaces ».</strong> Le mot est placé à égalité avec le précédent, et c'est volontaire :
+      une donnée verrouillée au point que personne ne l'obtient échoue aussi sûrement qu'une donnée qui
+      fuit. La gestion des données est donc un <strong>équilibre permanent entre deux exigences qui
+      tirent en sens inverse</strong>, et non l'application d'une seule.</p>
+
+    <p><strong>« Pour améliorer les résultats de l'entreprise ».</strong> C'est la finalité, et elle sert
+      de juge. Une gestion de données irréprochable techniquement mais qui n'améliore aucun résultat n'est
+      pas une réussite partielle : c'est un coût. Cette finalité donne aussi le seul critère défendable
+      pour arbitrer — quand on hésite entre deux options, on choisit celle qui rapproche d'un résultat,
+      pas celle qui satisfait une préférence technique.</p>
+
+    <p>Vient ensuite la liste des cinq missions. Elle n'est pas une énumération arbitraire : c'est le
+      <strong>parcours complet d'une donnée</strong>, du moment où elle entre jusqu'au moment où quelqu'un
+      s'en sert. Elle <em>entre</em> (collecter et intégrer), elle <em>se pose</em> quelque part (stocker),
+      elle est <em>encadrée</em> (gouverner, sécuriser), elle <em>vit et vieillit</em> (cycle de vie,
+      traçabilité, observabilité), elle est <em>consommée</em> (fournir des données utilisables).</p>
+
+    <p>Deux détails de cette liste méritent d'être relevés, car ils annoncent la suite du cours. D'abord,
+      la deuxième mission ne dit pas « stocker », mais <strong>« stocker selon les workloads et les
+      contraintes »</strong> : il n'existe pas un bon stockage, il en existe un par type de charge — ce
+      qui mènera à OLTP et OLAP (N16 à N19) puis au choix batch / stream (N20 à N22). Ensuite, la
+      cinquième mission nomme <strong>quatre publics différents</strong> — métiers, analystes, data
+      scientists, ingénieurs IA — et non « les utilisateurs ». Ces quatre-là ne demandent ni la même
+      fraîcheur, ni la même agrégation, ni la même qualité ; les servir tous à partir d'un même socle
+      gouverné est précisément le problème que l'architecture moderne cherche à résoudre (N30).</p>
+
+    <p>Enfin, remarquez le rapport entre les cinq missions et les couches de l'architecture que nous
+      construirons à la fin du cours : collecter correspond à l'ingestion, stocker au storage, fournir à
+      la couche analytics et IA — tandis que <strong>gouverner et suivre le cycle de vie ne sont pas des
+      étapes, mais traversent tout le reste</strong>. La liste des missions est donc déjà, en creux, le
+      plan de l'architecture moderne.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>La gestion des données n'est pas l'administration de bases de données.</strong> Un DBA
+        tient un système en état de marche ; la gestion des données couvre le parcours complet, depuis des
+        sources qu'aucune base ne contient jusqu'à des usages qui n'existent pas encore.</li>
+      <li><strong>Ce n'est pas un projet, c'est un cycle.</strong> Un projet se termine ; les cinq missions
+        continuent tant que la donnée vit. Une organisation qui « a fait la gouvernance » l'an dernier ne
+        l'a pas faite.</li>
+      <li><strong>Sécurité et efficacité se décident ensemble, jamais l'une après l'autre.</strong> Les
+        deux échecs symétriques se ressemblent plus qu'on ne croit : données ouvertes sans cadre d'un
+        côté, données inaccessibles « par prudence » de l'autre. Dans les deux cas, la définition n'est
+        pas satisfaite.</li>
+      <li><strong>« Gérer le cycle de vie » n'est pas « tout garder ».</strong> Conserver sans fin coûte,
+        encombre et peut devenir non conforme. Décider ce que l'on supprime, et quand, fait partie de la
+        mission au même titre que conserver.</li>
+      <li><strong>« Fournir des données utilisables » n'est pas « donner un accès ».</strong> Un accès à
+        une base dont personne ne comprend les champs ne rend pas la donnée utilisable (voir N1).</li>
+      <li><strong>Une mission sans responsable n'est pas assurée.</strong> La quatrième mission est la
+        plus souvent orpheline : tout le monde produit et consomme, personne ne surveille. Elle ne se
+        remarque qu'au moment d'un incident, c'est-à-dire trop tard.</li>
+      <li><strong>Les cinq missions ne sont pas séquentielles.</strong> On ne finit pas de collecter avant
+        de gouverner. Elles s'exercent en même temps, sur des données différentes et à des stades
+        différents.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> تدبير المعطيات (gestion des données) هو الجمع والمعالجة والاستعمال
+    <strong>بشكل آمن وفعال</strong> ديال المعطيات <strong>باش نحسنو نتائج المقاولة</strong>. تلات كلمات
+    هوما الأساس: «آمن» و«فعال» (بجوج فنفس الوقت — معطى مسدود ما كيوصل حتى لحد كيفشل بحال معطى سائب)،
+    و«نتائج المقاولة» (هي الحاكم: تدبير نقي تقنيا وما حسن والو هو تكلفة ماشي نجاح). وكتتقسم لخمس مهام:
+    <strong>1)</strong> الجمع والدمج ديال مصادر متنوعة، <strong>2)</strong> التخزين <em>حسب نوع
+    الاستعمال والقيود</em>، <strong>3)</strong> الحكامة والأمن والتحكم فالولوج، <strong>4)</strong>
+    دورة الحياة والتتبع والمراقبة، <strong>5)</strong> توفير معطيات صالحة للاستعمال لأربع جمهورات
+    مختلفين (المهنيين، المحللين، data scientists، مهندسي الذكاء الاصطناعي). هاد الخمسة هوما بالضبط مسار
+    المعطى من فين كيدخل حتى فين كيتستعمل — وهوما فنفس الوقت التخطيط ديال الأركيتكتير العصرية.</p>
+</div>
+
+<h3 id="n03-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de la <strong>résolution locale</strong>. Chaque équipe, prise isolément, se
+      comporte raisonnablement : le marketing extrait un fichier pour sa campagne, le contrôle de gestion
+      se branche sur la base de caisse, le data scientist demande une copie pour entraîner son modèle.
+      Aucune de ces décisions n'est fautive ; leur accumulation l'est. Au bout de deux ans, la même donnée
+      existe en huit exemplaires, aucun ne fait autorité, personne ne sait lequel est à jour, et la
+      première question transverse — « combien de clients actifs ? » — reçoit trois réponses différentes.</p>
+    <p>Sans la règle, ce désordre n'a pas de nom : il se vit comme une suite d'incidents sans lien. Avec
+      elle, il devient un <strong>défaut de mission identifiable</strong> : ce n'est pas « nos données sont
+      en désordre », c'est « personne n'exerce la mission d'intégration », ou « la mission de cycle de vie
+      n'a pas de responsable ». La règle traite donc le problème du <strong>périmètre</strong> : nommer
+      une activité complète, qu'on peut attribuer, financer et évaluer, au lieu d'une série de réparations.</p>
+  </div>
+</div>
+
+<h3 id="n03-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Diagnostiquer une organisation en cinq questions</strong> : qui collecte et intègre, qui
+        décide du stockage, qui gouverne, qui surveille, qui sert les consommateurs. La mission sans nom
+        en face est le point faible.</li>
+      <li><strong>Attribuer des responsabilités</strong> plutôt que des outils. Un outil sans mission
+        attribuée ne change rien ; une mission attribuée sans outil produit déjà des effets.</li>
+      <li><strong>Construire un cahier des charges</strong> ou évaluer une offre : une proposition qui ne
+        couvre que la collecte et le stockage laisse trois missions à la charge du client, ce qu'il vaut
+        mieux découvrir avant de signer.</li>
+      <li><strong>Justifier un budget de gouvernance</strong> auprès d'une direction, en le rattachant à
+        la finalité de la définition — les résultats — plutôt qu'à une obligation abstraite.</li>
+      <li><strong>Arbitrer entre sécurité et efficacité</strong> en rappelant que la définition exige les
+        deux : toute position extrême est, littéralement, hors définition.</li>
+      <li><strong>Préparer la lecture de l'architecture moderne</strong> : les cinq missions annoncent les
+        couches et la couche transverse (N30), ce qui rendra ce schéma évident au lieu d'être à mémoriser.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n03-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La définition vient du monde de la pratique, et sa forme le montre : elle ne décrit pas une
+      discipline académique mais une <strong>fonction d'entreprise</strong>, avec des verbes d'action et
+      une finalité économique. C'est pourquoi elle se termine par « améliorer les résultats » et non par
+      « assurer la qualité des données » : la qualité est un moyen.</p>
+
+    <p>Quant aux cinq missions, on peut les retrouver soi-même par la méthode employée tout au long de ce
+      cours : <strong>retirer un élément et observer la panne</strong>. Suivons une donnée de l'enseigne —
+      un ticket de caisse.</p>
+    <ul>
+      <li><strong>Sans la mission 1 (collecter et intégrer)</strong> : le ticket existe dans la caisse et
+        nulle part ailleurs. Chaque question transverse exige un travail manuel, et le client du site ne
+        sera jamais rapproché du client du magasin.</li>
+      <li><strong>Sans la mission 2 (stocker selon les workloads)</strong> : tout est posé au même endroit,
+        donc le rapport analytique s'exécute sur la base des encaissements et la ralentit. La panne n'est
+        pas une perte de données, c'est une perte de service.</li>
+      <li><strong>Sans la mission 3 (gouverner, sécuriser)</strong> : les données clients circulent en
+        fichiers, sans cadre d'usage ni contrôle d'accès. Le jour où un fichier sort, l'entreprise ne sait
+        même pas dire qui y avait accès.</li>
+      <li><strong>Sans la mission 4 (cycle de vie, traçabilité, observabilité)</strong> : le stockage
+        double chaque année sans qu'on sache ce qui sert ; un chargement échoue une nuit et personne ne
+        le voit ; un chiffre faux apparaît dans un tableau de bord et l'on ne peut pas remonter à son
+        origine. C'est la mission dont l'absence coûte le plus longtemps avant d'être repérée.</li>
+      <li><strong>Sans la mission 5 (fournir des données utilisables)</strong> : tout le reste est en
+        place, et pourtant chaque demande métier passe par un développement spécifique. L'entreprise a
+        payé une plateforme pour reproduire ses anciens goulots d'étranglement.</li>
+    </ul>
+
+    <p>Chaque suppression produit une panne différente, et aucune des quatre autres missions ne la
+      compense : les cinq sont donc <strong>indépendantes et nécessaires</strong>. Enfin, la raison pour
+      laquelle elles sont rassemblées sous un seul nom tient à la finalité : prises séparément, ce sont
+      des tâches techniques ; prises ensemble et jugées sur les résultats de l'entreprise, elles forment
+      une fonction.</p>
+  </div>
+</div>
+
+<h3 id="n03-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans l'organisation d'une équipe data.</strong> On écrit les cinq missions et l'on place
+        un nom en face de chacune. L'exercice prend dix minutes et fait apparaître les missions que
+        personne n'exerce — en général la quatrième — ainsi que celles où trois équipes se marchent dessus.</li>
+      <li><strong>Dans l'audit d'un système d'information existant.</strong> Les cinq missions servent de
+        grille de lecture : pour chacune, qui la porte, avec quel outil, et quelle preuve peut-on en
+        montrer ? Une mission sans preuve est une mission déclarée, pas assurée.</li>
+      <li><strong>Dans la rédaction d'un cahier des charges ou l'évaluation d'une offre.</strong> On
+        vérifie quelles missions le périmètre proposé couvre réellement, et lesquelles restent à la charge
+        de l'entreprise — information rarement mise en avant par un fournisseur.</li>
+      <li><strong>Dans un dossier de conformité.</strong> Les missions 3 et 4 fournissent directement la
+        structure attendue : qui accède à quoi, selon quelles règles, pendant combien de temps, et comment
+        on le prouve.</li>
+      <li><strong>Dans la préparation d'un projet d'IA.</strong> Avant de parler de modèles, on vérifie que
+        les cinq missions sont assurées sur les données concernées. Un projet d'IA bâti sur une mission 1
+        ou 4 défaillante échoue pour des raisons qui n'ont rien à voir avec l'IA.</li>
+      <li><strong>Dans le dialogue avec la direction générale.</strong> La définition permet de présenter
+        la gestion des données comme une fonction à finalité économique, avec un coût et un effet
+        attendus, plutôt que comme une dépense technique.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n03-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Chaque équipe a sa propre copie du fichier clients. »</strong> Mission 1 non assurée :
+        il n'y a pas d'intégration, donc chacun en fabrique une pour soi.</li>
+      <li><strong>« Le rapport fait ramer la production. »</strong> Mission 2 : le stockage n'a pas été
+        choisi selon les workloads, un seul système porte deux charges incompatibles.</li>
+      <li><strong>« Qui a le droit de voir cette colonne ? — On ne sait pas. »</strong> Mission 3. Tant que
+        la réponse n'est pas écrite quelque part, elle n'existe pas.</li>
+      <li><strong>« Le chargement de cette nuit a échoué, on s'en est aperçu trois jours plus tard. »</strong>
+        Mission 4, volet observabilité. Le problème n'est pas l'échec, c'est le délai de détection.</li>
+      <li><strong>« Notre volume stocké double chaque année et personne ne sait ce qu'on peut effacer. »</strong>
+        Mission 4, volet cycle de vie. Le coût est visible, la décision manque.</li>
+      <li><strong>« D'où vient ce chiffre ? »</strong> Mission 4, volet traçabilité. Une question banale
+        qui, restée sans réponse, discrédite l'ensemble des tableaux de bord.</li>
+      <li><strong>« Chaque demande métier prend six semaines de développement. »</strong> Mission 5 : les
+        données ne sont pas fournies sous une forme utilisable, elles sont reconstruites à chaque fois.</li>
+      <li><strong>« La sécurité a tout bloqué, plus personne ne travaille. »</strong> Déséquilibre entre
+        « sécurisés » et « efficaces » : la définition exige les deux, l'arbitrage doit être rouvert.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n03-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Fixer le périmètre et le résultat visé.</strong> N'évaluez jamais « la gestion des
+      données » en général : choisissez un domaine — les données clients, les ventes, les capteurs d'un
+      site — et écrivez le résultat d'entreprise attendu. Sans ce résultat, l'évaluation n'aura pas de
+      juge, et la dernière partie de la définition resterait lettre morte.</p>
+
+    <p><strong>Étape 2 — Passer les cinq missions une par une.</strong> Pour chacune, trois questions :
+      <em>qui</em> l'exerce, <em>avec quoi</em>, et <em>quelle preuve</em> peut-on montrer ? La preuve est
+      ce qui distingue une mission réellement assurée d'une mission déclarée : un document d'habilitation,
+      une alerte qui s'est déclenchée, une règle de purge appliquée.</p>
+
+    <p><strong>Étape 3 — Repérer les missions orphelines et les missions disputées.</strong> Une mission
+      sans nom en face est un risque à venir ; une mission portée par trois équipes produit des copies
+      divergentes. Notez les deux : ce sont deux maladies opposées, et elles n'appellent pas le même
+      remède.</p>
+
+    <p><strong>Étape 4 — Tester l'équilibre « sécurisés et efficaces ».</strong> Posez deux questions
+      symétriques : existe-t-il une donnée sensible accessible sans contrôle ? existe-t-il une donnée
+      légitime qu'un utilisateur autorisé n'obtient pas dans un délai raisonnable ? Un « oui » à l'une ou
+      à l'autre signale un déséquilibre à corriger, et il faut les poser toutes les deux, car corriger
+      l'une crée souvent l'autre.</p>
+
+    <p><strong>Étape 5 — Conclure par un plan ordonné par l'effet, pas par la facilité.</strong> Classez
+      les manques selon ce qu'ils coûtent au résultat visé à l'étape 1, puis attribuez chaque mission
+      manquante à un responsable nommé, avec la preuve attendue. Une mission attribuée sans preuve
+      attendue retombera dans l'oubli au premier imprévu.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Gérer les données, c'est assurer <strong>cinq missions</strong> — collecter et intégrer, stocker
+      selon les workloads, gouverner et sécuriser, suivre le cycle de vie, fournir des données utilisables
+      — de façon <strong>à la fois sécurisée et efficace</strong>, et jugée sur les résultats de
+      l'entreprise.</p>
+    <p class="ar" dir="rtl">تدبير المعطيات = <strong>خمس مهام</strong> (الجمع والدمج · التخزين حسب
+      الاستعمال · الحكامة والأمن · دورة الحياة والتتبع · توفير معطيات صالحة)، <strong>بأمان وفعالية
+      بجوج</strong>، والحكم عليها بنتائج المقاولة.</p>
+  </div>
+</div>
+
+<h3 id="n03-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — diagnostic de l'enseigne</div>
+  <div class="box-b">
+    <p>Reprenez le cas d'ouverture. Aujourd'hui : chaque application écrit dans sa propre base ; le
+      rapport du soir interroge directement la base des caisses ; les logs et les photos ne sont chargés
+      nulle part ; le même client porte trois identifiants ; la base opérationnelle ne garde que six mois
+      d'historique ; aucune alerte n'existe sur les chargements. Appliquez la démarche et produisez un
+      plan ordonné. Résultat visé : disposer chaque matin à 8 h du chiffre d'affaires de la veille par
+      région.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Périmètre et résultat.</strong> Périmètre : les ventes des 120 magasins et du
+      site. Résultat visé : chiffre d'affaires de la veille par région, disponible à 8 h, et reconnu comme
+      le chiffre de référence par la direction. Ce dernier point compte autant que le premier : un chiffre
+      livré à l'heure mais contesté n'améliore aucun résultat.</p>
+
+    <p><strong>Étape 2 — Les cinq missions.</strong></p>
+    <ul>
+      <li><strong>1. Collecter et intégrer</strong> — exercée partiellement et par accident : chaque
+        application écrit chez elle, aucune intégration n'est organisée. Preuve : aucune. Les logs et les
+        photos ne sont collectés par personne.</li>
+      <li><strong>2. Stocker selon les workloads</strong> — non exercée. Un seul système porte la charge
+        transactionnelle et la charge analytique, d'où le ralentissement des encaissements. Preuve du
+        défaut : le rapport du soir ralentit les caisses, fait observable.</li>
+      <li><strong>3. Gouverner et sécuriser</strong> — non documentée. Nul ne peut dire qui accède aux
+        données clients ni selon quelles règles.</li>
+      <li><strong>4. Cycle de vie, traçabilité, observabilité</strong> — <strong>orpheline</strong>. Six
+        mois d'historique conservés par défaut et non par décision, aucune alerte sur les chargements,
+        aucune trace permettant de dire d'où vient un chiffre.</li>
+      <li><strong>5. Fournir des données utilisables</strong> — non exercée : chaque demande donne lieu à
+        une extraction spécifique.</li>
+    </ul>
+
+    <p><strong>Étape 3 — Orphelines et disputées.</strong> Orpheline : la mission 4, sans aucun titulaire.
+      Disputée : la mission 1, que trois équipes exercent chacune pour son besoin, ce qui produit
+      précisément les trois identifiants clients du cas.</p>
+
+    <p><strong>Étape 4 — Sécurisés et efficaces.</strong> Donnée sensible accessible sans contrôle : oui,
+      les fichiers clients circulent par extraction. Donnée légitime non obtenue à temps : oui, le chiffre
+      d'affaires de la veille. <strong>Les deux déséquilibres coexistent</strong>, ce qui est fréquent et
+      interdit de traiter l'un en aggravant l'autre : verrouiller les extractions sans offrir un accès
+      servi rendrait la situation pire, pas meilleure.</p>
+
+    <p><strong>Étape 5 — Plan ordonné par l'effet sur le résultat visé.</strong></p>
+    <ol>
+      <li><strong>Mission 2 d'abord</strong> : sortir la charge analytique de la base des caisses en
+        alimentant une plateforme dédiée. C'est ce qui débloque directement le résultat de 8 h et supprime
+        au passage le ralentissement des encaissements — un seul geste, deux effets.</li>
+      <li><strong>Mission 1 ensuite</strong> : organiser une intégration unique des ventes magasins et
+        site, avec une règle de rapprochement des identifiants clients, pour que le chiffre soit celui de
+        l'enseigne et non celui d'un canal.</li>
+      <li><strong>Mission 4 en même temps</strong>, et non « plus tard » : une alerte si le chargement de
+        la nuit échoue, et la trace de l'origine de chaque chiffre. Sans cela, le premier incident à 8 h 05
+        détruira la confiance que les deux étapes précédentes auront construite.</li>
+      <li><strong>Mission 5</strong> : exposer une vue « ventes par région et par jour » documentée, au
+        lieu de laisser chaque service refaire sa requête.</li>
+      <li><strong>Mission 3</strong> : écrire les règles d'accès sur les données clients, en parallèle, en
+        veillant à ne pas fermer ce que l'on vient d'ouvrir.</li>
+    </ol>
+    <p>Chaque responsable est nommé, et chaque mission reçoit une preuve attendue : une alerte qui se
+      déclenche, un document d'habilitation, une vue publiée.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — la jeune entreprise de livraison</div>
+  <div class="box-b">
+    <p>Une entreprise de livraison de 30 salariés a recruté un data scientist, seul sur le sujet des
+      données. Il extrait lui-même les données depuis la base de l'application, les nettoie sur son poste,
+      entraîne des modèles de prévision de délais et publie des résultats appréciés. Il n'existe ni
+      entrepôt, ni documentation, ni sauvegarde de ses traitements. La direction veut « industrialiser ».
+      Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Périmètre et résultat.</strong> Périmètre : les données de courses et de
+      livreurs. Résultat visé : des prévisions de délais fiables, utilisées en exploitation tous les jours
+      et qui survivent au départ de leur auteur. Le second membre de phrase est le vrai sujet de
+      l'exercice.</p>
+
+    <p><strong>Étape 2 — Les cinq missions.</strong> Mission 1 : exercée, mais par une personne et à la
+      main. Mission 2 : non exercée, le poste du data scientist tient lieu de stockage. Mission 3 : non
+      exercée, des données personnelles de clients et de livreurs se retrouvent sur une machine
+      individuelle. Mission 4 : non exercée, aucune trace de ce qui a produit quel résultat. Mission 5 :
+      exercée en apparence — les résultats sont publiés — mais ils ne sont pas reproductibles par un
+      tiers.</p>
+
+    <p><strong>Étape 3 — Orphelines et disputées.</strong> Quatre missions sur cinq sont orphelines ;
+      aucune n'est disputée, puisqu'une seule personne fait tout. C'est le profil inverse de celui de
+      l'exercice 12.1, et il appelle un remède inverse : là où la grande enseigne devait <em>unifier</em>
+      des pratiques concurrentes, il faut ici <em>répartir</em> une pratique unique. Le risque n'est pas
+      la divergence, c'est la dépendance à une personne.</p>
+
+    <p><strong>Étape 4 — Sécurisés et efficaces.</strong> Côté sécurité : des données personnelles sur un
+      poste individuel, sans contrôle ni chiffrement, constituent le risque majeur. Côté efficacité :
+      l'entreprise est au contraire très efficace aujourd'hui — les résultats sortent vite. Tout l'enjeu
+      de l'industrialisation est donc de <strong>ne pas acheter de la sécurité en détruisant
+      l'efficacité existante</strong>, erreur classique qui transforme un atout en procédure.</p>
+
+    <p><strong>Étape 5 — Plan ordonné.</strong> (a) Déplacer les données du poste vers un stockage
+      partagé, sauvegardé et contrôlé — cela traite d'un coup les missions 2 et 3, sans rien changer à la
+      façon de travailler. (b) Versionner les traitements dans un dépôt : mission 4, à un coût presque
+      nul, et qui rend le travail reproductible. (c) Documenter les champs utilisés : mission 5, pour
+      qu'un deuxième profil puisse reprendre. (d) Automatiser l'extraction quotidienne : mission 1.
+      L'ordre est choisi pour que chaque étape reste discrète du point de vue du data scientist : une
+      industrialisation qui le ralentit sera abandonnée avant d'être finie.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — la banque où tout est verrouillé</div>
+  <div class="box-b">
+    <p>Dans une banque, toute demande d'accès à des données passe par un comité mensuel ; les exports sont
+      interdits ; les analystes travaillent sur des échantillons anonymisés vieux de six mois. La
+      direction des risques se plaint de ne pas pouvoir détecter les fraudes assez tôt. Le responsable
+      sécurité répond que la réglementation l'impose. Analysez la situation avec la règle et proposez une
+      sortie.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Périmètre et résultat.</strong> Périmètre : les transactions et les alertes de
+      fraude. Résultat visé : détecter une fraude en quelques minutes plutôt qu'en quelques jours,
+      c'est-à-dire éviter une perte financière réelle et chiffrable.</p>
+
+    <p><strong>Étape 2 — Les cinq missions.</strong> Les missions 1, 2 et 3 sont exercées, et la troisième
+      remarquablement bien. La mission 4 est partiellement exercée. La mission 5 est en échec complet :
+      les données fournies ne sont pas utilisables pour l'usage visé — un échantillon anonymisé de six
+      mois ne permet pas de détecter une fraude en cours.</p>
+
+    <p><strong>Étape 3 — Orphelines et disputées.</strong> Aucune mission orpheline, mais un déséquilibre
+      assumé : la mission 3 a absorbé la mission 5.</p>
+
+    <p><strong>Étape 4 — Sécurisés et efficaces.</strong> C'est le cœur du cas. La définition exige les
+      deux termes <em>ensemble</em>. Un dispositif qui atteint un niveau de sécurité élevé en rendant la
+      donnée inutilisable pour son usage légitime <strong>ne satisfait pas la définition</strong> : il
+      échoue sur « efficaces » et sur « améliorer les résultats de l'entreprise ». L'argument
+      réglementaire doit donc être examiné précisément, car la réglementation impose des règles d'accès,
+      de finalité et de traçabilité — elle n'impose presque jamais un délai d'un mois ni une ancienneté de
+      six mois. Ces deux contraintes sont des choix d'organisation, pas des obligations légales, et c'est
+      exactement là que se trouve la marge.</p>
+
+    <p><strong>Étape 5 — Sortie proposée.</strong> Remplacer un contrôle <em>a priori</em> uniforme par un
+      contrôle <strong>proportionné et tracé</strong> : (a) définir un usage « détection de fraude » avec
+      sa finalité écrite et ses habilitations nominatives, accordées une fois pour toutes au lieu d'être
+      renégociées chaque mois ; (b) donner à cet usage un accès aux données fraîches, mais restreint aux
+      seuls champs nécessaires, avec pseudonymisation des éléments qui ne servent pas à la détection ;
+      (c) renforcer la mission 4 en contrepartie — journalisation de tous les accès, revue périodique —
+      de sorte que le niveau de maîtrise augmente au lieu de baisser ; (d) mesurer le résultat : délai
+      moyen de détection avant et après. On ne demande pas à la sécurité de céder : on
+      <strong>échange un contrôle en amont contre une traçabilité en aval</strong>, ce qui rend la
+      proposition défendable devant un régulateur.</p>
+  </div>
+</div>
+
+<h3 id="n03-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition de mémoire, puis expliquez en trois phrases pourquoi le mot « efficaces »
+        y figure à côté de « sécurisés ».</li>
+      <li>Pour chacune des cinq missions, donnez un exemple concret dans une clinique, puis le symptôme
+        observable quand elle n'est pas assurée.</li>
+      <li>Une entreprise annonce avoir « terminé son projet de gouvernance des données ». Que répondez-vous,
+        en vous appuyant sur la règle ?</li>
+      <li>La mission 2 précise « selon les workloads et contraintes ». Donnez deux workloads d'une même
+        entreprise qui appellent deux stockages différents, et dites ce qui se passe si on les place au
+        même endroit.</li>
+      <li>La mission 5 cite quatre publics. Pour chacun, indiquez ce qu'il demande en priorité — fraîcheur,
+        agrégation, exhaustivité, représentativité — et une conséquence pour l'architecture.</li>
+      <li>Dans votre établissement ou votre entreprise, identifiez la mission la moins bien assurée et
+        proposez la première action, avec sa preuve attendue.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n03-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez ces six activités sous la mission correspondante : chiffrer une base ; définir une durée de
+      conservation de trois ans ; rapprocher deux référentiels clients ; publier un catalogue de données ;
+      choisir un stockage adapté à des requêtes d'agrégation ; alerter quand un chargement échoue.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une université veut réduire l'abandon en première année. Appliquez les cinq étapes de la démarche
+      au périmètre « parcours des étudiants », en nommant pour chaque mission un responsable plausible
+      (scolarité, DSI, enseignants, délégué à la protection des données) et la preuve attendue. Terminez
+      par le plan ordonné et justifiez l'ordre par l'effet sur le résultat visé, non par la facilité
+      technique.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Deux entreprises du même secteur affichent des situations opposées. A : cinq missions formellement
+      assurées, comités, procédures, documentation abondante — mais aucun projet data n'a amélioré un
+      résultat depuis deux ans. B : trois missions sur cinq assurées, peu de procédures — mais deux
+      projets ont fait baisser les coûts de façon mesurable. Laquelle gère le mieux ses données au sens
+      de la définition ? Défendez votre réponse en citant précisément la règle, puis dites ce que chacune
+      doit corriger en priorité, et expliquez pourquoi le remède de A n'est pas « assurer les deux
+      missions manquantes » et celui de B n'est pas « rédiger des procédures ».</p>
+  </div>
+</div>

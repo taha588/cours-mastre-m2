@@ -1,0 +1,531 @@
+<h1 class="chapitre saut" id="partie1"><span class="num">Partie I</span>Évolution des architectures de données</h1>
+
+<h2 class="notion" id="n07">N7 — Les sept contraintes et la loi du découplage</h2>
+
+<h3 id="n07-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>Chaque génération d'architecture répond à un <strong>problème dominant</strong> : transaction,
+      analyse, volume, variété, élasticité, intégration, nouveaux usages.</p>
+
+    <p><strong>Évolution des contraintes :</strong></p>
+    <table>
+      <thead><tr><th>Contrainte</th><th>Ce qui augmente</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Volume</strong></td><td>plus de données</td></tr>
+        <tr><td><strong>Variété</strong></td><td>plus de formats</td></tr>
+        <tr><td><strong>Vitesse</strong></td><td>besoin de données fraîches</td></tr>
+        <tr><td><strong>Distribution</strong></td><td>plusieurs sites / clouds / systèmes</td></tr>
+        <tr><td><strong>Complexité</strong></td><td>plus de workloads</td></tr>
+        <tr><td><strong>Gouvernance</strong></td><td>sécurité, conformité, traçabilité</td></tr>
+        <tr><td><strong>IA</strong></td><td>qualité, représentativité, contexte</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Loi.</strong> Plus les contraintes augmentent, plus l'architecture doit
+      <strong>découpler les composants et les responsabilités</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n07-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Première chose à voir : ces sept lignes ne décrivent pas des défauts, mais des
+      <strong>axes de croissance</strong>. Aucune organisation ne « souffre de variété » comme on
+      souffre d'une panne : elle a simplement plus de formats qu'avant, parce qu'elle fait plus de
+      choses. Les sept contraintes disent donc dans quelles <em>directions</em> la demande grandit —
+      et une architecture ne se juge pas sur sa capacité à les supprimer, mais sur sa capacité à les
+      absorber.</p>
+
+    <p>Deuxième chose : ce qui compte n'est pas le niveau d'une contrainte, c'est sa
+      <strong>vitesse de croissance</strong>. Une entreprise qui gère 50 To depuis cinq ans sans
+      augmentation a un volume élevé et une contrainte de volume faible. Une autre qui passe de 1 à
+      4 To en un an a un volume modeste et une contrainte forte. C'est la seconde qui doit agir.</p>
+
+    <p><strong>La vraie règle est la dernière phrase</strong>, et elle énonce une loi de réponse : plus
+      les contraintes augmentent, plus il faut <em>découpler</em>. Pour comprendre pourquoi, il faut
+      définir le couplage : deux éléments sont couplés quand <strong>un changement de l'un oblige à
+      toucher l'autre</strong>. Dans une architecture couplée, chaque augmentation d'une contrainte se
+      propage : le volume grandit, et c'est le workload transactionnel qui ralentit ; un format nouveau
+      arrive, et c'est tout le chargement qui casse. <strong>Le couplage transforme la croissance d'une
+      contrainte en panne d'une autre partie du système.</strong> Avec sept contraintes qui montent en
+      même temps, une architecture couplée doit être refaite à chaque incrément — ce qui est
+      exactement la situation décrite au lundi matin de notre enseigne.</p>
+
+    <p>Découpler, c'est donc installer des points où la propagation s'arrête. La phrase nomme les deux
+      endroits où le faire, et il faut les deux :</p>
+    <ul>
+      <li><strong>Découpler les composants</strong> — séparer le stockage du calcul, l'ingestion du
+        traitement, le producteur du consommateur par un contrat (une interface, au sens de N5). Chaque
+        séparation est une frontière que la contrainte ne franchit plus toute seule.</li>
+      <li><strong>Découpler les responsabilités</strong> — faire en sorte qu'une équipe puisse avancer
+        sans attendre une autre. C'est la partie que l'on oublie, et son absence annule la première :
+        si deux composants sont techniquement séparés mais tenus par la même équipe débordée, la file
+        d'attente est au même endroit qu'avant.</li>
+    </ul>
+
+    <p>Reste une précision essentielle, car la loi est une <em>proportion</em>, pas un maximum :
+      <strong>découpler coûte</strong>. Plus de pièces, plus de contrats à tenir, plus de coordination,
+      souvent plus de latence et plus de points de panne. Une petite organisation avec une source et
+      deux usages n'a rien à gagner à découpler : elle paierait une souplesse dont elle n'a pas
+      l'emploi. La bonne lecture est donc : <em>découpler à la hauteur des contraintes, là où elles
+      croissent, et pas ailleurs</em>.</p>
+
+    <p>Enfin, un mot sur le rapport avec N4, car les deux listes se ressemblent sans se répéter. Les
+      <strong>quatre causes</strong> de N4 — volume, silos, formats, IA — sont ce que l'organisation
+      <em>constate</em> ; les <strong>sept contraintes</strong> sont les axes plus fins selon lesquels
+      l'architecte <em>mesure</em>. Les silos de N4 se décomposent ici en distribution et complexité, et
+      deux axes apparaissent que le constat ne montrait pas : la <strong>vitesse</strong> et la
+      <strong>gouvernance</strong>. N4 explique pourquoi la gestion devient difficile ; N7 dit dans
+      quelle direction l'architecture doit répondre.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Trop découpler est une faute symétrique.</strong> Quinze composants indépendants dans
+        une équipe de trois personnes produisent de la coordination, pas de la souplesse. La loi est une
+        proportion : au-dessous on casse, au-dessus on paie sans rien gagner.</li>
+      <li><strong>Découpler les composants sans découpler les responsabilités ne découple rien.</strong>
+        Le goulot d'étranglement se déplace du système vers l'organisation, et devient plus difficile à
+        voir.</li>
+      <li><strong>Les sept ne croissent pas au même rythme.</strong> Les traiter comme un bloc conduit à
+        un programme uniforme ; il faut nommer celle qui croît le plus vite, car c'est elle qui dicte le
+        prochain découplage.</li>
+      <li><strong>« Vitesse » est un besoin, pas une technologie.</strong> Elle se mesure par la
+        fraîcheur attendue par un usage, pas par le fait d'avoir installé un outil de streaming.</li>
+      <li><strong>La gouvernance est une contrainte croissante, pas une case à cocher.</strong> De
+        nouvelles obligations apparaissent, le périmètre des données sensibles s'étend : une conformité
+        acquise ne reste pas acquise.</li>
+      <li><strong>Qualité et représentativité ne sont pas la même chose.</strong> Un jeu de données peut
+        être parfaitement propre et totalement non représentatif — et c'est alors l'IA qui échoue, pas
+        la qualité qui manque.</li>
+      <li><strong>Le découplage a ses propres pannes.</strong> Un contrat entre deux composants peut être
+        rompu, une file peut déborder, une latence s'ajoute à chaque frontière. On n'échange pas un
+        problème contre rien : on l'échange contre un problème que l'on sait traiter.</li>
+      <li><strong>La distribution n'est pas un but.</strong> Être réparti sur plusieurs sites ou clouds
+        est une contrainte subie — rachat, réglementation, implantation — bien plus souvent qu'un choix
+        d'architecture (N14).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> كل جيل ديال الأركيتكتير كيجاوب على مشكل مهيمن، والقيود كتزيد
+    ف<strong>سبع اتجاهات</strong>: <strong>الحجم</strong> (معطيات أكثر) · <strong>التنوع</strong>
+    (فورما أكثر) · <strong>السرعة</strong> (الحاجة لمعطيات طرية) · <strong>التوزيع</strong> (مواقع
+    وclouds وأنظمة متعددة) · <strong>التعقيد</strong> (workloads أكثر) · <strong>الحكامة</strong>
+    (أمن، امتثال، تتبع) · <strong>الذكاء الاصطناعي</strong> (جودة، تمثيلية، سياق). والقانون:
+    <strong>ما زادو القيود، ما خص الأركيتكتير تفصل المكونات والمسؤوليات</strong>. علاش؟ حيت
+    «مقرونين» معناها: تبديل فواحد كيفرض تمسّ الآخر. فأركيتكتير مقرونة، نمو قيد واحد كيتحول لعطب
+    فجيهة أخرى (الحجم كيزيد → الكايسات كيبطاو). الفصل = كنحطو نقط فين كيحبس هاد الانتقال. وخاص
+    <strong>بجوج</strong>: المكونات (تخزين/حساب، إدخال/معالجة، منتج/مستهلك بعقد) والمسؤوليات (فريق
+    يقدر يتقدم بلا ما يتسنى فريق آخر) — وإلا فصلتي المكونات وخليتي فريق واحد، الطابور بقا فبلاصتو.
+    وآخر نقطة مهمة: <strong>الفصل كيكلف</strong> — فهو تناسب ماشي حد أقصى: فصل على قد القيود، وفين
+    كاينة هي كتنمى.</p>
+</div>
+
+<h3 id="n07-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de la <strong>réponse indéterminée</strong>. Une organisation constate que
+      son architecture ne suit plus, et se demande quoi faire. Les réponses disponibles sont toutes
+      plausibles — moderniser, migrer, centraliser, décentraliser, acheter une plateforme — et rien ne
+      permet de trancher, parce que le constat « ça ne suit plus » ne contient aucune direction.</p>
+    <p>La règle fournit cette direction, et elle est unique : <strong>découpler</strong>, à la hauteur de
+      ce qui croît. Elle transforme une question ouverte en question fermée : <em>quel couplage
+      transmet aujourd'hui la contrainte qui croît le plus vite ?</em> Elle traite en outre un problème
+      de temps : les contraintes montent <em>continûment</em>, alors que les projets sont discontinus.
+      En découplant, on cesse de refaire l'architecture à chaque palier pour pouvoir, à la place,
+      l'étendre par morceaux.</p>
+  </div>
+</div>
+
+<h3 id="n07-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Donner une direction unique</strong> à un plan d'évolution, au lieu d'une liste de
+        chantiers concurrents.</li>
+      <li><strong>Mesurer, et donc prioriser</strong> : noter les sept contraintes et leur croissance
+        désigne celle à traiter d'abord, avec un argument chiffré.</li>
+      <li><strong>Prévoir où ça cassera</strong> : chaque couplage est un chemin de propagation connu ;
+        on peut dire à l'avance quelle contrainte fera tomber quelle partie.</li>
+      <li><strong>Justifier un refus</strong> : « nous ne découplons pas ici, nos contraintes ne le
+        justifient pas » est un argument recevable, et il évite une complexité inutile.</li>
+      <li><strong>Lire l'histoire des architectures</strong> : chaque génération étudiée dans cette
+        partie a découplé quelque chose de plus que la précédente — c'est le fil qui relie N9 à N12.</li>
+      <li><strong>Relier technique et organisation</strong> : la loi parle des deux, ce qui légitime de
+        traiter la question des équipes dans un document d'architecture.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n07-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La liste des sept contraintes vient de l'observation des générations successives : chacune est
+      née parce qu'une contrainte particulière était devenue dominante, et c'est ce que dit la première
+      phrase de l'énoncé — transaction, puis analyse, puis volume, variété, élasticité, intégration,
+      nouveaux usages. La liste ne prétend pas être éternelle : si une huitième contrainte devenait
+      dominante, elle s'y ajouterait.</p>
+
+    <p><strong>La loi du découplage, elle, se démontre.</strong> Prenons la chaîne couplée de l'enseigne :
+      le reporting interroge directement la base des caisses. Augmentons une seule contrainte, le
+      volume des ventes, et suivons ce qui se passe :</p>
+    <ul>
+      <li>Plus de tickets → la requête du rapport balaie plus de lignes → elle dure plus longtemps →
+        elle consomme CPU, mémoire et entrées-sorties pendant plus longtemps → <strong>les
+        encaissements ralentissent</strong>.</li>
+      <li>Autrement dit : la croissance de la contrainte <em>volume</em> a produit une panne sur un
+        workload <em>transactionnel</em> qui, lui, n'avait pas changé. La contrainte a
+        <strong>traversé</strong>, et elle a traversé par le point de couplage — la base partagée.</li>
+      <li>Découplons : les ventes sont copiées chaque nuit vers une plateforme analytique séparée, et le
+        rapport n'interroge plus que celle-ci. Augmentons de nouveau le volume : le rapport ralentit, et
+        <em>c'est tout</em>. La panne reste du côté où la contrainte a grandi. <strong>Le découplage n'a
+        pas supprimé la contrainte : il a supprimé sa transmission.</strong></li>
+    </ul>
+
+    <p>Généralisons. Avec sept contraintes et une architecture où tout communique avec tout, le nombre
+      de chemins de propagation est très grand, et chaque croissance touche potentiellement tout le
+      système : c'est la raison mathématique pour laquelle une architecture couplée doit être refaite
+      entièrement à chaque palier, au lieu d'être étendue. Le découplage réduit ces chemins, et c'est
+      la seule réponse qui gagne en efficacité à mesure que le nombre de contraintes augmente.</p>
+
+    <p><strong>Et pourquoi « et les responsabilités » ?</strong> Parce qu'un chemin de propagation peut
+      être organisationnel aussi bien que technique. Si deux composants séparés sont tenus par la même
+      équipe, toute évolution de l'un entre dans la même file d'attente que l'autre : le délai se
+      transmet exactement comme se transmettait la charge. L'ajout de ces trois mots n'est donc pas une
+      recommandation de bonne gestion, c'est la même loi appliquée au second type de couplage.</p>
+  </div>
+</div>
+
+<h3 id="n07-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans un plan d'évolution pluriannuel.</strong> On note les sept contraintes
+        aujourd'hui et leur projection à trois ans, puis on classe les découplages par la contrainte
+        qu'ils arrêtent. Le plan obtenu est défendable, parce que chaque chantier est rattaché à une
+        croissance mesurée.</li>
+      <li><strong>Dans le choix entre deux architectures candidates.</strong> La question devient :
+        laquelle découple ce qui, chez nous, croît le plus vite ? C'est le critère qui départage un
+        Data Warehouse, un Data Lake et un Lakehouse bien mieux que leurs fonctionnalités (N10 à N12).</li>
+      <li><strong>Dans l'analyse d'un incident récurrent.</strong> Un incident qui revient sous des
+        formes différentes révèle presque toujours un couplage : la même contrainte se propage par le
+        même chemin. Identifier le chemin vaut mieux que corriger chaque symptôme.</li>
+      <li><strong>Dans l'organisation des équipes.</strong> Le second volet de la loi s'applique
+        directement : qui doit pouvoir avancer sans attendre qui ? Les frontières d'équipes devraient
+        coïncider avec les frontières de composants.</li>
+      <li><strong>Dans une due diligence ou un audit technique.</strong> Noter les sept contraintes et
+        repérer les couplages donne, en une journée, une vision juste de ce que coûtera la croissance à
+        venir.</li>
+      <li><strong>Dans la lecture de l'histoire des architectures.</strong> Toute cette partie I
+        s'éclaire si l'on demande, pour chaque génération : quelle contrainte dominait, et qu'a-t-elle
+        découplé ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n07-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« On touche à ça, et ça casse ailleurs. »</strong> Définition même du couplage. Notez
+        le chemin : il vous donnera le découplage à faire.</li>
+      <li><strong>« Toute évolution doit passer par la même équipe. »</strong> Couplage de
+        responsabilités. Le symptôme est un délai qui s'allonge, pas une panne.</li>
+      <li><strong>« Le rapport fait ralentir la production. »</strong> Deux workloads couplés par un
+        composant partagé : la complexité et le volume se transmettent l'un à l'autre.</li>
+      <li><strong>« Impossible de mettre à jour ce système sans arrêter l'autre. »</strong> Couplage de
+        disponibilité, qui se paie au moment le plus coûteux : celui de la maintenance.</li>
+      <li><strong>« Chaque nouvel usage oblige à modifier le socle. »</strong> Le consommateur est
+        couplé à la structure interne : il manque une interface au sens de N5.</li>
+      <li><strong>« Nous avons migré vers le cloud mais les mêmes problèmes persistent. »</strong> Un
+        changement d'hébergement ne découple rien ; les chemins de propagation ont été déplacés tels
+        quels.</li>
+      <li><strong>« Nous avons quinze services et trois développeurs. »</strong> Le signal inverse :
+        découplage supérieur aux contraintes. Il faut regrouper, non séparer davantage.</li>
+      <li><strong>« Nous gardons 50 To depuis cinq ans sans croissance. »</strong> Contrainte de volume
+        élevée mais stable : ne pas confondre le niveau avec la croissance, et ne pas en faire une
+        priorité.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n07-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Noter les sept contraintes : niveau <em>et</em> croissance.</strong> Pour
+      chacune, deux colonnes : où en sommes-nous, et de combien cela augmente-t-il par an. Volume en
+      téraoctets et en pourcentage ; variété en nombre de familles de formats ; vitesse par la fraîcheur
+      la plus exigeante demandée ; distribution par le nombre de sites ou de clouds ; complexité par le
+      nombre de workloads distincts ; gouvernance par le nombre de règles ou de périmètres sensibles ;
+      IA par les usages avancés demandés. <strong>C'est la colonne de croissance qui décide</strong>,
+      pas celle du niveau.</p>
+
+    <p><strong>Étape 2 — Cartographier les couplages par un test simple.</strong> Pour chaque paire
+      d'éléments, posez : <em>si celui-ci change ou grossit, dois-je toucher à celui-là ?</em> Si la
+      réponse est oui, tracez un trait. N'oubliez pas les couplages de responsabilités : <em>si cette
+      équipe est occupée, cette évolution attend-elle ?</em> Le résultat est une carte des chemins par
+      lesquels les contraintes circulent.</p>
+
+    <p><strong>Étape 3 — Trouver le croisement : quel couplage transmet la contrainte la plus
+      croissante ?</strong> Superposez les deux résultats précédents. Un couplage sur un axe stable peut
+      rester en l'état ; un couplage sur l'axe qui croît le plus vite est une panne programmée dont on
+      peut presque dater l'arrivée.</p>
+
+    <p><strong>Étape 4 — Découpler là, et seulement là, sur les deux plans.</strong> Posez une
+      frontière : une séparation de composants (un stockage distinct, une file, un contrat d'interface)
+      <em>et</em> une attribution claire de responsabilité de part et d'autre. Vérifiez explicitement
+      que la contrainte ne traverse plus : reprenez le scénario de croissance et suivez-le jusqu'au
+      bout. S'il s'arrête à la frontière, c'est gagné.</p>
+
+    <p><strong>Étape 5 — Écrire le prix du découplage.</strong> Chaque frontière ajoute une latence, un
+      contrat à maintenir, un point de panne et de la coordination. Notez-les. Si ce prix dépasse ce que
+      la contrainte coûterait en restant couplée, <strong>ne découplez pas</strong> : la loi est une
+      proportion, et refuser un découplage inutile fait partie de son application.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le couplage transforme la <strong>croissance d'une contrainte</strong> en <strong>panne d'une
+      autre partie</strong> du système. Découpler — composants <em>et</em> responsabilités — supprime la
+      transmission, jamais la contrainte ; et comme découpler coûte, on le fait <strong>à la hauteur de
+      ce qui croît</strong>.</p>
+    <p class="ar" dir="rtl">الاقتران كيحول <strong>نمو قيد</strong> لـ<strong>عطب فجيهة أخرى</strong>.
+      الفصل — المكونات <em>و</em> المسؤوليات — كيقطع الانتقال، ماشي القيد؛ وحيت الفصل كيكلف، كنديروه
+      <strong>على قد اللي كينمى</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n07-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — noter les sept contraintes de l'enseigne</div>
+  <div class="box-b">
+    <p>Pour l'enseigne du cas d'ouverture : 2 To de ventes, +40 % par an ; trois familles de formats,
+      dont deux non chargées ; demandes de fraîcheur passant du mensuel au quotidien, avec une demande
+      à deux minutes pour les futurs capteurs ; un seul centre de données, un début de cloud ; quatre
+      workloads distincts contre un seul il y a cinq ans ; un règlement sur les données personnelles à
+      appliquer cette année ; une première demande de prévision. Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Niveau et croissance.</strong></p>
+    <table>
+      <thead><tr><th>Contrainte</th><th>Niveau</th><th>Croissance</th></tr></thead>
+      <tbody>
+        <tr><td>Volume</td><td>2 To — modeste</td><td>+40 %/an — forte</td></tr>
+        <tr><td>Variété</td><td>3 familles</td><td>forte : 2 familles sur 3 ne sont pas encore traitées</td></tr>
+        <tr><td>Vitesse</td><td>mensuel → quotidien</td><td>très forte : une exigence à 2 min arrive</td></tr>
+        <tr><td>Distribution</td><td>1 site, début de cloud</td><td>faible</td></tr>
+        <tr><td>Complexité</td><td>4 workloads</td><td>forte : 1 → 4 en cinq ans</td></tr>
+        <tr><td>Gouvernance</td><td>aucune règle écrite</td><td>forte : échéance réglementaire cette année</td></tr>
+        <tr><td>IA</td><td>aucun usage en production</td><td>moyenne : une première demande</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Étape 2 — Carte des couplages.</strong> (a) Le reporting lit directement la base des
+      caisses : volume et complexité se transmettent au workload transactionnel. (b) Chaque usage se
+      branche sur les sources : tout nouvel usage oblige à toucher aux systèmes opérationnels. (c) Les
+      traitements sont écrits par chaque demandeur : une règle de calcul modifiée se répercute de façon
+      imprévisible. (d) Côté responsabilités, une seule équipe traite toutes les demandes : chaque
+      évolution entre dans la même file.</p>
+
+    <p><strong>Étape 3 — Le croisement.</strong> Les contraintes qui croissent le plus vite sont la
+      vitesse et la complexité ; le couplage (a) transmet précisément celles-là, puisqu'il met sur le
+      même composant un workload analytique de plus en plus fréquent et un workload transactionnel
+      critique. <strong>C'est le couplage à casser en premier</strong>, et l'on peut même en dater
+      l'échéance : à +40 % par an, la fenêtre nocturne disponible se réduit chaque trimestre.</p>
+
+    <p><strong>Étape 4 — Découpler, sur les deux plans.</strong> Composants : une plateforme analytique
+      séparée, alimentée par une ingestion planifiée ; les consommateurs n'accèdent plus aux bases
+      opérationnelles mais à des vues contractuelles. Responsabilités : l'exploitation tient
+      l'ingestion, l'équipe data tient les règles de calcul, le métier possède les définitions.
+      Vérification : si le volume double, le rapport ralentit — et les caisses ne bougent pas. La
+      transmission est coupée.</p>
+
+    <p><strong>Étape 5 — Prix accepté.</strong> Une copie supplémentaire des données, donc du stockage ;
+      un décalage de fraîcheur, les données n'étant plus celles de l'instant ; une chaîne d'ingestion à
+      surveiller, donc un nouveau point de panne. Ce prix est inférieur au coût d'un ralentissement des
+      encaissements en période de forte affluence. <em>Ce qui n'est pas traité ici</em> : la variété —
+      les logs et les photos restent dehors — et la gouvernance, dont l'échéance impose un chantier
+      parallèle. Les noter évite de croire que ce découplage règle tout.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le découplage excessif</div>
+  <div class="box-b">
+    <p>Une entreprise de 25 personnes vend un logiciel en ligne. Son équipe data compte 3 personnes.
+      Elle a mis en place : un bus d'événements, quatre services d'ingestion séparés, un lac de données,
+      un entrepôt, un moteur de transformation, un orchestrateur, un catalogue, et une couche d'API.
+      Volume : 300 Go, croissance 10 % par an. Deux sources. Un usage : un tableau de bord
+      hebdomadaire. Rien ne fonctionne jamais tout à fait. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Niveau et croissance.</strong> Volume : faible, croissance faible. Variété :
+      deux sources, probablement une seule famille. Vitesse : hebdomadaire, soit la plus faible exigence
+      possible. Distribution : nulle. Complexité : un seul workload. Gouvernance : à vérifier, mais sans
+      rapport avec l'architecture en place. IA : aucun usage.
+      <strong>Les sept contraintes sont faibles et croissent peu.</strong></p>
+
+    <p><strong>Étape 2 — Carte des couplages.</strong> Ils ont été supprimés presque partout : chaque
+      composant est indépendant. Mais une autre carte est à faire, celle des <em>frontières</em> : il y
+      en a au moins huit, et chacune exige un contrat, une surveillance et une compétence.</p>
+
+    <p><strong>Étape 3 — Le croisement.</strong> Aucune contrainte croissante ne justifie un seul de ces
+      découplages. Le diagnostic s'inverse : <strong>le découplage est très supérieur aux
+      contraintes</strong>, et c'est lui qui crée la panne permanente. Avec trois personnes pour huit
+      frontières, chacune est mal tenue ; les incidents ne viennent pas de la charge, ils viennent du
+      nombre de pièces.</p>
+
+    <p><strong>Étape 4 — L'action est de regrouper.</strong> Pour un usage hebdomadaire sur 300 Go et
+      deux sources, une chaîne simple suffit : une extraction planifiée, un stockage unique, des
+      transformations versionnées, un tableau de bord. Trois composants au lieu de neuf. Le découplage
+      à conserver est le seul que la situation justifie : séparer la base de production de la base
+      d'analyse, parce que c'est le seul endroit où une contrainte — même faible — traverserait vers un
+      service client.</p>
+
+    <p><strong>Étape 5 — Le prix, lu à l'envers.</strong> Cet exercice illustre l'étape 5 appliquée
+      <em>avant</em> de découpler : le prix de chaque frontière — coordination, surveillance, pannes —
+      aurait dû être comparé à une contrainte croissante. Il n'y en avait aucune. <strong>La loi dit
+      « plus les contraintes augmentent, plus il faut découpler » ; elle ne dit pas « découplez
+      toujours ».</strong> Une architecture surdimensionnée échoue aussi sûrement qu'une architecture
+      couplée, et souvent plus vite, car elle échoue dès le premier jour.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le découplage à moitié fait</div>
+  <div class="box-b">
+    <p>Un assureur a séparé stockage et calcul, installé une plateforme analytique distincte des
+      systèmes de production, et mis en place des interfaces propres. Pourtant, le délai moyen pour
+      livrer un nouvel indicateur est passé de six à neuf semaines en deux ans. Toutes les demandes —
+      ingestion, transformation, publication, habilitations — sont traitées par la même équipe data de
+      six personnes, qui est aussi d'astreinte. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Niveau et croissance.</strong> La contrainte qui croît visiblement ici est la
+      <strong>complexité</strong> : le nombre de workloads et de demandes augmente, puisque le délai
+      s'allonge à effectif constant. Les autres contraintes sont tenues par l'architecture en place.</p>
+
+    <p><strong>Étape 2 — Carte des couplages.</strong> Côté composants, la carte est presque vide : le
+      travail a été fait. Côté responsabilités, tout converge vers un point unique. Le test de l'étape 2
+      le montre immédiatement : <em>si cette équipe est occupée, cette évolution attend-elle ?</em> —
+      oui, pour les quatre types de demandes, et aussi pendant les astreintes.</p>
+
+    <p><strong>Étape 3 — Le croisement.</strong> La complexité croissante se transmet intégralement par
+      le couplage organisationnel. Le résultat est exactement celui qu'on observerait avec un composant
+      partagé saturé — un délai qui s'allonge — mais il est invisible sur un schéma d'architecture, ce
+      qui explique qu'il n'ait pas été traité.</p>
+
+    <p><strong>Étape 4 — Découpler les responsabilités.</strong> Deux directions, souvent combinées.
+      D'abord, séparer les rôles : l'exploitation et l'astreinte d'un côté, l'évolution de l'autre, de
+      sorte qu'un incident ne consomme plus le temps prévu pour les livraisons. Ensuite, rendre les
+      métiers autonomes sur la partie qui les concerne — construire leurs indicateurs à partir de
+      données préparées et documentées — l'équipe data gardant le socle et les contrats. Vérification :
+      si trois métiers demandent un indicateur le même jour, les trois peuvent avancer en parallèle.</p>
+
+    <p><strong>Étape 5 — Le prix.</strong> L'autonomie des métiers crée un risque de divergence des
+      définitions, celui-là même qui produisait les chiffres contradictoires de N1. Il se paie par un
+      catalogue, des définitions partagées et des règles de calcul centralisées — c'est-à-dire par un
+      renforcement de la gouvernance. <strong>Enseignement</strong> : la loi nomme les deux termes,
+      composants <em>et</em> responsabilités, parce que découpler l'un sans l'autre déplace le goulot
+      d'étranglement au lieu de le supprimer. Ici, l'architecture était bonne ; l'organisation était
+      restée couplée.</p>
+  </div>
+</div>
+
+<h3 id="n07-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les sept contraintes et, pour chacune, ce qui augmente. Donnez pour trois d'entre elles
+        un indicateur chiffré permettant de mesurer leur croissance.</li>
+      <li>Définissez le couplage en une phrase, puis donnez trois exemples de couplage technique et deux
+        exemples de couplage de responsabilités.</li>
+      <li>Expliquez pourquoi la loi est une proportion et non un maximum, en décrivant une situation où
+        découpler serait une erreur.</li>
+      <li>Comparez les quatre causes de N4 et les sept contraintes de N7 : qu'est-ce qui se correspond,
+        et quels axes n'apparaissaient pas dans N4 ?</li>
+      <li>Pour une université : notez les sept contraintes (inscriptions, notes, cours en ligne,
+        recherche, bibliothèque) et désignez celle qui croît le plus vite aujourd'hui.</li>
+      <li>Un responsable annonce : « nous migrons vers le cloud, nos problèmes de couplage seront
+        résolus. » Répondez en vous appuyant sur la règle.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n07-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque situation à la contrainte concernée : « nous ouvrons un second centre de données
+      en Europe » ; « nos clients veulent voir leur solde immédiatement » ; « nous devons prouver qui a
+      consulté quoi » ; « nous recevons désormais des vidéos » ; « nous entraînons un premier
+      modèle » ; « nous sommes passés de 2 à 11 tableaux de bord » ; « nos données doublent chaque
+      année ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un groupe hospitalier fusionne trois établissements, chacun avec son propre système. Contraintes
+      constatées : volume ×3 immédiat, quatre familles de formats, exigence de dossier patient
+      consultable en moins de trois secondes, trois sites distincts, sept workloads, réglementation
+      santé stricte, projet d'aide au diagnostic. Appliquez les cinq étapes : notez les sept
+      contraintes, cartographiez au moins quatre couplages plausibles, désignez celui à casser en
+      premier et justifiez par la croissance, puis décrivez le découplage sur les deux plans et son
+      prix.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>La loi affirme que découpler est la réponse à la croissance des contraintes. Pourtant, chaque
+      frontière ajoute latence, coordination et points de panne — si bien qu'au-delà d'un certain point,
+      découpler davantage <em>dégrade</em> le système. Formulez ce point d'équilibre : à partir de quels
+      éléments mesurables décideriez-vous qu'un découplage supplémentaire n'est plus rentable ?
+      Construisez un critère de décision et appliquez-le aux trois cas des exercices 12.1, 12.2 et 12.3
+      pour vérifier qu'il donne bien, dans chacun, la conclusion attendue — découpler, regrouper, ou
+      découpler autrement.</p>
+  </div>
+</div>

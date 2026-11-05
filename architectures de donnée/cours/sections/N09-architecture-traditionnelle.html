@@ -1,0 +1,537 @@
+<h2 class="notion" id="n09">N9 — L'architecture traditionnelle : Applications → Base de données → Reporting</h2>
+
+<h3 id="n09-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>L'architecture traditionnelle enchaîne <strong>trois blocs</strong> :</p>
+
+    <p><strong>1. Applications</strong> — applications métiers (CRM, ERP, e-commerce, autres
+      applications) ; elles <strong>génèrent des données transactionnelles</strong> ; données
+      généralement structurées ; utilisateurs opérationnels.</p>
+    <p style="text-align:center"><em>↓ données transactionnelles : Insert, Update, Delete ↓</em></p>
+
+    <p><strong>2. Base de données</strong> — base de données <strong>transactionnelle (OLTP)</strong> ;
+      stockage des données structurées ; <strong>garantit l'intégrité et la cohérence</strong> ;
+      optimisée pour les <strong>écritures et lectures rapides</strong>.</p>
+
+    <table>
+      <thead><tr><th>ID</th><th>Nom</th><th>Date</th><th>Montant</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Client A</td><td>2024-01-01</td><td>1200</td></tr>
+        <tr><td>2</td><td>Client B</td><td>2024-01-02</td><td>850</td></tr>
+        <tr><td>3</td><td>Client C</td><td>2024-01-03</td><td>530</td></tr>
+      </tbody>
+    </table>
+
+    <p style="text-align:center"><em>↓ données pour l'analyse : requêtes SQL, exports ↓</em></p>
+
+    <p><strong>3. Reporting</strong> — outils de reporting et tableaux de bord ; analyses descriptives
+      (KPI, indicateurs) ; <strong>requêtes sur la base de données</strong> ; destiné aux décideurs et
+      aux métiers.</p>
+
+    <p><strong>Quand cette architecture fonctionne bien ?</strong> Peu de sources, données
+      principalement structurées, reporting limité, volume maîtrisé et besoins temps réel faibles.</p>
+
+    <p><strong>Quand atteint-elle ses limites ?</strong> Quand les <strong>workloads</strong> et les
+      <strong>sources</strong> se multiplient.</p>
+  </div>
+</div>
+
+<h3 id="n09-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Tout, dans cette architecture, découle d'un seul fait structurel, et il faut le voir pour
+      comprendre aussi bien ses qualités que ses limites : <strong>le reporting interroge la même base
+      que les applications</strong>. Regardez la flèche de droite dans l'énoncé — « données pour
+      l'analyse : requêtes SQL, exports ». Ce n'est pas un transfert vers un autre système, c'est une
+      lecture du même. <strong>Il n'existe aucun endroit séparé pour l'analyse.</strong></p>
+
+    <p>Commençons par ce que cela apporte, car on l'oublie trop vite. Avec un seul endroit où la donnée
+      vit, il n'y a <em>pas de copie</em>, donc pas de synchronisation à assurer, pas de divergence
+      possible entre deux chiffres, pas de décalage de fraîcheur : le rapport lit l'état réel, à
+      l'instant où il le lit. La définition d'un montant est unique parce qu'il n'existe qu'une seule
+      colonne. Les quatre conditions de valeur de N1 sont satisfaites presque gratuitement.
+      <strong>C'est une architecture simple, cohérente et peu coûteuse — et c'est pour cela qu'elle a
+      duré et qu'elle dure encore.</strong></p>
+
+    <p>Vient ensuite le domaine de validité, et il vaut la peine de le relire autrement. Les cinq
+      conditions énoncées ne sont pas une liste à retenir : ce sont <strong>les sept contraintes de N7,
+      toutes en position basse</strong> :</p>
+    <ul>
+      <li><em>Peu de sources</em> → distribution et intégration faibles ;</li>
+      <li><em>données principalement structurées</em> → variété faible ;</li>
+      <li><em>reporting limité</em> → complexité faible, peu de workloads ;</li>
+      <li><em>volume maîtrisé</em> → volume faible ;</li>
+      <li><em>besoins temps réel faibles</em> → vitesse faible.</li>
+    </ul>
+    <p>Autrement dit : <strong>l'architecture traditionnelle est exactement celle qui convient quand les
+      contraintes sont basses</strong>. Ce n'est pas une architecture « d'avant », c'est l'architecture
+      d'un régime de contraintes — et ce régime existe encore dans d'innombrables organisations.</p>
+
+    <p>La phrase sur les limites se déduit alors d'elle-même. « Quand les workloads et les sources se
+      multiplient » nomme deux contraintes qui montent : la complexité et l'intégration. Et le mécanisme
+      de la dégradation est celui de N7, dans sa forme la plus pure : <strong>un composant unique porte
+      deux workloads de natures opposées</strong>. Le transactionnel fait beaucoup de petites opérations
+      et exige une latence faible ; l'analytique fait peu de requêtes mais balaie de grands volumes.
+      Optimiser pour l'un, c'est pénaliser l'autre, et les faire cohabiter, c'est les faire se
+      concurrencer sur la même mémoire, le même processeur, les mêmes disques. D'où la panne
+      caractéristique, qui n'est pas une panne : <em>le rapport du soir ralentit les encaissements</em>.</p>
+
+    <p>Un dernier point, plus subtil. Quand le reporting devient trop lourd, la réaction naturelle est
+      d'<strong>exporter</strong> — et le mot figure dans l'énoncé même. L'export soulage la base, mais
+      il crée une copie sans contrat, sans fraîcheur définie, sans responsable. Deux exports faits à
+      deux moments donnent deux chiffres différents. <strong>L'export est la première fuite hors de
+      l'architecture traditionnelle</strong>, et c'est souvent par là qu'une organisation entre dans le
+      désordre décrit au tout début du cours.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Ce n'est pas une mauvaise architecture.</strong> C'est l'architecture adaptée à un
+        domaine de validité précis. La traiter avec mépris conduit à des migrations inutiles (N8,
+        exercice 12.2).</li>
+      <li><strong>L'erreur n'est pas d'y être, c'est de ne pas voir qu'on en est sorti.</strong> Le
+        domaine de validité se quitte sans bruit : aucune alarme ne se déclenche le jour où la
+        cinquième source arrive.</li>
+      <li><strong>Le symptôme n'est pas une panne mais une dégradation croisée.</strong> Ce qui ralentit
+        n'est pas ce qui a grossi : c'est l'autre workload. C'est pourquoi le diagnostic est si souvent
+        posé au mauvais endroit.</li>
+      <li><strong>« Optimisée pour les écritures et lectures rapides » ne veut pas dire « rapide pour
+        tout ».</strong> Une base OLTP est conçue pour retrouver quelques lignes, pas pour en agréger
+        des millions. Ses index, sa normalisation et ses garanties de cohérence servent le premier
+        usage et pèsent sur le second.</li>
+      <li><strong>Les exports sont un palliatif qui coûte plus tard.</strong> Ils soulagent la base et
+        fabriquent des copies divergentes. Si l'on doit exporter, il faut au moins fixer un contrat :
+        qui, quand, quelle définition, quelle fraîcheur.</li>
+      <li><strong>Une réplique de lecture ne découple qu'à moitié.</strong> Elle sépare les ressources,
+        ce qui résout la concurrence, mais conserve le modèle de données transactionnel : les requêtes
+        d'agrégation restent inadaptées, et l'intégration de nouvelles sources reste impossible.</li>
+      <li><strong>Le bloc « Applications » peut contenir plusieurs applications</strong> sans que l'on
+        sorte du modèle, tant qu'elles écrivent dans la même base. Ce qui fait sortir du modèle, c'est
+        la multiplication des <em>bases</em>, donc des silos.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الأركيتكتير التقليدية = <strong>تطبيقات ← قاعدة بيانات ←
+    تقارير</strong>. التطبيقات (CRM، ERP، e-commerce) كتولد معطيات معاملاتية (Insert/Update/Delete)،
+    والقاعدة OLTP كتخزن معطيات مهيكلة وكتضمن <strong>التكامل والاتساق</strong> وكتكون محسّنة للكتابة
+    والقراءة السريعة، والتقارير كتجي من <strong>استعلامات SQL وexports على نفس القاعدة</strong>.
+    وهادي هي النقطة البنيوية الوحيدة اللي كيخرج منها كلشي: <strong>ما كايناش بلاصة منفصلة
+    للتحليل</strong>. الإيجابي: بلاصة وحدة = بلا نسخ، بلا تزامن، بلا اختلاف فالأرقام، والتعريف واحد.
+    والشروط ديال صلاحيتها (مصادر قليلة، معطيات مهيكلة، تقارير محدودة، حجم متحكم فيه، حاجة ضعيفة للوقت
+    الحقيقي) هوما بالضبط <strong>القيود السبعة ديال N7 كلهم فمستوى منخفض</strong>. وحدودها كتجي ملي
+    كيتكاثرو الـworkloads والمصادر: مكون واحد كيحمل جوج أنواع متعارضين (معاملات صغيرة كثيرة مقابل مسح
+    أحجام كبيرة)، فكيتنافسو على نفس الموارد — ومن تمة العطب الشهير: <em>تقرير الليل كيبطي
+    الكايسات</em>. وآخر نقطة: <strong>الـexport هو أول تسريب</strong> خارج هاد الأركيتكتير، ومنو
+    كيبدا اختلاف الأرقام.</p>
+</div>
+
+<h3 id="n09-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Cette architecture traite le problème fondateur de l'informatique de gestion : <strong>faire
+      fonctionner l'activité quotidienne et pouvoir en rendre compte</strong>. Les applications font
+      tourner le métier — une commande saisie, un paiement enregistré, un stock décrémenté — la base
+      garantit que ces opérations sont fiables et cohérentes, et le reporting permet à la direction de
+      savoir ce qui s'est passé. Avec trois blocs et deux flèches, une organisation obtient à la fois un
+      outil de travail et un instrument de pilotage.</p>
+    <p>Mais la règle, telle qu'elle est énoncée ici, traite un second problème, qui est celui du cours :
+      <strong>savoir reconnaître son domaine de validité</strong>. En énonçant explicitement quand cette
+      architecture fonctionne bien et quand elle atteint ses limites, on transforme une question
+      d'opinion — « est-elle dépassée ? » — en question de fait : combien de sources, quels formats,
+      combien de workloads, quel volume, quelle fraîcheur ? La réponse s'obtient alors en comptant.</p>
+  </div>
+</div>
+
+<h3 id="n09-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Décider de ne rien changer</strong>, avec un argument vérifiable : les cinq conditions
+        sont réunies, donc l'architecture est la bonne. C'est l'usage le plus économique de cette
+        notion.</li>
+      <li><strong>Dater la sortie du domaine de validité</strong> : en suivant les cinq conditions, on
+        voit venir le moment où l'une bascule, au lieu de le subir.</li>
+      <li><strong>Poser le bon diagnostic</strong> devant une dégradation croisée, au lieu d'ajouter de
+        la puissance à un système dont le problème est le partage.</li>
+      <li><strong>Identifier le premier découplage utile</strong> : séparer le workload analytique est
+        presque toujours le premier pas, et c'est le chemin vers le Data Warehouse (N10).</li>
+      <li><strong>Reconnaître les palliatifs</strong> — exports, répliques de lecture, rapports lancés
+        la nuit — et savoir ce que chacun résout et ce qu'il reporte.</li>
+      <li><strong>Comprendre la suite</strong> : les trois générations suivantes se définissent toutes
+        par rapport à cette base de départ.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n09-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Cette architecture n'a pas été conçue : elle s'est <strong>constituée par addition</strong>. Au
+      départ, il n'y a que les deux premiers blocs — des applications et une base — c'est-à-dire la
+      génération 1 de N8, dont le problème dominant était de gérer les transactions quotidiennes. Le
+      reporting est venu ensuite, quand on a voulu savoir ce que contenaient ces données. Et comme la
+      base était là, avec ses données et son langage de requêtes, on a interrogé la base.
+      <strong>Personne n'a décidé que l'analyse devait se faire sur le système transactionnel : cela
+      s'est fait parce que c'était le chemin le plus court.</strong> Ce détail d'histoire explique
+      pourquoi cette architecture est si répandue et pourquoi sa limite est si rarement anticipée.</p>
+
+    <p><strong>Pourquoi ces cinq conditions précisément ?</strong> On les retrouve en demandant, pour
+      chacune, ce qui se passe quand elle n'est plus remplie :</p>
+    <ul>
+      <li><em>Beaucoup de sources</em> → la base ne contient plus tout. Or l'architecture n'a
+        <strong>aucun endroit</strong> où faire l'intégration : il n'y a pas de couche pour cela. Le
+        rapprochement se fera donc à la main ou par exports.</li>
+      <li><em>Données non structurées</em> → elles n'entrent pas dans le schéma, donc elles restent
+        dehors. C'est le cas des logs et des photos de notre enseigne.</li>
+      <li><em>Reporting important</em> → les requêtes d'agrégation entrent en concurrence avec les
+        transactions sur les mêmes ressources.</li>
+      <li><em>Volume élevé</em> → les mêmes requêtes balaient davantage de lignes, et la concurrence
+        s'aggrave ; la base, par ailleurs, conserve rarement l'historique profond que l'analyse
+        réclame.</li>
+      <li><em>Besoin de temps réel</em> → une exigence de fraîcheur forte sur l'analyse accroît la
+        fréquence des requêtes analytiques, donc la pression sur le système transactionnel.</li>
+    </ul>
+
+    <p>Les cinq conditions sont donc les cinq façons de faire apparaître, chacune à sa manière, le même
+      défaut unique : <strong>l'absence d'un lieu séparé pour l'analyse et l'intégration</strong>. Ce
+      n'est pas un défaut de conception — c'est le prix de la simplicité, et ce prix est nul tant que
+      les contraintes restent basses.</p>
+
+    <p>Enfin, remarquez que la phrase « quand les workloads et les sources se multiplient » annonce
+      exactement les deux générations suivantes : les <em>workloads</em> qui se multiplient mènent au
+      Data Warehouse, qui sépare l'analyse (N10) ; les <em>sources</em> qui se multiplient, avec leurs
+      formats, mènent au Data Lake (N11). La limite d'une génération dessine la génération suivante,
+      comme le veut le principe de N8.</p>
+  </div>
+</div>
+
+<h3 id="n09-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans l'évaluation d'un système d'information de PME.</strong> La plupart tiennent
+        entièrement dans ce modèle, et la question utile n'est pas « faut-il moderniser ? » mais « les
+        cinq conditions sont-elles encore réunies ? ». Cette façon de poser la question économise
+        souvent un projet entier.</li>
+      <li><strong>Dans le diagnostic d'un ralentissement applicatif.</strong> Dès qu'un métier signale
+        une lenteur aux heures où tournent les rapports, la cause est très probablement le partage du
+        composant, et non son dimensionnement.</li>
+      <li><strong>Dans la préparation d'un premier projet décisionnel.</strong> C'est le moment où l'on
+        décide si l'on reste dans le modèle ou si l'on sépare l'analyse — décision structurante, qu'il
+        vaut mieux prendre consciemment.</li>
+      <li><strong>Dans l'audit des exports.</strong> Compter les exports réguliers d'une organisation est
+        une mesure directe de la pression exercée sur ce modèle : chacun est une demande à laquelle
+        l'architecture ne savait pas répondre.</li>
+      <li><strong>Dans l'enseignement et l'examen.</strong> C'est l'architecture de référence à partir
+        de laquelle toutes les autres se définissent ; savoir énoncer ses trois blocs, ses cinq
+        conditions et son mode de défaillance est un acquis de base.</li>
+      <li><strong>Dans une reprise d'existant.</strong> Reconnaître ce modèle permet de prévoir d'emblée
+        ce que l'on va trouver : des exports, des rapports nocturnes, et au moins une plainte sur les
+        performances.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n09-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Nos rapports tapent directement dans la base de production. »</strong> Description
+        littérale du modèle. Il reste à vérifier les cinq conditions.</li>
+      <li><strong>« L'application rame à 18 h, quand les rapports partent. »</strong> Dégradation
+        croisée : les deux workloads se concurrencent. Signal le plus caractéristique.</li>
+      <li><strong>« On a interdit les rapports en journée. »</strong> Palliatif organisationnel : on a
+        résolu la concurrence en sacrifiant la fraîcheur. Cela fonctionne un temps, et cela montre que
+        le domaine de validité est déjà quitté sur la condition « temps réel ».</li>
+      <li><strong>« Chaque service a son export Excel. »</strong> La fuite est installée ; les chiffres
+        divergent déjà, même si personne ne l'a encore constaté.</li>
+      <li><strong>« On a ajouté une deuxième, puis une troisième application avec sa propre base. »</strong>
+        Les sources se multiplient : la condition « peu de sources » est tombée, et aucune couche
+        d'intégration n'existe.</li>
+      <li><strong>« On voudrait analyser les logs du site. »</strong> La condition « données
+        principalement structurées » tombe : ces données n'entreront pas dans le schéma.</li>
+      <li><strong>« La base ne garde que six mois. »</strong> L'historique nécessaire à l'analyse
+        n'existe pas, parce que la base a été dimensionnée pour l'opérationnel.</li>
+      <li><strong>« Tout va bien, peu de sources, un rapport mensuel. »</strong> Signal inverse, tout
+        aussi important : <strong>ne rien changer</strong>, et l'écrire noir sur blanc.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n09-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Vérifier que l'on est bien dans ce modèle.</strong> Une seule question tranche :
+      <em>le reporting interroge-t-il la base des applications ?</em> Si oui — directement ou par
+      exports — c'est l'architecture traditionnelle, quels que soient les outils employés.</p>
+
+    <p><strong>Étape 2 — Mesurer les cinq conditions, avec des chiffres.</strong> Combien de sources
+      détiennent une donnée utile ? Quelle proportion est structurée ? Combien de rapports et de
+      requêtes analytiques par jour, à quelles heures ? Quel volume et quelle croissance ? Quelle
+      fraîcheur est demandée par le plus exigeant des usages ? Notez chaque condition « tenue » ou
+      « dépassée », et surtout sa tendance.</p>
+
+    <p><strong>Étape 3 — Si les cinq sont tenues : conclure, et l'écrire.</strong> L'architecture
+      convient ; aucune évolution n'est justifiée. Écrivez-le dans un document daté, avec les chiffres
+      et les signaux qui annonceront le changement. Cette conclusion est un livrable à part entière —
+      c'est elle qui protégera l'organisation d'une migration décidée par la mode.</p>
+
+    <p><strong>Étape 4 — Si une condition est dépassée : identifier laquelle, car elle désigne la
+      suite.</strong> Reporting trop lourd ou volume élevé → le problème est la concurrence des
+      workloads, et le premier découplage consiste à séparer l'analyse (direction Data Warehouse, N10).
+      Sources et formats multipliés → le problème est l'intégration et la variété (direction Data Lake,
+      N11). Les deux à la fois → traitez d'abord celle qui coûte le plus cher aujourd'hui, pas les deux
+      en même temps.</p>
+
+    <p><strong>Étape 5 — Décider ce que l'on garde, pas seulement ce que l'on ajoute.</strong> Le bloc
+      applications et sa base transactionnelle restent nécessaires : ils répondent toujours au problème
+      de la génération 1. On ajoute un lieu pour l'analyse, on ne remplace pas l'opérationnel. Écrivez
+      aussi le sort des palliatifs — quels exports disparaissent, lesquels deviennent des flux
+      contractuels — faute de quoi ils survivront à côté de la nouvelle architecture et continueront de
+      produire des chiffres divergents.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Dans l'architecture traditionnelle, <strong>le reporting lit la base des applications</strong> :
+      d'où sa simplicité et sa cohérence, et d'où sa limite — un composant unique pour deux workloads
+      opposés. Elle convient tant que les <strong>cinq conditions</strong> tiennent ; elle cède quand
+      les <strong>workloads et les sources se multiplient</strong>.</p>
+    <p class="ar" dir="rtl">فالأركيتكتير التقليدية، <strong>التقارير كتقرا من قاعدة التطبيقات</strong>:
+      من تمة البساطة والاتساق، ومن تمة الحد — مكون واحد لجوج workloads متعارضين. صالحة ما دامت
+      <strong>الشروط الخمسة</strong> قائمة، وكتطيح ملي كيتكاثرو <strong>الـworkloads
+      والمصادر</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n09-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — le cabinet comptable</div>
+  <div class="box-b">
+    <p>Un cabinet comptable de 18 personnes utilise un logiciel métier unique, avec sa base de données.
+      Chaque mois, l'associé édite quatre rapports : chiffre d'affaires, encours clients, temps passé
+      par dossier, rentabilité par client. Volume : 40 Go, +5 % par an. Toutes les données sont
+      structurées. Aucune demande de fraîcheur infra-journalière. Un prestataire propose une
+      « plateforme data moderne ». Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Sommes-nous dans ce modèle ?</strong> Oui : les quatre rapports sont produits
+      par des requêtes sur la base du logiciel métier. Trois blocs, deux flèches.</p>
+
+    <p><strong>Étape 2 — Les cinq conditions, chiffrées.</strong> <em>Peu de sources</em> : une seule —
+      tenue. <em>Données structurées</em> : 100 % — tenue. <em>Reporting limité</em> : quatre rapports
+      par mois, soit une charge analytique négligeable — tenue. <em>Volume maîtrisé</em> : 40 Go à
+      +5 %, donc environ 46 Go dans trois ans — tenue, très largement. <em>Temps réel faible</em> :
+      aucune demande — tenue. <strong>Cinq conditions sur cinq.</strong></p>
+
+    <p><strong>Étape 3 — Conclusion.</strong> L'architecture traditionnelle est <strong>le bon
+      choix</strong> pour ce cabinet, et le restera plusieurs années. La proposition du prestataire doit
+      être refusée — non parce qu'elle serait mauvaise en soi, mais parce qu'elle répond à des problèmes
+      que le cabinet n'a pas : variété, volume, multiplicité des workloads. En reprenant le principe de
+      N8 : il n'y a ici <em>aucun besoin nouveau</em>, donc aucun compromis à renégocier.</p>
+
+    <p><strong>Ce qu'il faut écrire.</strong> Un document d'une page, daté : les cinq conditions
+      mesurées, la décision de ne rien changer, et les trois signaux qui rouvriront le dossier —
+      l'arrivée d'une seconde application avec sa propre base, une demande d'analyse sur des documents
+      non structurés, ou le passage à des rapports quotidiens consultés par plusieurs personnes.
+      <strong>Sans ce document, la même proposition reviendra dans six mois</strong> et il faudra
+      refaire le raisonnement.</p>
+
+    <p><strong>Une réserve, cependant.</strong> Le fait que l'architecture convienne ne dit rien de la
+      sauvegarde, de la sécurité ni du support du logiciel. Ces questions relèvent des missions 3 et 4
+      de N3 et doivent être examinées séparément : une architecture adaptée peut parfaitement coexister
+      avec une gestion défaillante.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — l'enseigne : mesurer la sortie du domaine</div>
+  <div class="box-b">
+    <p>Reprenez l'enseigne du cas d'ouverture. Mesurez les cinq conditions, dites laquelle est tombée en
+      premier, et déterminez le premier découplage à réaliser.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Modèle confirmé.</strong> Le rapport du soir interroge directement la base des
+      caisses : nous sommes bien dans l'architecture traditionnelle.</p>
+
+    <p><strong>Étape 2 — Les cinq conditions.</strong></p>
+    <table>
+      <thead><tr><th>Condition</th><th>État</th><th>Fait constaté</th></tr></thead>
+      <tbody>
+        <tr><td>Peu de sources</td><td><strong>dépassée</strong></td>
+          <td>6 systèmes, dont 4 décrivent le même client</td></tr>
+        <tr><td>Données structurées</td><td><strong>dépassée</strong></td>
+          <td>logs JSON et photos non chargés</td></tr>
+        <tr><td>Reporting limité</td><td><strong>dépassée</strong></td>
+          <td>4 workloads contre 1 il y a cinq ans</td></tr>
+        <tr><td>Volume maîtrisé</td><td>limite</td>
+          <td>2 To, +40 %/an — le niveau va, la croissance non</td></tr>
+        <tr><td>Temps réel faible</td><td><strong>dépassée</strong></td>
+          <td>du mensuel au quotidien, et 2 min demandées pour les capteurs</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Laquelle est tombée en premier ?</strong> Chronologiquement, c'est « peu de sources » :
+      l'ouverture du site marchand, puis de l'application, a introduit des bases supplémentaires bien
+      avant que le reporting ne devienne lourd. Mais — et c'est le point important — <strong>cette
+      chute n'a produit aucun symptôme immédiat</strong>. Chaque canal fonctionnait très bien chez lui.
+      Le symptôme n'est apparu que le jour où l'on a voulu une vue d'ensemble, c'est-à-dire des années
+      plus tard. C'est la raison pour laquelle on ne voit pas qu'on est sorti du domaine de validité.</p>
+
+    <p><strong>Étape 4 — Quelle condition traiter en premier ?</strong> Ce n'est pas la première tombée,
+      c'est celle qui coûte le plus cher aujourd'hui : la concurrence des workloads, qui ralentit les
+      encaissements en période de forte affluence — un coût commercial immédiat et mesurable. Le premier
+      découplage est donc la <strong>séparation du workload analytique</strong> : alimenter une
+      plateforme analytique distincte, et faire en sorte que plus aucun rapport ne touche la base des
+      caisses. C'est la direction du Data Warehouse (N10).</p>
+
+    <p><strong>Étape 5 — Ce que l'on garde.</strong> Les caisses, le site, l'application et leurs bases
+      restent en place, inchangés : ils répondent parfaitement au problème de la génération 1. On
+      n'ajoute qu'un lieu pour l'analyse. Et l'on traite le sort des palliatifs : les exports Excel du
+      contrôle de gestion doivent être remplacés par la vue publiée, faute de quoi ils continueront à
+      produire un second chiffre d'affaires, concurrent du premier.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — la spirale des exports</div>
+  <div class="box-b">
+    <p>Dans une mutuelle, les rapports pesaient sur la base de production. La DSI a interdit les requêtes
+      analytiques en journée. Les métiers ont alors demandé des exports quotidiens, qu'ils retravaillent
+      dans des classeurs. Deux ans plus tard : 40 exports automatiques, 12 classeurs partagés, trois
+      chiffres différents pour le nombre d'adhérents, et une demande d'audit du régulateur sur l'origine
+      des chiffres déclarés. Analysez et proposez une sortie.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Modèle et déviation.</strong> On est parti de l'architecture traditionnelle, et
+      la condition « reporting limité » est tombée. La réponse apportée — interdire les requêtes en
+      journée — a traité le symptôme (la concurrence) en sacrifiant la fraîcheur, sans rien changer à la
+      structure. Les exports ont été la conséquence logique de cette interdiction : les métiers avaient
+      toujours besoin de leurs chiffres.</p>
+
+    <p><strong>Étape 2 — Ce que chaque export a réellement créé.</strong> Chacun est une copie sans
+      contrat : sans définition écrite, sans responsable, sans fraîcheur garantie, sans traçabilité. Les
+      trois chiffres d'adhérents divergents ne viennent pas d'erreurs de calcul, mais de trois
+      <em>définitions</em> implicites différentes — à quelle date, adhérents actifs ou radiés inclus,
+      doublons traités ou non. C'est exactement la panne décrite en N1 : la donnée n'est plus comprise
+      de la même manière par tous.</p>
+
+    <p><strong>Pourquoi la demande du régulateur est le vrai signal.</strong> Il ne demande pas un
+      chiffre, il demande son <strong>origine</strong>. Or aucun des 40 exports ne peut répondre : il
+      n'existe ni lignage, ni versions, ni responsables. La huitième ligne de la grille de N6 — comment
+      vérifier leur état ? — n'a jamais été remplie, et c'est un contrôle externe qui le révèle.</p>
+
+    <p><strong>Étape 4 — Sortie proposée, dans l'ordre.</strong> (a) Séparer le workload analytique :
+      une plateforme alimentée chaque nuit depuis la base de production, ce qui lève l'interdiction des
+      requêtes en journée et supprime la cause première. (b) Publier <em>une</em> définition d'adhérent,
+      possédée par le métier, implémentée une seule fois, et exposée par une vue documentée. (c)
+      Remplacer les exports un par un par cette vue, en commençant par ceux qui alimentent les
+      déclarations au régulateur. (d) Mettre en place la traçabilité demandée : d'où vient chaque
+      chiffre, calculé par quelle règle, à quelle date.</p>
+
+    <p><strong>Étape 5 — Et surtout : fermer les exports remplacés.</strong> C'est la partie qui échoue
+      le plus souvent. Un export qui survit à côté de la vue officielle continue de produire un chiffre
+      concurrent, et il reviendra dans la discussion au pire moment. Prévoyez une date d'arrêt pour
+      chacun, annoncée, et un responsable pour la faire respecter.
+      <strong>Enseignement</strong> : le palliatif n'était pas gratuit. Interdire les requêtes en
+      journée a coûté deux ans de divergence des chiffres et un audit réglementaire — bien plus que
+      n'aurait coûté la séparation du workload analytique au moment où le problème est apparu.</p>
+  </div>
+</div>
+
+<h3 id="n09-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Décrivez les trois blocs et les deux flux de l'architecture traditionnelle, puis énoncez ses
+        cinq conditions de validité.</li>
+      <li>Expliquez pourquoi une base « optimisée pour les écritures et lectures rapides » est mal
+        adaptée aux requêtes d'agrégation. Appuyez-vous sur la nature des deux workloads.</li>
+      <li>Montrez que les cinq conditions correspondent aux contraintes de N7 en position basse, en
+        donnant la correspondance une par une.</li>
+      <li>Un responsable propose d'ajouter une réplique de lecture pour que les rapports n'affectent plus
+        la production. Qu'est-ce que cela résout, et qu'est-ce que cela ne résout pas ?</li>
+      <li>Pour une pharmacie, une auto-école et une clinique de 200 lits, dites laquelle relève
+        probablement encore de ce modèle et pourquoi, en citant les conditions.</li>
+      <li>Expliquez pourquoi un export est un palliatif coûteux, et formulez le contrat minimal qu'un
+        export devrait porter si l'on ne peut pas l'éviter.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n09-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chacun de ces faits, dites quelle condition de validité est menacée : « nous ouvrons une
+      boutique en ligne avec sa propre base » ; « la direction veut un tableau de bord consulté toutes
+      les heures » ; « nous recevons les réclamations par messagerie vocale » ; « nos données doublent
+      chaque année » ; « nous passons de 2 à 15 rapports hebdomadaires ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une entreprise de transport (90 véhicules) fonctionne en architecture traditionnelle : un logiciel
+      d'exploitation, sa base, et des rapports hebdomadaires. Elle vient d'installer des boîtiers
+      télématiques qui émettent position et consommation toutes les 30 secondes, et souhaite un suivi de
+      la consommation par chauffeur ainsi qu'une alerte en cas de conduite dangereuse. Appliquez les cinq
+      étapes : vérifiez le modèle, mesurez les conditions, dites lesquelles tombent, déterminez le
+      premier découplage et précisez ce qui est conservé. Justifiez pourquoi traiter les deux besoins
+      ensemble ou séparément.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>On affirme souvent que l'architecture traditionnelle « ne passe pas à l'échelle ». Montrez que
+      cette formule est imprécise : distinguez les cas où c'est le <em>volume</em> qui met l'architecture
+      en défaut, de ceux où c'est la <em>multiplication des workloads</em>, et de ceux où c'est la
+      <em>multiplication des sources</em> — en montrant que ces trois défaillances n'ont ni le même
+      symptôme, ni la même solution, ni le même coût. Construisez ensuite un cas où le volume est très
+      élevé et où l'architecture traditionnelle reste pourtant le bon choix, puis un cas où le volume
+      est faible et où elle ne convient plus. Concluez sur ce que cela implique pour un diagnostic.</p>
+  </div>
+</div>

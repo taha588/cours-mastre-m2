@@ -1,0 +1,556 @@
+<h2 class="notion" id="n08">N8 — Le principe d'évolution architecturale</h2>
+
+<h3 id="n08-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Idée clé.</strong> L'évolution n'est pas « ancienne technologie → nouvelle technologie » ;
+      c'est <strong>« nouveau besoin → nouveau compromis architectural »</strong>.</p>
+
+    <p>Le mécanisme comporte <strong>trois temps</strong> :</p>
+    <ol>
+      <li><strong>Nouveau besoin</strong> — par exemple : analyser l'historique des ventes.</li>
+      <li><strong>Nouvelle contrainte</strong> — volume, latence, variété, distribution.</li>
+      <li><strong>Choix architectural</strong> = <strong>composants</strong> (plateformes, services,
+        outils) + <strong>flux</strong> (ingestion, traitement, accès) + <strong>compromis</strong>
+        (coût, performance, scalabilité).</li>
+    </ol>
+
+    <p><strong>Repères historiques — une lecture par les problèmes :</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Génération</th><th>Problème principal</th><th>Réponse</th><th>Exemple</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Systèmes opérationnels</strong><br><em>1980-1990</em></td>
+          <td>Gérer efficacement les transactions quotidiennes de l'organisation.</td>
+          <td>Transactions fiables et rapides (OLTP).</td>
+          <td>DB transactionnelle (Oracle, MySQL, SQL Server).</td>
+        </tr>
+        <tr>
+          <td><strong>2. Data Warehouse</strong><br><em>1990-2000</em></td>
+          <td>Besoin d'analyse et de reporting sur des données structurées.</td>
+          <td>Analyse structurée et historique.</td>
+          <td>Entrepôt analytique (SAP BW, Teradata…).</td>
+        </tr>
+        <tr>
+          <td><strong>3. Big Data</strong><br><em>2000-2010</em></td>
+          <td>Explosion du volume de données et besoin de traitement distribué.</td>
+          <td>Traitement à grande échelle (clusters).</td>
+          <td>Hadoop, Spark — traitement distribué.</td>
+        </tr>
+        <tr>
+          <td><strong>4. Data Lake</strong><br><em>2010-2015</em></td>
+          <td>Diversité des formats (structurés, semi-structurés, non structurés).</td>
+          <td>Stockage flexible et à grande échelle.</td>
+          <td>Data Lake (S3, HDFS, ADLS…).</td>
+        </tr>
+        <tr>
+          <td><strong>5. Cloud</strong><br><em>2015-2020</em></td>
+          <td>Coûts d'infrastructure, élasticité et besoin de services managés.</td>
+          <td>Infrastructure cloud et services de données.</td>
+          <td>AWS, Azure, GCP (stockage, traitement, AI).</td>
+        </tr>
+        <tr>
+          <td><strong>6. Lakehouse</strong><br><em>2020-2023</em></td>
+          <td>Séparer lake et warehouse crée de la complexité et des coûts.</td>
+          <td>Une plateforme unifiée pour l'analytique et l'IA.</td>
+          <td>Databricks Lakehouse, Snowflake, Delta Lake…</td>
+        </tr>
+        <tr>
+          <td><strong>7. Aujourd'hui</strong><br><em>2023-…</em></td>
+          <td>Nouveaux usages liés à l'IA (ML, GenAI) et besoin de données de confiance.</td>
+          <td>Intégration, gouvernance, qualité et données prêtes pour l'IA.</td>
+          <td>Plateformes de données modernes (Lakehouse, Data Mesh, Data Fabric).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 id="n08-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>L'idée clé est formulée par une négation, et cette négation vise une manière de penser très
+      répandue. Dire « ancienne technologie → nouvelle technologie », c'est supposer deux choses :
+      que la nouvelle <em>remplace</em> l'ancienne, et qu'elle fait <em>mieux la même chose</em>. Les
+      deux sont fausses, et le tableau historique le prouve en une ligne : les bases transactionnelles
+      de la génération 1, datées de 1980-1990, <strong>fonctionnent encore aujourd'hui dans toutes les
+      entreprises du monde</strong>. Rien n'a été remplacé. Chaque génération a <em>ajouté</em> une
+      réponse à un problème que les précédentes ne traitaient pas.</p>
+
+    <p>Regardez d'ailleurs comment le tableau est construit : ses colonnes ne sont pas « technologie » et
+      « date », mais <strong>« problème principal » et « réponse »</strong>. La chronologie n'est qu'un
+      effet secondaire — les problèmes sont apparus dans cet ordre. Et si l'on compare cette liste aux
+      sept problèmes dominants annoncés en N7 — transaction, analyse, volume, variété, élasticité,
+      intégration, nouveaux usages — on constate qu'ils se correspondent
+      <strong>un par un, dans l'ordre</strong> : les sept générations sont les sept réponses aux sept
+      problèmes dominants. Le tableau historique n'est donc pas une frise de produits, c'est la liste
+      des problèmes que l'on a su nommer.</p>
+
+    <p>Le mécanisme en trois temps dit <em>comment</em> cela se produit, et sa valeur tient à son
+      deuxième temps. On passe rarement directement du besoin au choix — on <em>croit</em> le faire,
+      et c'est là qu'est l'erreur. Entre « je veux analyser l'historique des ventes » et « je choisis
+      tel outil », il y a une étape obligatoire : <strong>quelle contrainte ce besoin crée-t-il ?</strong>
+      Du volume ? De la latence ? De la variété ? De la distribution ? Sauter cette étape, c'est choisir
+      une solution sans savoir à quelle pression elle devra résister — et la suite du cours montrera que
+      la même demande, selon la latence exigée, appelle des architectures entièrement différentes.</p>
+
+    <p>Le troisième temps mérite autant d'attention, pour un mot : le choix architectural est défini
+      comme <strong>composants + flux + compromis</strong>. Le compromis fait partie du choix, il n'en
+      est pas la conséquence regrettable. Autrement dit, <strong>un choix annoncé sans son compromis est
+      un choix incomplet</strong> — exactement ce que disaient déjà l'étape 5 de N6 et celle de N7. Dire
+      « nous adoptons telle plateforme » ne devient une décision d'architecture qu'une fois ajouté
+      « … en acceptant tel coût, telle latence, telle perte de souplesse ».</p>
+
+    <p>Reste la conséquence la plus profonde, visible dans le tableau pour qui le lit deux fois :
+      <strong>la réponse d'une génération crée le problème de la suivante</strong>. L'entrepôt
+      (génération 2) apporte l'analyse structurée, et sa rigidité devient le problème que le Data Lake
+      (génération 4) résout ; mais faire coexister lake et warehouse crée à son tour de la complexité et
+      des coûts, ce qui est <em>littéralement</em> le problème principal de la génération 6. L'évolution
+      n'est donc pas une marche vers une solution finale : c'est une suite de compromis dont chacun
+      déplace la difficulté. C'est pourquoi aucune architecture ne peut être dite « moderne » ou
+      « dépassée » dans l'absolu — seulement <strong>adaptée, ou non, au problème dominant du
+      moment</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>« Nouveau » ne veut pas dire « meilleur ».</strong> Chaque génération répond à un
+        problème <em>différent</em>, pas au même problème en mieux. Un Data Lake n'est pas un entrepôt
+        amélioré : il traite la variété, pas l'analyse structurée.</li>
+      <li><strong>Les générations s'empilent, elles ne se remplacent pas.</strong> Une entreprise de 2026
+        fait tourner simultanément de l'OLTP de génération 1, un entrepôt de génération 2, du traitement
+        distribué de génération 3 et un stockage objet de génération 4. C'est normal, et ce n'est pas
+        de la dette.</li>
+      <li><strong>Les dates ne sont pas des échéances.</strong> Une organisation dont le problème
+        dominant est l'analyse structurée est parfaitement à sa place avec un entrepôt, en 2026 comme en
+        1995. Elle n'est pas « en retard de quatre générations ».</li>
+      <li><strong>Adopter la réponse d'une génération sans en avoir le problème</strong> est la faute la
+        plus coûteuse : on paie la complexité d'une solution pour une contrainte que l'on n'a pas (c'est
+        le découplage excessif de N7).</li>
+      <li><strong>Sauter le deuxième temps.</strong> Aller du besoin au produit sans nommer la contrainte
+        conduit à des choix que rien ne permet ensuite de défendre ni de réviser.</li>
+      <li><strong>Cacher le compromis.</strong> Un dossier qui ne présente que des avantages n'a pas
+        appliqué le troisième temps : le compromis existe, il sera simplement découvert par quelqu'un
+        d'autre, plus tard.</li>
+      <li><strong>Confondre un besoin et une solution.</strong> « Nous avons besoin d'un Lakehouse » n'est
+        pas un besoin ; « nous devons servir la BI et l'IA sur les mêmes données sans multiplier les
+        copies » en est un.</li>
+      <li><strong>Croire que la génération 7 est la dernière.</strong> Elle est seulement la plus
+        récente. Son compromis — intégration et gouvernance poussées — créera le problème dominant de la
+        suivante.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> التطور ماشي «تكنولوجيا قديمة ← تكنولوجيا جديدة»، هو
+    <strong>«حاجة جديدة ← تنازل معماري جديد»</strong>. والآلية فتلات مراحل: <strong>1)</strong> حاجة
+    جديدة (مثلا: تحليل تاريخ المبيعات)، <strong>2)</strong> قيد جديد كتخلقو هاد الحاجة (حجم، زمن
+    استجابة، تنوع، توزيع)، <strong>3)</strong> اختيار معماري = <strong>مكونات + تدفقات +
+    تنازل</strong>. تلات نقط: (أ) الأجيال السبعة <strong>ما تعوضوش بعضياتهم، تراكمو</strong> — قواعد
+    OLTP ديال 1980 مازال خدامة اليوم فكل مقاولة؛ (ب) المرحلة الثانية هي اللي كتتقفز، وهي الأهم:
+    بين «بغيت نحلل» و«نختار هاد الأداة» خاص تعرف <strong>أشمن قيد خلقات هاد الحاجة</strong>؛
+    (ج) <strong>التنازل جزء من الاختيار</strong> ماشي نتيجة مؤسفة — اختيار بلا تنازل هو اختيار ناقص.
+    وأعمق نقطة: <strong>جواب كل جيل كيخلق مشكل الجيل اللي من بعدو</strong> (الـwarehouse والـlake
+    بجوج خلقو التعقيد والتكلفة اللي هوما مشكل الـLakehouse). يعني ما كايناش أركيتكتير «عصرية» ولا
+    «متجاوزة» فحد ذاتها، كاينة غير <strong>مناسبة ولا لا للمشكل المهيمن دابا</strong>.</p>
+</div>
+
+<h3 id="n08-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de la <strong>décision par la mode</strong>. Faute de principe, les choix
+      d'architecture se justifient par l'ancienneté : telle technologie est « dépassée », telle autre
+      est « ce qui se fait aujourd'hui ». L'argument est imparable parce qu'il est invérifiable, et il
+      produit deux erreurs opposées — migrer sans nécessité, ou refuser d'évoluer en appelant prudence
+      ce qui n'est que l'absence d'analyse.</p>
+    <p>La règle remplace cet argument par une chaîne vérifiable : <em>quel besoin nouveau ? quelle
+      contrainte crée-t-il ? quel compromis acceptons-nous ?</em> Elle traite aussi un second problème,
+      plus insidieux : celui de la <strong>table rase</strong>. En montrant que les générations
+      s'empilent au lieu de se remplacer, elle enlève sa justification au projet de tout refaire — et
+      ramène la question à sa forme utile : qu'est-ce qui, précisément, ne répond plus ?</p>
+  </div>
+</div>
+
+<h3 id="n08-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Justifier ou refuser une évolution</strong> sur un argument vérifiable, en exhibant le
+        besoin et la contrainte, au lieu d'invoquer la modernité.</li>
+      <li><strong>Lire une architecture existante</strong> : à quel problème dominant répond-elle ? Si
+        c'est encore le nôtre, elle n'a pas à changer.</li>
+      <li><strong>Situer une technologie</strong> que l'on découvre : de quel problème est-elle la
+        réponse ? La question coupe court à la plupart des discours commerciaux.</li>
+      <li><strong>Anticiper</strong> : connaissant le compromis que l'on accepte aujourd'hui, on sait
+        quelle difficulté se présentera demain — puisque c'est la réponse d'aujourd'hui qui crée le
+        problème de demain.</li>
+      <li><strong>Désamorcer un débat d'outils</strong> en le ramenant aux trois temps : besoin,
+        contrainte, compromis. Deux équipes qui s'opposent sur un produit sont souvent d'accord sur le
+        besoin et en désaccord sur la contrainte mesurée.</li>
+      <li><strong>Comprendre la suite du cours</strong> : les notions N9 à N12 ne sont rien d'autre que
+        quatre applications de ce principe, génération par génération.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n08-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Le principe s'établit en confrontant les deux lectures possibles de l'histoire aux faits. Si la
+      lecture « ancienne technologie → nouvelle technologie » était la bonne, trois conséquences
+      devraient s'observer. Aucune ne s'observe.</p>
+
+    <ul>
+      <li><strong>Première conséquence attendue : les anciennes générations disparaissent.</strong>
+        Or les bases transactionnelles de 1980 sont aujourd'hui plus nombreuses que jamais, et le
+        traitement distribué de 2005 n'a fait disparaître aucun entrepôt. Les sept générations
+        coexistent. <em>Réfuté.</em></li>
+      <li><strong>Deuxième conséquence attendue : chaque génération fait mieux ce que faisait la
+        précédente.</strong> Or un Data Lake est <em>moins</em> bon qu'un entrepôt pour produire un
+        rapport financier structuré — il n'a pas été conçu pour cela. Il répond à la variété, pas à
+        l'analyse. <em>Réfuté.</em></li>
+      <li><strong>Troisième conséquence attendue : la technologie précède l'usage.</strong> Or le
+        traitement distribué n'apparaît pas avant l'explosion des volumes, ni le Data Lake avant la
+        multiplication des formats : à chaque fois, le besoin est antérieur. <em>Réfuté.</em></li>
+    </ul>
+
+    <p>La lecture « nouveau besoin → nouveau compromis » résiste, elle, aux trois tests, et elle
+      explique en outre un fait que l'autre ne peut pas expliquer : <strong>pourquoi la génération 6
+      existe</strong>. Son problème principal, tel qu'il est écrit dans le tableau, est que « séparer
+      lake et warehouse crée de la complexité et des coûts ». Ce problème n'a pas été apporté par le
+      monde extérieur : il a été <em>produit</em> par les réponses des générations 2 et 4. Aucune
+      lecture technologique ne peut rendre compte de cela ; la lecture par les compromis, si — chaque
+      compromis accepté devient une contrainte quelques années plus tard.</p>
+
+    <p>Quant au mécanisme en trois temps, il se justifie par ce qui manque quand on en retire un :</p>
+    <ul>
+      <li>Sans le <strong>besoin</strong> : on fait de la technique pour elle-même, et rien ne permet de
+        dire quand c'est fini.</li>
+      <li>Sans la <strong>contrainte</strong> : on choisit sans savoir à quoi la solution devra résister,
+        donc sans pouvoir la dimensionner ni la défendre.</li>
+      <li>Sans le <strong>compromis</strong> : on promet un gain sans son prix, et la déception arrive
+        au moment de l'exploitation — c'est l'exercice 12.3 de N4.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n08-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans une décision de migration ou de modernisation.</strong> On exige que le dossier
+        soit écrit en trois temps. Un dossier qui commence par le nom d'une plateforme est renvoyé à son
+        auteur : il lui manque le besoin et la contrainte, c'est-à-dire tout ce qui permettrait de le
+        juger.</li>
+      <li><strong>Face à une proposition commerciale.</strong> Une seule question suffit à la situer :
+        de quel problème dominant ce produit est-il la réponse ? Si ce problème n'est pas le nôtre, la
+        démonstration peut être excellente et la conclusion négative.</li>
+      <li><strong>Dans un diagnostic d'existant.</strong> On identifie à quelle génération répond chaque
+        brique, et l'on vérifie si son problème est toujours le nôtre. Les briques encore alignées sur
+        un problème actuel ne sont pas de la dette technique, quelle que soit leur date.</li>
+      <li><strong>Dans un arbitrage budgétaire.</strong> Présenter le compromis en même temps que le gain
+        rend la décision possible : une direction accepte rarement un coût, mais elle accepte un
+        échange.</li>
+      <li><strong>Dans l'enseignement et la veille.</strong> Classer toute nouveauté par le problème
+        qu'elle résout, plutôt que par sa nouveauté, est la seule façon de ne pas devoir tout réapprendre
+        tous les trois ans.</li>
+      <li><strong>Dans la prévision à moyen terme.</strong> Le compromis que l'on accepte aujourd'hui
+        indique le problème que l'on rencontrera demain : c'est une base de planification plus fiable
+        que les tendances annoncées.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n08-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Cette technologie est dépassée. »</strong> Demandez : dépassée pour quel problème ?
+        Si le problème est toujours le nôtre, la réponse ne l'est pas.</li>
+      <li><strong>« Tout le monde passe au Lakehouse. »</strong> Argument de nouveauté. La question à
+        poser est celle du problème dominant, et elle se règle en une phrase.</li>
+      <li><strong>« Il nous faut une plateforme moderne. »</strong> Un besoin exprimé sous forme de
+        solution : il manque les deux premiers temps.</li>
+      <li><strong>« On va tout migrer et repartir sur des bases saines. »</strong> Le projet de table
+        rase suppose que les générations se remplacent. Elles s'empilent.</li>
+      <li><strong>« Notre système date de 2008. »</strong> Une date n'est pas un diagnostic. La question
+        est : répond-il encore au problème dominant ?</li>
+      <li><strong>« Le dossier ne présente que des avantages. »</strong> Le troisième temps est absent.
+        Réclamez le compromis — il existe forcément.</li>
+      <li><strong>« Nous avons migré et les problèmes sont les mêmes. »</strong> Le besoin et la
+        contrainte n'avaient pas été nommés : on a changé de composants sans changer de compromis.</li>
+      <li><strong>« Notre lac de données est devenu ingérable. »</strong> Le compromis accepté il y a
+        quelques années est devenu la contrainte d'aujourd'hui : c'est le passage de la génération 4 à
+        la génération 6, vécu de l'intérieur.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n08-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Écrire le besoin nouveau sans nommer aucune technologie.</strong> Une phrase,
+      au présent, du point de vue de celui qui en a besoin : « analyser l'historique des ventes sur
+      trois ans », « détecter une fraude avant la fin de la transaction ». Si le nom d'un produit
+      apparaît dans la phrase, c'est qu'on a déjà sauté à l'étape 3 — recommencez.</p>
+
+    <p><strong>Étape 2 — En déduire la contrainte, et la mesurer.</strong> Ce besoin crée-t-il du volume,
+      de la latence, de la variété, de la distribution ? Souvent plusieurs : classez-les et chiffrez la
+      principale. C'est l'étape que tout le monde saute, et c'est elle qui rend le choix suivant
+      défendable — et révisable, puisqu'on saura quoi remesurer plus tard.</p>
+
+    <p><strong>Étape 3 — Formuler le choix en trois parties : composants, flux, compromis.</strong>
+      Quelles briques, quels flux entre elles, et — obligatoirement — ce que l'on accepte de perdre :
+      du coût, de la fraîcheur, de la simplicité, de la souplesse. Un choix dont la troisième partie est
+      vide n'est pas encore un choix.</p>
+
+    <p><strong>Étape 4 — Situer dans l'histoire, pour ne pas refaire ce qui existe.</strong> À quelle
+      génération ce problème correspond-il ? Quelles briques existantes y répondent déjà ? Lesquelles
+      restent nécessaires pour d'autres problèmes toujours actuels ? L'objectif est de n'ajouter qu'une
+      réponse, pas de remplacer un ensemble qui fonctionne.</p>
+
+    <p><strong>Étape 5 — Écrire le problème de demain.</strong> Le compromis accepté à l'étape 3 est la
+      contrainte future : notez-la, avec le signal qui annoncera son arrivée. Cette ligne, écrite
+      aujourd'hui, est ce qui permettra à la prochaine évolution d'être décidée à temps plutôt que subie
+      — et c'est elle qui transforme le principe en outil de pilotage.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Pas « ancienne → nouvelle technologie », mais <strong>nouveau besoin → nouvelle contrainte →
+      nouveau compromis</strong>. Les générations <strong>s'empilent</strong>, et la réponse de chacune
+      crée le problème de la suivante.</p>
+    <p class="ar" dir="rtl">ماشي «تكنولوجيا قديمة ← جديدة»، بل <strong>حاجة جديدة ← قيد جديد ← تنازل
+      جديد</strong>. الأجيال <strong>كتتراكم</strong>، وجواب كل واحد كيخلق مشكل اللي من بعدو.</p>
+  </div>
+</div>
+
+<h3 id="n08-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — les trois demandes, relues par le principe</div>
+  <div class="box-b">
+    <p>Reprenez les trois demandes de la direction de l'enseigne : le chiffre d'affaires de la veille à
+      8 h, la vue client unique, la prévision de la demande. Appliquez à chacune le mécanisme en trois
+      temps et situez-la dans le tableau historique.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Demande A — le chiffre d'affaires de la veille.</strong>
+      <em>Besoin</em> : disposer chaque matin d'une analyse des ventes de la veille par région.
+      <em>Contrainte</em> : ce n'est ni du volume ni de la variété — c'est de l'<strong>analyse
+      historique sur données structurées</strong>, avec une latence quotidienne. <em>Choix</em> :
+      composants — une plateforme analytique distincte des caisses ; flux — une ingestion nocturne et
+      une vue publiée ; compromis — une copie supplémentaire, un décalage de fraîcheur, une chaîne à
+      surveiller. <em>Situation historique</em> : <strong>génération 2</strong>, le Data Warehouse,
+      problème identifié vers 1990. Ce point mérite d'être dit clairement : la réponse à la demande la
+      plus urgente de la direction est une architecture vieille de trente ans, et c'est la bonne.</p>
+
+    <p><strong>Demande B — la vue client unique.</strong> <em>Besoin</em> : reconnaître le même client
+      à travers la caisse, le site, l'application et la fidélité. <em>Contrainte</em> : de
+      l'<strong>intégration</strong> et de la <strong>variété</strong> — plusieurs systèmes, plusieurs
+      familles de formats, aucun identifiant commun. <em>Choix</em> : composants — un socle accueillant
+      le brut et un référentiel client ; flux — ingestion des différentes sources, rapprochement,
+      publication d'une vue unifiée ; compromis — un rapprochement imparfait, donc une part d'incertitude
+      à assumer et à marquer, plus un travail de gouvernance continu. <em>Situation</em> : à cheval sur
+      les <strong>générations 4 et 6</strong>, puisque la variété appelle le lac et que l'unification
+      est le problème du Lakehouse.</p>
+
+    <p><strong>Demande C — la prévision de la demande.</strong> <em>Besoin</em> : prévoir les ventes par
+      produit et par magasin. <em>Contrainte</em> : <strong>nouveaux usages</strong> — qualité,
+      représentativité et contexte — plus une profondeur d'historique que la base opérationnelle ne
+      conserve pas. <em>Choix</em> : composants — stockage d'historique long, chaîne de préparation,
+      entraînement périodique ; flux — alimentation quotidienne, construction de variables, calcul
+      hebdomadaire ; compromis — coût de conservation sur trois ans, et dépendance à la qualité des
+      données amont, qui devient un sujet permanent. <em>Situation</em> : <strong>génération 7</strong>.</p>
+
+    <p><strong>Lecture d'ensemble.</strong> Trois demandes formulées le même matin relèvent de trois
+      générations différentes — la 2, la 4-6 et la 7. C'est la démonstration la plus claire que les
+      générations s'empilent : il serait absurde de choisir « une » architecture pour les trois, comme
+      il serait absurde de refuser la demande A au motif qu'elle n'est « pas moderne ». Chaque demande
+      reçoit la réponse de son problème dominant.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — un dossier de modernisation à réécrire</div>
+  <div class="box-b">
+    <p>Un responsable présente ce dossier : « Notre entrepôt a douze ans. Les plateformes modernes sont
+      aujourd'hui des Lakehouses. Nous proposons de migrer l'ensemble vers un Lakehouse cloud en
+      dix-huit mois. Bénéfices : modernité, scalabilité, compatibilité avec l'IA. » Contexte réel :
+      l'entreprise produit des rapports financiers structurés, 800 Go, croissance 8 % par an, une seule
+      famille de formats, aucune demande d'IA, aucune exigence de fraîcheur inférieure à la journée.
+      Réécrivez le dossier selon le principe.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Quel est le besoin nouveau ?</strong> En relisant le dossier, on n'en trouve
+      aucun. « L'entrepôt a douze ans » est une date ; « les plateformes modernes sont des Lakehouses »
+      est un constat sur le marché. Le dossier commence directement à l'étape 3, et par le nom d'un
+      produit : il lui manque les deux premiers temps.</p>
+
+    <p><strong>Étape 2 — Quelle contrainte ?</strong> Mesurons : 800 Go avec 8 % de croissance — volume
+      faible et stable ; une seule famille de formats — variété nulle ; latence quotidienne — vitesse
+      faible ; un site — distribution nulle ; aucune demande d'IA. <strong>Aucune contrainte ne
+      croît.</strong> Le problème dominant de cette entreprise est l'analyse structurée, c'est-à-dire
+      celui de la génération 2 — précisément celui auquel son entrepôt répond.</p>
+
+    <p><strong>Étape 3 — Le choix et son compromis.</strong> Si l'on migrait tout de même, le compromis
+      serait : dix-huit mois d'effort, un risque de régression sur des rapports financiers — ceux dont
+      la justesse est la moins négociable — un coût de licences et de compétences nouvelles, le tout
+      pour une capacité à traiter la variété et l'IA dont l'entreprise n'a aujourd'hui aucun usage.
+      <strong>Le compromis est entièrement défavorable</strong>, et il suffit de l'écrire pour que la
+      décision devienne évidente.</p>
+
+    <p><strong>Étape 4 — Situer.</strong> L'entrepôt existant répond au problème dominant actuel. Les
+      « bénéfices » annoncés — scalabilité, compatibilité IA — sont les réponses aux problèmes des
+      générations 3 et 7, que l'entreprise n'a pas. Payer la réponse d'un problème qu'on n'a pas, c'est
+      exactement la faute décrite dans les pièges.</p>
+
+    <p><strong>Étape 5 — Réécriture et vraie conclusion.</strong> Le dossier devient : <em>« Nous
+      n'identifions aujourd'hui aucun besoin nouveau créant une contrainte que notre entrepôt ne tienne
+      pas. Nous ne migrons pas. Nous surveillons trois signaux : l'apparition de formats non
+      structurés, une demande de fraîcheur infra-journalière, un premier usage d'IA. Au premier de ces
+      signaux, nous reprenons ce dossier en trois temps. »</em> Une précision honnête doit toutefois y
+      figurer : douze ans peuvent poser de vrais problèmes de <em>support</em> ou de
+      <em>sécurité</em> — mais ce serait alors un autre besoin, à écrire comme tel, et il conduirait
+      probablement à une mise à niveau plutôt qu'à un changement de génération.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — quand le compromis d'hier devient la contrainte d'aujourd'hui</div>
+  <div class="box-b">
+    <p>Il y a six ans, un opérateur télécom a mis en place un Data Lake pour accueillir logs, fichiers
+      d'appels et données clients, après avoir constaté que son entrepôt ne pouvait pas les ingérer.
+      Aujourd'hui : 400 To stockés, personne ne sait ce que contient la moitié des répertoires, les
+      analystes continuent d'utiliser l'entrepôt, et le projet d'IA n'arrive pas à constituer un jeu de
+      données fiable. Analysez avec le principe.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Remontons six ans en arrière — le mécanisme appliqué à l'époque.</strong>
+      <em>Besoin</em> : exploiter les logs et les appels, impossibles à charger dans l'entrepôt.
+      <em>Contrainte</em> : la variété. <em>Choix</em> : un Data Lake, stockage flexible et à grande
+      échelle — la réponse exacte de la génération 4. <strong>La décision était juste</strong>, et il
+      faut le dire avant tout le reste, car la tentation est de la juger à l'aune de ses conséquences.</p>
+
+    <p><strong>Quel compromis avait été accepté ?</strong> Celui qui accompagne toujours cette réponse :
+      accueillir le brut sans schéma préalable, donc <em>reporter</em> la description, le catalogage et
+      la qualité à plus tard. C'est le compromis du stockage flexible — et il avait été accepté, peut-être
+      sans être écrit.</p>
+
+    <p><strong>Ce compromis est devenu la contrainte d'aujourd'hui.</strong> « Personne ne sait ce que
+      contient la moitié des répertoires » est exactement le prix du report : sans métadonnées, le lac
+      devient un marécage (N2, N11). Les analystes sont restés sur l'entrepôt parce que le lac ne leur
+      offrait ni structure ni garanties, et l'IA échoue non par manque de données mais par manque de
+      <em>données de confiance</em> — le problème principal de la génération 7, mot pour mot.</p>
+
+    <p><strong>Le nouveau mécanisme, aujourd'hui.</strong> <em>Besoin</em> : servir la BI et l'IA sur un
+      socle commun, documenté et fiable. <em>Contrainte</em> : intégration et gouvernance — la
+      coexistence lake / warehouse coûte cher et laisse chacun à moitié servi, ce qui est le problème
+      principal de la génération 6. <em>Choix</em> : rapprocher les deux mondes — gestion et garanties
+      sur le stockage flexible, catalogue, qualité, traçabilité. <em>Compromis</em> : ce travail de
+      description et de gouvernance a un coût immédiat et visible, pour un bénéfice différé ; et il
+      impose une discipline que l'absence de schéma avait justement permis d'éviter.</p>
+
+    <p><strong>Étape 5 — Et le problème de demain ?</strong> Le compromis que l'on accepte maintenant —
+      davantage de règles, de catalogues et de contrôles — produira à son tour sa contrainte : une
+      lourdeur susceptible de ralentir l'arrivée de nouvelles sources. Le signal à surveiller est le
+      délai de mise à disposition d'une source nouvelle : s'il s'allonge, la prochaine évolution est
+      annoncée. <strong>Écrire cette ligne aujourd'hui est tout ce qui sépare une architecture pilotée
+      d'une architecture subie.</strong></p>
+  </div>
+</div>
+
+<h3 id="n08-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez l'idée clé et les trois temps du mécanisme, puis expliquez pourquoi le deuxième temps
+        est celui qu'on saute le plus souvent.</li>
+      <li>Citez les sept générations avec leur problème principal, sans regarder le tableau. Vérifiez
+        ensuite, et notez celles que vous avez oubliées — elles correspondent souvent aux problèmes que
+        vous n'avez jamais rencontrés.</li>
+      <li>Montrez, sur deux exemples tirés du tableau, que la réponse d'une génération crée le problème
+        de la suivante.</li>
+      <li>Une entreprise utilise encore un système de génération 1 et un entrepôt de génération 2, sans
+        rien d'autre. Dans quels cas est-ce parfaitement justifié ? Dans quels cas est-ce un problème ?</li>
+      <li>Transformez ces trois phrases en besoins correctement formulés : « il nous faut du Data
+        Mesh » ; « nous devons passer au cloud » ; « nous avons besoin d'un lac de données ».</li>
+      <li>Pour un besoin de votre choix, écrivez les trois temps complets, puis l'étape 5 : quel problème
+        votre compromis créera-t-il, et à quel signal le reconnaîtrez-vous ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n08-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque problème principal à sa génération et à sa réponse : « diversité des formats » ;
+      « besoin d'analyse et de reporting sur données structurées » ; « coûts d'infrastructure et
+      élasticité » ; « explosion du volume » ; « gérer les transactions quotidiennes » ; « séparer lake
+      et warehouse crée complexité et coûts » ; « nouveaux usages liés à l'IA et données de confiance ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une chaîne de télévision veut lancer un service de recommandation personnalisée à partir de
+      l'historique de visionnage, tout en continuant à produire ses rapports d'audience quotidiens.
+      Appliquez les cinq étapes à chacun des deux besoins séparément, situez-les dans le tableau
+      historique, puis dites ce que les deux peuvent partager et ce qui doit rester distinct. Terminez
+      par l'étape 5 pour chacun : quel problème le compromis retenu créera-t-il ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le tableau s'arrête à « 2023 — … ». En appliquant le principe, proposez ce que pourrait être la
+      <strong>génération 8</strong> : partez du compromis accepté par la génération 7 — intégration,
+      gouvernance, qualité et données prêtes pour l'IA — déduisez-en la contrainte qu'il produit, puis
+      formulez le problème dominant qui en résulterait et la forme générale de la réponse. Votre
+      raisonnement doit être entièrement dérivé du principe, sans invoquer aucune technologie existante
+      ni aucune tendance annoncée. Précisez enfin à quels signaux observables on saurait que cette
+      génération commence.</p>
+  </div>
+</div>

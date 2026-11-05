@@ -1,0 +1,892 @@
+<title>Animations du chapitre 0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F2F5F5; --surface:#FFFFFF; --ink:#101F23; --muted:#5A7177; --line:#DBE3E3;
+  --accent:#0E7C7B; --signal:#D4521F; --marine:#1C3B5A;
+  --quoi-bar:#2A6EB8; --quoi-bg:#E9F2FD; --ou-bar:#A8760B; --ou-bg:#FDF4E2;
+  --comment-bar:#237F36; --comment-bg:#E8F6EB; --retenir-bar:#14561F; --retenir-bg:#E0F1E4;
+  --piege-bar:#B2302F; --piege-bg:#FBE9E8; --domaine-bar:#68296B; --domaine-bg:#F5EDF5;
+  --note-bar:#1C3B5A; --note-bg:#FFFFFF; --app-bar:#4C8F3B; --app-bg:#FFFFFF;
+  --sol-bar:#1C3B5A; --sol-bg:#FFFFFF; --code-bg:#EFF2F2;
+  --fig-bg:#E9EEEE; --fig-line:#C3D0D0;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Newsreader","Iowan Old Style",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1416; --surface:#111D20; --ink:#E4EDED; --muted:#90A6AB; --line:#243437;
+  --accent:#34B3AE; --signal:#FF7B46; --marine:#17303F;
+  --quoi-bar:#5C9EE4; --quoi-bg:#12232F; --ou-bar:#D8A93C; --ou-bg:#2A2314;
+  --comment-bar:#4FBB66; --comment-bg:#122618; --retenir-bar:#6FD186; --retenir-bg:#102A17;
+  --piege-bar:#EE6B66; --piege-bg:#2C1716; --domaine-bar:#C487C7; --domaine-bg:#241A26;
+  --note-bar:#86ACD2; --note-bg:#111D20; --app-bar:#7FC96B; --app-bg:#111D20;
+  --sol-bar:#86ACD2; --sol-bg:#111D20; --code-bg:#0E1A1D;
+  --fig-bg:#162428; --fig-line:#2E4348; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B1416; --surface:#111D20; --ink:#E4EDED; --muted:#90A6AB; --line:#243437;
+  --accent:#34B3AE; --signal:#FF7B46; --marine:#17303F;
+  --quoi-bar:#5C9EE4; --quoi-bg:#12232F; --ou-bar:#D8A93C; --ou-bg:#2A2314;
+  --comment-bar:#4FBB66; --comment-bg:#122618; --retenir-bar:#6FD186; --retenir-bg:#102A17;
+  --piege-bar:#EE6B66; --piege-bg:#2C1716; --domaine-bar:#C487C7; --domaine-bg:#241A26;
+  --note-bar:#86ACD2; --note-bg:#111D20; --app-bar:#7FC96B; --app-bg:#111D20;
+  --sol-bar:#86ACD2; --sol-bg:#111D20; --code-bg:#0E1A1D;
+  --fig-bg:#162428; --fig-line:#2E4348; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--marine)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--marine);color:#F2F7FB}
+.bar .in{max-width:1100px;margin:0 auto;display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;
+  padding-block:.5rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar b{font-family:var(--display);font-weight:700;font-size:.95rem}
+.bar span{font-size:.78rem;opacity:.8;font-family:var(--display);font-weight:500}
+.wrap{max-width:1100px;margin:0 auto;padding-block:1.6rem 3.5rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.06;letter-spacing:-.02em;margin:.2rem 0 .4rem;text-wrap:balance}
+.lede{color:var(--muted);font-style:italic;margin:0 0 1.4rem;max-width:62ch}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.tabs button{font-family:var(--display);font-weight:700;font-size:.76rem;letter-spacing:.03em;
+  background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:.4rem .7rem;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tabs button:hover{border-color:var(--accent);color:var(--accent)}
+.tabs button[aria-selected="true"]:hover{color:#fff}
+.slide{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1.3rem 1.3rem 1.5rem}
+.kick{font-family:var(--display);font-weight:700;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--signal);margin:0 0 .25rem}
+.slide h2{font-family:var(--display);font-weight:700;font-size:clamp(1.25rem,3.2vw,1.65rem);line-height:1.12;margin:0 0 .35rem;text-wrap:balance}
+.claim{font-family:var(--display);font-weight:500;color:var(--accent);margin:0 0 1rem;font-size:1rem}
+.watch{border-left:4px solid var(--ou-bar);background:var(--ou-bg);border-radius:0 3px 3px 0;padding:.7rem .9rem;margin:0 0 1.1rem;font-size:.95rem}
+.watch b{font-family:var(--display);font-weight:700;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ou-bar);display:block;margin-bottom:.2rem}
+figure.fig{margin:0;background:var(--fig-bg);border:1px solid var(--fig-line);border-radius:4px;padding:1rem;overflow:hidden}
+figure.fig svg{display:block;width:100%;height:auto;max-width:100%}
+figure.fig figcaption{font-family:var(--display);font-size:.8rem;color:var(--muted);margin-top:.7rem;line-height:1.45}
+figure.fig figcaption b{color:var(--signal);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.68rem;display:block;margin-bottom:.15rem}
+.ctrl{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;margin-top:.7rem}
+.ctrl button{font-family:var(--display);font-weight:700;font-size:.78rem;letter-spacing:.03em;color:#fff;background:var(--accent);border:0;border-radius:3px;padding:.45rem .9rem;cursor:pointer}
+.ctrl button:hover{filter:brightness(1.1)}
+.ctrl button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.ctrl button.ghost[aria-pressed="true"]{background:var(--signal);color:#fff;border-color:var(--signal)}
+.ctrl .read{font-family:var(--mono);font-size:.8rem;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:auto}
+.nav{display:flex;gap:.5rem;align-items:center;margin-top:1.2rem;font-family:var(--display);font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.nav button{font-family:var(--display);font-weight:700;font-size:.78rem;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:.4rem .8rem;cursor:pointer}
+.nav .pos{margin-left:auto;font-variant-numeric:tabular-nums}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:.08em .32em;border-radius:2px}
+svg .lbl{font-family:"Bricolage Grotesque","Trebuchet MS",sans-serif;font-size:11px;font-weight:700;fill:var(--ink)}
+svg .sm{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--muted)}
+svg .node{fill:var(--surface);stroke:var(--fig-line);stroke-width:1.5}
+svg .wire{stroke:var(--fig-line);stroke-width:2;fill:none}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="bar"><div class="in">
+  <b>Animations &mdash; Chapitre 0</b>
+  <span>Traitement de donn&eacute;es en temps r&eacute;el &middot; Master Data Science &amp; Big Data &middot; S3</span>
+</div></div>
+
+<div class="wrap">
+  <h1>Les huit animations du chapitre&nbsp;0</h1>
+  <p class="lede">Une notion par animation, &agrave; projeter ou &agrave; manipuler. Chacune
+  montre le mouvement que le texte du cours a du mal &agrave; d&eacute;crire&nbsp;: une latence
+  qui d&eacute;passe son budget, des messages qui se doublent, une cl&eacute; qui retombe
+  toujours dans le m&ecirc;me casier.</p>
+
+  <div class="tabs" role="tablist"><button type="button" role="tab" data-go="0" aria-selected="true">N1 &middot; La seconde de Salma</button>
+<button type="button" role="tab" data-go="1" aria-selected="false">N2 &middot; Batch et streaming</button>
+<button type="button" role="tab" data-go="2" aria-selected="false">N6 &middot; Client et serveur</button>
+<button type="button" role="tab" data-go="3" aria-selected="false">N7 &middot; Le réseau imparfait</button>
+<button type="button" role="tab" data-go="4" aria-selected="false">N9 &middot; La clé et le casier</button>
+<button type="button" role="tab" data-go="5" aria-selected="false">N11 &middot; Les deux heures d'un message</button>
+<button type="button" role="tab" data-go="6" aria-selected="false">N12 &middot; Le cluster</button>
+<button type="button" role="tab" data-go="7" aria-selected="false">N14 &middot; Le générateur Python</button></div>
+
+<section class="slide" data-slide="0">
+  <p class="kick">Animation 1 &middot; notion N1</p>
+  <h2>La seconde de Salma</h2>
+  <p class="claim">Le temps réel, c'est une latence comparée à un délai utile.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Regardez le compteur de millisecondes et le repère rouge. Activez <em>Réseau lent</em> : la chaîne ne change pas, mais la réponse arrive après le budget et le paiement est refusé.</div>
+<figure class="fig" id="fig1">
+  <svg viewBox="0 0 640 170" role="img" aria-label="Animation : un paiement traverse le terminal, le reseau, le moteur de score de la banque, puis revient en reponse.">
+    <g id="f1-track">
+      <line class="wire" x1="110" y1="78" x2="178" y2="78"></line>
+      <line class="wire" x1="288" y1="78" x2="356" y2="78"></line>
+      <line class="wire" x1="466" y1="78" x2="534" y2="78"></line>
+      <rect class="node" x="10" y="52" width="100" height="52" rx="3"></rect>
+      <rect class="node" x="178" y="52" width="110" height="52" rx="3"></rect>
+      <rect class="node" x="356" y="52" width="110" height="52" rx="3"></rect>
+      <rect class="node" x="534" y="52" width="96" height="52" rx="3"></rect>
+      <text class="lbl" x="60" y="74" text-anchor="middle">Terminal</text>
+      <text class="sm"  x="60" y="90" text-anchor="middle">cree l'evenement</text>
+      <text class="lbl" x="233" y="74" text-anchor="middle">Reseau</text>
+      <text class="sm"  x="233" y="90" text-anchor="middle">~40 ms</text>
+      <text class="lbl" x="411" y="74" text-anchor="middle">Banque</text>
+      <text class="sm"  x="411" y="90" text-anchor="middle">score de fraude</text>
+      <text class="lbl" x="582" y="74" text-anchor="middle">Decision</text>
+      <text class="sm"  x="582" y="90" text-anchor="middle" id="f1-verdict">en attente</text>
+    </g>
+    <circle id="f1-dot" cx="60" cy="78" r="8" fill="#D4521F"></circle>
+    <text class="sm" id="f1-stage" x="320" y="28" text-anchor="middle">Pret. Appuyez sur Lancer le paiement.</text>
+    <text class="sm" id="f1-clock" x="320" y="142" text-anchor="middle" style="font-size:13px;fill:var(--accent);font-weight:600">0 ms</text>
+    <line x1="60" y1="126" x2="580" y2="126" stroke="var(--fig-line)" stroke-width="1"></line>
+    <line id="f1-budget" x1="450" y1="118" x2="450" y2="134" stroke="var(--piege-bar)" stroke-width="2"></line>
+    <circle id="f1-tick" cx="60" cy="126" r="4" fill="var(--accent)"></circle>
+    <text class="sm" x="450" y="156" text-anchor="middle" fill="var(--piege-bar)">delai utile : 300 ms</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f1-play">Lancer le paiement</button>
+    <button type="button" class="ghost" id="f1-slow" aria-pressed="false">Reseau lent</button>
+    <span class="read" id="f1-read">latence : &mdash;</span>
+  </div>
+  <figcaption><b>Figure 1 &middot; La seconde de Salma</b>L'&eacute;v&eacute;nement est cr&eacute;&eacute; par le terminal, traverse le r&eacute;seau, re&ccedil;oit un score, et la d&eacute;cision revient. Le rep&egrave;re rouge marque le d&eacute;lai utile&nbsp;: tant que le point le franchit avant la fin, la r&eacute;ponse a encore de la valeur. Activez <em>R&eacute;seau lent</em> pour voir la latence d&eacute;passer le budget.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="1" hidden>
+  <p class="kick">Animation 2 &middot; notion N2</p>
+  <h2>Batch et streaming</h2>
+  <p class="claim">La latence d'un lot vaut environ la moitié de sa période.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Les deux couloirs reçoivent exactement les mêmes événements. Suivez l'écart de latence moyenne qui se creuse : il ne vient pas de la puissance de la machine, mais du rythme de regroupement.</div>
+<figure class="fig" id="fig2">
+  <svg viewBox="0 0 640 220" role="img" aria-label="Animation comparant le traitement par lots et le traitement en flux.">
+    <text class="lbl" x="10" y="20">Batch &mdash; periode de 5 s</text>
+    <rect x="10" y="30" width="620" height="60" rx="3" fill="var(--surface)" stroke="var(--fig-line)"></rect>
+    <g id="f2-batch-events"></g>
+    <rect id="f2-bin" x="470" y="40" width="70" height="40" rx="3" fill="none" stroke="var(--ou-bar)" stroke-width="1.5" stroke-dasharray="4 3"></rect>
+    <text class="sm" x="505" y="64" text-anchor="middle" id="f2-bin-count">0</text>
+    <text class="sm" x="590" y="58" text-anchor="middle" id="f2-batch-out">&mdash;</text>
+    <text class="sm" x="590" y="72" text-anchor="middle">resultat</text>
+    <text class="lbl" x="10" y="124">Streaming &mdash; au fil de l'eau</text>
+    <rect x="10" y="134" width="620" height="60" rx="3" fill="var(--surface)" stroke="var(--fig-line)"></rect>
+    <g id="f2-stream-events"></g>
+    <rect x="470" y="144" width="70" height="40" rx="3" fill="none" stroke="var(--comment-bar)" stroke-width="1.5"></rect>
+    <text class="sm" x="505" y="168" text-anchor="middle" id="f2-proc">calcul</text>
+    <text class="sm" x="590" y="162" text-anchor="middle" id="f2-stream-out">&mdash;</text>
+    <text class="sm" x="590" y="176" text-anchor="middle">resultat</text>
+    <text class="sm" x="320" y="212" text-anchor="middle" id="f2-clock">t = 0,0 s</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f2-play">Lancer</button>
+    <button type="button" class="ghost" id="f2-reset">Remettre a zero</button>
+    <span class="read" id="f2-read">latence moy. &mdash; batch : &mdash; &middot; flux : &mdash;</span>
+  </div>
+  <figcaption><b>Figure 2 &middot; Deux fa&ccedil;ons de traiter</b>Les m&ecirc;mes &eacute;v&eacute;nements arrivent dans les deux couloirs. En haut ils s'accumulent dans le bac et ne produisent un r&eacute;sultat qu'&agrave; la fin de la p&eacute;riode&nbsp;; en bas chacun traverse le calcul imm&eacute;diatement. Observez l'&eacute;cart de latence moyenne qui se creuse.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="2" hidden>
+  <p class="kick">Animation 3 &middot; notion N6</p>
+  <h2>Client et serveur</h2>
+  <p class="claim">L'initiative appartient toujours au client.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Lancez plusieurs demandes coup sur coup. Le serveur ne fait rien tant qu'on ne lui demande rien, puis les demandes s'empilent dans sa file : c'est là que naît la latence d'attente.</div>
+<figure class="fig" id="fig3">
+  <svg viewBox="0 0 640 210" role="img" aria-label="Animation : trois clients envoient des demandes a un serveur, qui renvoie des reponses.">
+    <rect class="node" x="440" y="60" width="150" height="90" rx="3"></rect>
+    <text class="lbl" x="515" y="88" text-anchor="middle">Serveur</text>
+    <text class="sm"  x="515" y="104" text-anchor="middle">rend un service</text>
+    <text class="sm"  x="515" y="124" text-anchor="middle" id="f3-load">file : 0</text>
+    <g id="f3-clients">
+      <rect class="node" x="20" y="22" width="110" height="42" rx="3"></rect>
+      <text class="lbl" x="75" y="42" text-anchor="middle">Client A</text>
+      <text class="sm"  x="75" y="56" text-anchor="middle" id="f3-sa">au repos</text>
+      <rect class="node" x="20" y="84" width="110" height="42" rx="3"></rect>
+      <text class="lbl" x="75" y="104" text-anchor="middle">Client B</text>
+      <text class="sm"  x="75" y="118" text-anchor="middle" id="f3-sb">au repos</text>
+      <rect class="node" x="20" y="146" width="110" height="42" rx="3"></rect>
+      <text class="lbl" x="75" y="166" text-anchor="middle">Client C</text>
+      <text class="sm"  x="75" y="180" text-anchor="middle" id="f3-sc">au repos</text>
+    </g>
+    <line class="wire" x1="130" y1="43"  x2="440" y2="88"></line>
+    <line class="wire" x1="130" y1="105" x2="440" y2="105"></line>
+    <line class="wire" x1="130" y1="167" x2="440" y2="122"></line>
+    <g id="f3-packets"></g>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f3-a">Demande de A</button>
+    <button type="button" id="f3-b">Demande de B</button>
+    <button type="button" id="f3-c">Demande de C</button>
+    <span class="read" id="f3-read">servies : 0</span>
+  </div>
+  <figcaption><b>Figure 3 &middot; L'initiative appartient au client</b>Le serveur ne fait rien tant qu'on ne lui demande rien. Lancez plusieurs demandes rapidement&nbsp;: elles s'empilent dans la file du serveur, qui les traite l'une apr&egrave;s l'autre. C'est l&agrave; que na&icirc;t la latence d'attente de la notion&nbsp;1.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="3" hidden>
+  <p class="kick">Animation 4 &middot; notion N7</p>
+  <h2>Le réseau imparfait</h2>
+  <p class="claim">Retard, perte et duplication sont le fonctionnement normal.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Partez avec les retards seuls, puis activez les pertes et les doublons. Les messages partent numérotés de 1 à 6 ; comparez à chaque fois l'ordre d'arrivée.</div>
+<figure class="fig" id="fig4">
+  <svg viewBox="0 0 640 190" role="img" aria-label="Animation : des messages traversent un reseau imparfait, certains sont retardes, perdus ou dupliques.">
+    <rect class="node" x="10" y="60" width="96" height="50" rx="3"></rect>
+    <text class="lbl" x="58" y="82" text-anchor="middle">Emetteur</text>
+    <text class="sm"  x="58" y="98" text-anchor="middle" id="f4-sent">envoyes : 0</text>
+    <rect class="node" x="534" y="60" width="96" height="50" rx="3"></rect>
+    <text class="lbl" x="582" y="82" text-anchor="middle">Recepteur</text>
+    <text class="sm"  x="582" y="98" text-anchor="middle" id="f4-got">recus : 0</text>
+    <line class="wire" x1="106" y1="85" x2="534" y2="85" stroke-dasharray="5 4"></line>
+    <text class="sm" x="320" y="42" text-anchor="middle">reseau</text>
+    <g id="f4-msgs"></g>
+    <text class="sm" x="320" y="172" text-anchor="middle" id="f4-order">ordre d'arrivee : &mdash;</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f4-send">Envoyer 6 messages</button>
+    <button type="button" class="ghost" id="f4-delay" aria-pressed="true">Retards</button>
+    <button type="button" class="ghost" id="f4-loss" aria-pressed="false">Pertes</button>
+    <button type="button" class="ghost" id="f4-dup" aria-pressed="false">Doublons</button>
+    <span class="read" id="f4-read">&mdash;</span>
+  </div>
+  <figcaption><b>Figure 4 &middot; Le r&eacute;seau n'est pas parfait</b>Les messages partent num&eacute;rot&eacute;s de 1 &agrave; 6, dans l'ordre. Activez les pertes et les doublons&nbsp;: l'ordre d'arriv&eacute;e se brouille, des num&eacute;ros manquent, d'autres apparaissent deux fois. Toute la difficult&eacute; du temps r&eacute;el vient en partie de l&agrave;.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="4" hidden>
+  <p class="kick">Animation 5 &middot; notion N9</p>
+  <h2>La clé et le casier</h2>
+  <p class="claim">Même clé, même casier — toujours.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Envoyez une rafale et observez : une clé donnée tombe toujours au même endroit. C'est ce qui garantit l'ordre par sujet et permet de distribuer le travail sans coordination.</div>
+<figure class="fig" id="fig5">
+  <svg viewBox="0 0 640 220" role="img" aria-label="Animation : des messages tombent dans des casiers selon leur cle.">
+    <g id="f5-falling"></g>
+    <g>
+      <rect class="node" x="30"  y="130" width="130" height="66" rx="3"></rect>
+      <rect class="node" x="190" y="130" width="130" height="66" rx="3"></rect>
+      <rect class="node" x="350" y="130" width="130" height="66" rx="3"></rect>
+      <rect class="node" x="505" y="130" width="105" height="66" rx="3"></rect>
+      <text class="sm" x="95"  y="210" text-anchor="middle">casier 0</text>
+      <text class="sm" x="255" y="210" text-anchor="middle">casier 1</text>
+      <text class="sm" x="415" y="210" text-anchor="middle">casier 2</text>
+      <text class="sm" x="557" y="210" text-anchor="middle">casier 3</text>
+    </g>
+    <g id="f5-stacks"></g>
+    <text class="sm" x="320" y="22" text-anchor="middle" id="f5-hint">Chaque message porte une cle. Meme cle, meme casier.</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f5-send">Envoyer un message</button>
+    <button type="button" id="f5-burst">Envoyer 8 messages</button>
+    <button type="button" class="ghost" id="f5-clear">Vider</button>
+    <span class="read" id="f5-read">repartition : 0 / 0 / 0 / 0</span>
+  </div>
+  <figcaption><b>Figure 5 &middot; La cl&eacute; d&eacute;cide du casier</b>Les cartes <code>A</code>, <code>B</code>, <code>C</code>&hellip; tombent toujours dans le m&ecirc;me casier, quel que soit le moment de leur arriv&eacute;e. C'est exactement le m&eacute;canisme de partitionnement de Kafka, que nous verrons au chapitre&nbsp;3.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="5" hidden>
+  <p class="kick">Animation 6 &middot; notion N11</p>
+  <h2>Les deux heures d'un message</h2>
+  <p class="claim">L'heure du fait et l'heure de la réception ne coïncident pas.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Lancez une fois en réseau normal, puis en <em>Réseau encombré</em>. Les faits se produisent dans l'ordre en haut ; en bas, un événement plus ancien peut arriver après un plus récent.</div>
+<figure class="fig" id="fig6">
+  <svg viewBox="0 0 640 230" role="img" aria-label="Animation : deux axes de temps montrent que des evenements crees dans l'ordre arrivent dans le desordre.">
+    <text class="lbl" x="10" y="30">Heure d'evenement (quand le fait s'est produit)</text>
+    <line x1="30" y1="56" x2="610" y2="56" class="wire"></line>
+    <g id="f6-src"></g>
+    <text class="lbl" x="10" y="150">Heure de traitement (quand le message arrive)</text>
+    <line x1="30" y1="176" x2="610" y2="176" class="wire"></line>
+    <g id="f6-dst"></g>
+    <g id="f6-links"></g>
+    <text class="sm" x="320" y="212" text-anchor="middle" id="f6-note">Les evenements partent dans l'ordre 1, 2, 3, 4, 5.</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f6-play">Lancer</button>
+    <button type="button" class="ghost" id="f6-jam" aria-pressed="false">Reseau encombre</button>
+    <span class="read" id="f6-read">ordre d'arrivee : &mdash;</span>
+  </div>
+  <figcaption><b>Figure 6 &middot; Les deux heures d'un message</b>En haut, les faits se produisent dans l'ordre&nbsp;; en bas, ils arrivent avec des retards in&eacute;gaux. Les traits reliant les deux axes montrent les croisements&nbsp;: un &eacute;v&eacute;nement plus ancien peut arriver apr&egrave;s un plus r&eacute;cent.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="6" hidden>
+  <p class="kick">Animation 7 &middot; notion N12</p>
+  <h2>Le cluster</h2>
+  <p class="claim">Plus de machines : plus de capacité, et de nouveaux problèmes.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Faites tomber une machine, puis deux. Les autres absorbent la part perdue ; à une seule machine restante, la charge devient intenable. C'est le calcul de dimensionnement de la notion 12.</div>
+<figure class="fig" id="fig7">
+  <svg viewBox="0 0 640 210" role="img" aria-label="Animation : quatre machines se partagent la charge ; quand l'une tombe, les autres reprennent son travail.">
+    <text class="sm" x="320" y="20" text-anchor="middle" id="f7-head">4 machines actives &mdash; charge repartie</text>
+    <g id="f7-machines"></g>
+    <text class="sm" x="320" y="198" text-anchor="middle" id="f7-msg">Cliquez sur une machine pour la faire tomber en panne.</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f7-fail">Provoquer une panne</button>
+    <button type="button" class="ghost" id="f7-heal">Tout reparer</button>
+    <span class="read" id="f7-read">charge par machine : 25 %</span>
+  </div>
+  <figcaption><b>Figure 7 &middot; Partager le travail, survivre aux pannes</b>Chaque machine prend une part de la charge. Faites-en tomber une&nbsp;: les autres absorbent sa part, et leurs barres montent. C'est le gain, mais c'est aussi la limite&nbsp;: &agrave; une seule machine restante, la charge devient intenable.</figcaption>
+</figure>
+</section>
+
+<section class="slide" data-slide="7" hidden>
+  <p class="kick">Animation 8 &middot; notion N14</p>
+  <h2>Le générateur Python</h2>
+  <p class="claim">Une boucle infinie avec <code>yield</code>, c'est déjà un flux.</p>
+  <div class="watch"><b>Ce qu'il faut regarder</b>Avancez pas à pas avec <em>Demander une valeur</em> : la ligne surlignée montre que la fonction se met en pause sur <code>yield</code> et reprend exactement là. Les valeurs ne s'accumulent jamais.</div>
+<figure class="fig" id="fig8">
+  <svg viewBox="0 0 640 220" role="img" aria-label="Animation : un generateur Python produit des valeurs une par une, la ligne executee est mise en evidence.">
+    <rect x="10" y="14" width="330" height="150" rx="3" fill="var(--surface)" stroke="var(--fig-line)"></rect>
+    <rect id="f8-hl" x="16" y="36" width="318" height="18" fill="var(--ou-bg)" stroke="var(--ou-bar)" stroke-width="1"></rect>
+    <text class="sm" x="24" y="32" style="font-size:10.5px">def capteur():</text>
+    <text class="sm" x="24" y="50" style="font-size:10.5px">    while True:</text>
+    <text class="sm" x="24" y="68" style="font-size:10.5px">        t = random.gauss(25, 2)</text>
+    <text class="sm" x="24" y="86" style="font-size:10.5px">        yield round(t, 1)</text>
+    <text class="sm" x="24" y="104" style="font-size:10.5px">        time.sleep(1)</text>
+    <text class="sm" x="24" y="130" style="font-size:10.5px">for valeur in capteur():</text>
+    <text class="sm" x="24" y="148" style="font-size:10.5px">    print("Nouvelle mesure :", valeur)</text>
+    <text class="lbl" x="370" y="30">Flux produit</text>
+    <line class="wire" x1="360" y1="100" x2="630" y2="100"></line>
+    <g id="f8-vals"></g>
+    <text class="sm" x="500" y="200" text-anchor="middle" id="f8-state">en pause &mdash; la fonction attend qu'on lui redemande une valeur</text>
+  </svg>
+  <div class="ctrl">
+    <button type="button" id="f8-step">Demander une valeur</button>
+    <button type="button" id="f8-run">Lancer la boucle</button>
+    <button type="button" class="ghost" id="f8-stop">Arreter</button>
+    <span class="read" id="f8-read">valeurs produites : 0</span>
+  </div>
+  <figcaption><b>Figure 8 &middot; Le g&eacute;n&eacute;rateur, premi&egrave;re image d'un flux</b>La ligne surlign&eacute;e montre o&ugrave; en est la fonction. &Agrave; chaque <code>yield</code> elle rend une valeur et se met en pause&nbsp;; elle reprend exactement l&agrave; quand la boucle <code>for</code> en redemande une. Les valeurs ne s'accumulent jamais&nbsp;: elles sont consomm&eacute;es au fil de l'eau.</figcaption>
+</figure>
+</section>
+
+
+<div class="nav">
+  <button type="button" id="prev">&larr; Pr&eacute;c&eacute;dente</button>
+  <button type="button" id="next">Suivante &rarr;</button>
+  <span>Fl&egrave;ches du clavier pour naviguer</span>
+  <span class="pos" id="pos">1 / 8</span>
+</div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SPEED = RM ? 4 : 1;
+
+  function $(id) { return document.getElementById(id); }
+  function mk(tag, attrs) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+  function loop(step) {
+    var last = null, live = true;
+    function frame(ts) {
+      if (!live) return;
+      if (last === null) last = ts;
+      var dt = Math.min((ts - last) / 1000, 0.1) * SPEED;
+      last = ts;
+      if (step(dt) === false) { live = false; return; }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return { stop: function () { live = false; } };
+  }
+  function toggle(btn, onChange) {
+    btn.addEventListener("click", function () {
+      var on = btn.getAttribute("aria-pressed") === "true";
+      btn.setAttribute("aria-pressed", on ? "false" : "true");
+      if (onChange) onChange(!on);
+    });
+  }
+  function clear(g) { while (g.firstChild) g.removeChild(g.firstChild); }
+
+  /* ---------- Figure 1 : la seconde de Salma ---------- */
+  (function () {
+    var dot = $("f1-dot"), tick = $("f1-tick"), clock = $("f1-clock"),
+        stage = $("f1-stage"), verdict = $("f1-verdict"), read = $("f1-read"),
+        play = $("f1-play"), slow = $("f1-slow");
+    if (!dot) return;
+    var lent = false, run = null;
+    toggle(slow, function (on) { lent = on; });
+
+    function segments() {
+      var net = lent ? 160 : 48;
+      return [
+        { a: 60, b: 60, ms: 12, txt: "Le terminal cree l'evenement (12 ms)" },
+        { a: 60, b: 233, ms: net / 2, txt: "Le message traverse le reseau (" + net + " ms aller)" },
+        { a: 233, b: 411, ms: net / 2, txt: "Le message arrive a la banque" },
+        { a: 411, b: 411, ms: 35, txt: "La banque calcule le score de fraude (35 ms)" },
+        { a: 411, b: 582, ms: net, txt: "La reponse revient au terminal (" + net + " ms retour)" }
+      ];
+    }
+    function start() {
+      if (run) run.stop();
+      var segs = segments(), i = 0, t = 0, elapsed = 0;
+      var total = segs.reduce(function (s, x) { return s + x.ms; }, 0);
+      verdict.textContent = "en attente";
+      verdict.setAttribute("fill", "var(--muted)");
+      read.textContent = "latence : en cours";
+      run = loop(function (dt) {
+        t += dt * 1000 / 8;
+        while (i < segs.length && t > segs[i].ms) { t -= segs[i].ms; elapsed += segs[i].ms; i++; }
+        if (i >= segs.length) {
+          dot.setAttribute("cx", 582);
+          clock.textContent = total + " ms";
+          tick.setAttribute("cx", 60 + Math.min(total, 400) / 400 * 520);
+          var ok = total <= 300;
+          verdict.textContent = ok ? "ACCEPTE" : "REFUSE : trop tard";
+          verdict.setAttribute("fill", ok ? "var(--comment-bar)" : "var(--piege-bar)");
+          stage.textContent = ok
+            ? "Latence " + total + " ms, sous le budget de 300 ms."
+            : "Latence " + total + " ms : le budget de 300 ms est depasse.";
+          read.textContent = "latence : " + total + " ms / 300 ms";
+          return false;
+        }
+        var s = segs[i], p = s.ms ? t / s.ms : 1;
+        dot.setAttribute("cx", s.a + (s.b - s.a) * p);
+        var now = Math.round(elapsed + t);
+        clock.textContent = now + " ms";
+        tick.setAttribute("cx", 60 + Math.min(now, 400) / 400 * 520);
+        stage.textContent = s.txt;
+      });
+    }
+    play.addEventListener("click", start);
+  })();
+
+  /* ---------- Figure 2 : batch et streaming ---------- */
+  (function () {
+    var gB = $("f2-batch-events"), gS = $("f2-stream-events");
+    if (!gB) return;
+    var bin = $("f2-bin-count"), bOut = $("f2-batch-out"), sOut = $("f2-stream-out"),
+        proc = $("f2-proc"), clk = $("f2-clock"), read = $("f2-read"),
+        play = $("f2-play"), reset = $("f2-reset");
+    var PERIOD = 5, X0 = 20, X1 = 470, SPD = 300;
+    var st, run = null;
+
+    function init() {
+      if (run) { run.stop(); run = null; }
+      clear(gB); clear(gS);
+      st = { t: 0, spawn: 0, b: [], s: [], hold: [], nextFlush: PERIOD,
+             bSum: 0, bN: 0, sSum: 0, sN: 0, flash: 0 };
+      bin.textContent = "0"; bOut.textContent = "—"; sOut.textContent = "—";
+      proc.textContent = "calcul"; clk.textContent = "t = 0,0 s";
+      read.textContent = "latence moy. batch : — · flux : —";
+    }
+    function spawn() {
+      [["b", gB, 60], ["s", gS, 164]].forEach(function (cfg) {
+        var c = mk("circle", { cx: X0, cy: cfg[2], r: 6,
+          fill: cfg[0] === "b" ? "var(--ou-bar)" : "var(--comment-bar)" });
+        cfg[1].appendChild(c);
+        st[cfg[0]].push({ el: c, x: X0, born: st.t });
+      });
+    }
+    function advance(arr, y, onArrive, dt) {
+      for (var i = arr.length - 1; i >= 0; i--) {
+        var m = arr[i];
+        m.x += SPD * dt;
+        if (m.x >= X1) { m.el.parentNode.removeChild(m.el); arr.splice(i, 1); onArrive(m); }
+        else m.el.setAttribute("cx", m.x);
+      }
+    }
+    function start() {
+      init();
+      run = loop(function (dt) {
+        st.t += dt;
+        clk.textContent = "t = " + st.t.toFixed(1) + " s";
+        st.spawn += dt;
+        while (st.spawn >= 0.8) { st.spawn -= 0.8; spawn(); }
+        advance(st.b, 60, function (m) { st.hold.push(m); bin.textContent = String(st.hold.length); }, dt);
+        advance(st.s, 164, function (m) {
+          st.sSum += st.t - m.born; st.sN++;
+          sOut.textContent = "1 msg";
+          proc.textContent = "traite";
+          st.flash = 0.25;
+        }, dt);
+        if (st.flash > 0) { st.flash -= dt; if (st.flash <= 0) proc.textContent = "calcul"; }
+        if (st.t >= st.nextFlush) {
+          st.nextFlush += PERIOD;
+          var n = st.hold.length;
+          if (n) {
+            for (var i = 0; i < n; i++) { st.bSum += st.t - st.hold[i].born; st.bN++; }
+            bOut.textContent = n + " msg";
+          } else bOut.textContent = "0 msg";
+          st.hold = []; bin.textContent = "0";
+        }
+        read.textContent = "latence moy. batch : " +
+          (st.bN ? (st.bSum / st.bN).toFixed(1) + " s" : "—") + " · flux : " +
+          (st.sN ? (st.sSum / st.sN).toFixed(1) + " s" : "—");
+        if (st.t > 24) return false;
+      });
+    }
+    play.addEventListener("click", start);
+    reset.addEventListener("click", init);
+    init();
+  })();
+
+  /* ---------- Figure 3 : client et serveur ---------- */
+  (function () {
+    var g = $("f3-packets");
+    if (!g) return;
+    var load = $("f3-load"), read = $("f3-read");
+    var status = { A: $("f3-sa"), B: $("f3-sb"), C: $("f3-sc") };
+    var lines = { A: [130, 43, 440, 88], B: [130, 105, 440, 105], C: [130, 167, 440, 122] };
+    var queue = [], busy = null, served = 0, running = false;
+
+    function pulse(key, dir) {
+      var L = lines[key];
+      var c = mk("circle", { cx: dir > 0 ? L[0] : L[2], cy: dir > 0 ? L[1] : L[3], r: 6,
+        fill: dir > 0 ? "var(--signal)" : "var(--comment-bar)" });
+      g.appendChild(c);
+      return { el: c, key: key, dir: dir, p: 0, L: L };
+    }
+    var moving = [];
+    function send(key) {
+      if (status[key].textContent === "attend la reponse") return;
+      status[key].textContent = "attend la reponse";
+      moving.push(pulse(key, 1));
+      ensure();
+    }
+    function ensure() {
+      if (running) return;
+      running = true;
+      loop(function (dt) {
+        for (var i = moving.length - 1; i >= 0; i--) {
+          var m = moving[i];
+          m.p += dt / 0.8;
+          var L = m.L;
+          var x = m.dir > 0 ? L[0] + (L[2] - L[0]) * m.p : L[2] + (L[0] - L[2]) * m.p;
+          var y = m.dir > 0 ? L[1] + (L[3] - L[1]) * m.p : L[3] + (L[1] - L[3]) * m.p;
+          m.el.setAttribute("cx", x); m.el.setAttribute("cy", y);
+          if (m.p >= 1) {
+            m.el.parentNode.removeChild(m.el); moving.splice(i, 1);
+            if (m.dir > 0) queue.push(m.key);
+            else { status[m.key].textContent = "servi"; served++; read.textContent = "servies : " + served; }
+          }
+        }
+        if (!busy && queue.length) busy = { key: queue.shift(), t: 0 };
+        if (busy) {
+          busy.t += dt;
+          if (busy.t >= 0.6) { moving.push(pulse(busy.key, -1)); busy = null; }
+        }
+        load.textContent = "file : " + queue.length + (busy ? " (+1 en cours)" : "");
+        if (!moving.length && !queue.length && !busy) { running = false; return false; }
+      });
+    }
+    $("f3-a").addEventListener("click", function () { send("A"); });
+    $("f3-b").addEventListener("click", function () { send("B"); });
+    $("f3-c").addEventListener("click", function () { send("C"); });
+  })();
+
+  /* ---------- Figure 4 : le reseau imparfait ---------- */
+  (function () {
+    var g = $("f4-msgs");
+    if (!g) return;
+    var sent = $("f4-sent"), got = $("f4-got"), order = $("f4-order"), read = $("f4-read");
+    var opt = { delay: true, loss: false, dup: false };
+    toggle($("f4-delay"), function (v) { opt.delay = v; });
+    toggle($("f4-loss"), function (v) { opt.loss = v; });
+    toggle($("f4-dup"), function (v) { opt.dup = v; });
+    var running = false;
+
+    $("f4-send").addEventListener("click", function () {
+      if (running) return;
+      running = true;
+      clear(g);
+      var msgs = [], nSent = 0, nGot = 0, arrived = [];
+      for (var i = 1; i <= 6; i++) {
+        var copies = (opt.dup && Math.random() < 0.3) ? 2 : 1;
+        for (var c = 0; c < copies; c++) {
+          var jitter = opt.delay ? Math.random() * 1.6 : 0;
+          msgs.push({ n: i, wait: (i - 1) * 0.25 + (c ? 0.5 : 0), dur: 1.2 + jitter,
+                      lost: opt.loss && Math.random() < 0.22, t: 0, el: null,
+                      y: 85 + (i % 2 ? -1 : 1) * ((i % 3) * 7) });
+        }
+      }
+      sent.textContent = "envoyes : 6"; got.textContent = "recus : 0";
+      order.textContent = "ordre d'arrivee : —";
+      read.textContent = "en cours…";
+      loop(function (dt) {
+        var alive = false;
+        msgs.forEach(function (m) {
+          if (m.done) return;
+          alive = true;
+          m.t += dt;
+          if (m.t < m.wait) return;
+          if (!m.el) {
+            m.el = mk("circle", { cx: 106, cy: m.y, r: 9, fill: "var(--quoi-bar)" });
+            var tx = mk("text", { x: 106, y: m.y + 3.5, "text-anchor": "middle",
+              fill: "#fff", "font-size": "9.5", "font-family": "IBM Plex Mono, monospace" });
+            tx.textContent = m.n;
+            g.appendChild(m.el); g.appendChild(tx); m.tx = tx;
+            nSent++;
+          }
+          var p = (m.t - m.wait) / m.dur;
+          if (m.lost && p > 0.5) {
+            m.el.setAttribute("opacity", Math.max(0, 1 - (p - 0.5) * 6));
+            m.tx.setAttribute("opacity", Math.max(0, 1 - (p - 0.5) * 6));
+            if (p > 0.7) { m.done = true; m.el.remove(); m.tx.remove(); }
+            return;
+          }
+          if (p >= 1) {
+            m.done = true; m.el.remove(); m.tx.remove();
+            nGot++; arrived.push(m.n);
+            got.textContent = "recus : " + nGot;
+            order.textContent = "ordre d'arrivee : " + arrived.join(", ");
+            return;
+          }
+          var x = 106 + (534 - 106) * p;
+          m.el.setAttribute("cx", x); m.tx.setAttribute("x", x);
+        });
+        if (!alive) {
+          running = false;
+          var miss = [1, 2, 3, 4, 5, 6].filter(function (n) { return arrived.indexOf(n) < 0; });
+          var dups = arrived.filter(function (n, i) { return arrived.indexOf(n) !== i; });
+          read.textContent = "perdus : " + (miss.length ? miss.join(",") : "aucun") +
+            " · doublons : " + (dups.length ? dups.join(",") : "aucun");
+          return false;
+        }
+      });
+    });
+  })();
+
+  /* ---------- Figure 5 : la cle decide du casier ---------- */
+  (function () {
+    var gF = $("f5-falling"), gS = $("f5-stacks");
+    if (!gF) return;
+    var read = $("f5-read"), hint = $("f5-hint");
+    var CX = [95, 255, 415, 557], counts = [0, 0, 0, 0];
+    var KEYS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    var flying = [], running = false;
+
+    function render() {
+      read.textContent = "repartition : " + counts.join(" / ");
+    }
+    function drop(key) {
+      var idx = (key.charCodeAt(0) - 65) % 4;
+      var startX = 60 + Math.random() * 500;
+      var c = mk("circle", { cx: startX, cy: 34, r: 11, fill: "var(--quoi-bar)" });
+      var t = mk("text", { x: startX, y: 38, "text-anchor": "middle", fill: "#fff",
+        "font-size": "11", "font-family": "Bricolage Grotesque, sans-serif", "font-weight": "700" });
+      t.textContent = key;
+      gF.appendChild(c); gF.appendChild(t);
+      var targetY = 182 - Math.min(counts[idx], 3) * 22;
+      counts[idx]++;
+      flying.push({ c: c, t: t, x0: startX, y0: 34, x1: CX[idx], y1: targetY, p: 0 });
+      hint.textContent = "Cle " + key + " → casier " + idx;
+      render();
+      run();
+    }
+    function run() {
+      if (running) return;
+      running = true;
+      loop(function (dt) {
+        for (var i = flying.length - 1; i >= 0; i--) {
+          var f = flying[i];
+          f.p = Math.min(1, f.p + dt / 0.9);
+          var e = f.p * f.p;
+          var x = f.x0 + (f.x1 - f.x0) * f.p, y = f.y0 + (f.y1 - f.y0) * e;
+          f.c.setAttribute("cx", x); f.c.setAttribute("cy", y);
+          f.t.setAttribute("x", x); f.t.setAttribute("y", y + 4);
+          if (f.p >= 1) { gS.appendChild(f.c); gS.appendChild(f.t); flying.splice(i, 1); }
+        }
+        if (!flying.length) { running = false; return false; }
+      });
+    }
+    $("f5-send").addEventListener("click", function () {
+      drop(KEYS[Math.floor(Math.random() * KEYS.length)]);
+    });
+    $("f5-burst").addEventListener("click", function () {
+      for (var i = 0; i < 8; i++) {
+        (function (k) { setTimeout(function () { drop(k); }, i * 160); })(KEYS[Math.floor(Math.random() * KEYS.length)]);
+      }
+    });
+    $("f5-clear").addEventListener("click", function () {
+      clear(gF); clear(gS); flying = []; counts = [0, 0, 0, 0];
+      hint.textContent = "Chaque message porte une cle. Meme cle, meme casier.";
+      render();
+    });
+    render();
+  })();
+
+  /* ---------- Figure 6 : heure d'evenement et heure de traitement ---------- */
+  (function () {
+    var gSrc = $("f6-src"), gDst = $("f6-dst"), gLink = $("f6-links");
+    if (!gSrc) return;
+    var note = $("f6-note"), read = $("f6-read");
+    var jam = false;
+    toggle($("f6-jam"), function (v) { jam = v; });
+    var XS = [80, 185, 290, 395, 500];
+
+    function base() {
+      clear(gSrc); clear(gDst); clear(gLink);
+      XS.forEach(function (x, i) {
+        var c = mk("circle", { cx: x, cy: 56, r: 10, fill: "var(--comment-bar)" });
+        var t = mk("text", { x: x, y: 60, "text-anchor": "middle", fill: "#fff",
+          "font-size": "10", "font-family": "IBM Plex Mono, monospace" });
+        t.textContent = i + 1;
+        gSrc.appendChild(c); gSrc.appendChild(t);
+      });
+    }
+    base();
+    $("f6-play").addEventListener("click", function () {
+      base();
+      note.textContent = "Les evenements partent dans l'ordre 1, 2, 3, 4, 5.";
+      read.textContent = "en cours…";
+      var items = XS.map(function (x, i) {
+        var d = jam ? 20 + Math.random() * 190 : 5 + Math.random() * 45;
+        var c = mk("circle", { cx: x, cy: 56, r: 10, fill: "var(--signal)" });
+        var t = mk("text", { x: x, y: 60, "text-anchor": "middle", fill: "#fff",
+          "font-size": "10", "font-family": "IBM Plex Mono, monospace" });
+        t.textContent = i + 1;
+        gDst.appendChild(c); gDst.appendChild(t);
+        return { n: i + 1, x0: x, x1: Math.min(600, x + d), c: c, t: t, p: 0, sp: 0.5 + Math.random() * 0.5 };
+      });
+      loop(function (dt) {
+        var done = true;
+        items.forEach(function (m) {
+          if (m.p < 1) { done = false; m.p = Math.min(1, m.p + dt * m.sp); }
+          var x = m.x0 + (m.x1 - m.x0) * m.p, y = 56 + 120 * m.p;
+          m.c.setAttribute("cx", x); m.c.setAttribute("cy", y);
+          m.t.setAttribute("x", x); m.t.setAttribute("y", y + 4);
+        });
+        if (done) {
+          var sorted = items.slice().sort(function (a, b) { return a.x1 - b.x1; });
+          var seq = sorted.map(function (m) { return m.n; });
+          sorted.forEach(function (m) {
+            gLink.appendChild(mk("line", { x1: m.x0, y1: 66, x2: m.x1, y2: 166,
+              stroke: "var(--fig-line)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+          });
+          var ok = seq.join(",") === "1,2,3,4,5";
+          note.textContent = ok
+            ? "Ils arrivent ici dans le meme ordre — mais rien ne le garantissait."
+            : "Ils arrivent dans un autre ordre : un evenement plus ancien arrive apres un plus recent.";
+          read.textContent = "ordre d'arrivee : " + seq.join(", ");
+          return false;
+        }
+      });
+    });
+  })();
+
+  /* ---------- Figure 7 : le cluster ---------- */
+  (function () {
+    var g = $("f7-machines");
+    if (!g) return;
+    var head = $("f7-head"), msg = $("f7-msg"), read = $("f7-read");
+    var XS = [30, 185, 340, 495], W = 110, TOP = 36, H = 128, BOT = TOP + H;
+    var alive = [true, true, true, true], bars = [], labels = [];
+
+    XS.forEach(function (x, i) {
+      g.appendChild(mk("rect", { x: x, y: TOP, width: W, height: H, rx: 3,
+        fill: "var(--surface)", stroke: "var(--fig-line)", "stroke-width": 1.5 }));
+      var bar = mk("rect", { x: x + 8, y: BOT - 8, width: W - 16, height: 0, fill: "var(--accent)" });
+      g.appendChild(bar); bars.push(bar);
+      var lab = mk("text", { x: x + W / 2, y: TOP + 20, "text-anchor": "middle",
+        class: "lbl" });
+      lab.textContent = "M" + (i + 1);
+      g.appendChild(lab);
+      var pct = mk("text", { x: x + W / 2, y: TOP + 36, "text-anchor": "middle", class: "sm" });
+      g.appendChild(pct); labels.push(pct);
+      var hit = mk("rect", { x: x, y: TOP, width: W, height: H, fill: "transparent",
+        style: "cursor:pointer" });
+      hit.addEventListener("click", function () { alive[i] = !alive[i]; render(); });
+      g.appendChild(hit);
+    });
+
+    function render() {
+      var n = alive.filter(Boolean).length;
+      var share = n ? 100 / n : 0;
+      bars.forEach(function (b, i) {
+        var v = alive[i] ? share : 0;
+        var h = Math.min(H - 46, (H - 46) * v / 100);
+        b.setAttribute("height", h);
+        b.setAttribute("y", BOT - 8 - h);
+        b.setAttribute("fill", v > 90 ? "var(--piege-bar)" : v > 60 ? "var(--ou-bar)" : "var(--accent)");
+        labels[i].textContent = alive[i] ? Math.round(v) + " %" : "en panne";
+        labels[i].setAttribute("fill", alive[i] ? "var(--muted)" : "var(--piege-bar)");
+      });
+      head.textContent = n + (n > 1 ? " machines actives" : " machine active") + " — charge repartie";
+      read.textContent = "charge par machine : " + (n ? Math.round(share) + " %" : "service arrete");
+      msg.textContent = n === 0 ? "Plus aucune machine : le service est arrete."
+        : n === 1 ? "Une seule machine porte tout : la charge devient intenable."
+        : "Cliquez sur une machine pour la faire tomber en panne.";
+    }
+    $("f7-fail").addEventListener("click", function () {
+      var up = [];
+      alive.forEach(function (a, i) { if (a) up.push(i); });
+      if (up.length) { alive[up[Math.floor(Math.random() * up.length)]] = false; render(); }
+    });
+    $("f7-heal").addEventListener("click", function () { alive = [true, true, true, true]; render(); });
+    render();
+  })();
+
+  /* ---------- Figure 8 : le generateur Python ---------- */
+  (function () {
+    var hl = $("f8-hl"), gv = $("f8-vals");
+    if (!hl) return;
+    var state = $("f8-state"), read = $("f8-read"), vals = [], n = 0, auto = null;
+    var STEPS = [
+      { y: 40,  s: "la boucle while True recommence : le flux ne s'arrete jamais" },
+      { y: 58,  s: "une mesure est tiree : random.gauss(25, 2)" },
+      { y: 76,  s: "yield : la valeur part, la fonction se met en pause ici" },
+      { y: 138, s: "la boucle for recoit la valeur et l'affiche" },
+      { y: 94,  s: "time.sleep(1) : on attend avant la mesure suivante" }
+    ];
+    var i = -1;
+
+    function emit() {
+      n++;
+      var v = (25 + (Math.random() + Math.random() + Math.random() - 1.5) * 2.6).toFixed(1);
+      vals.forEach(function (o) { o.x += 48; });
+      var t = mk("text", { x: 378, y: 104, "text-anchor": "middle", class: "sm",
+        fill: "var(--signal)", "font-size": "11" });
+      t.textContent = v;
+      gv.appendChild(t);
+      vals.push({ el: t, x: 378 });
+      for (var k = vals.length - 1; k >= 0; k--) {
+        if (vals[k].x > 626) { vals[k].el.remove(); vals.splice(k, 1); }
+        else vals[k].el.setAttribute("x", vals[k].x);
+      }
+      read.textContent = "valeurs produites : " + n;
+    }
+    function step() {
+      i = (i + 1) % STEPS.length;
+      hl.setAttribute("y", STEPS[i].y - 14);
+      state.textContent = STEPS[i].s;
+      if (i === 2) emit();
+    }
+    $("f8-step").addEventListener("click", function () { stop(); step(); });
+    $("f8-run").addEventListener("click", function () {
+      if (auto) return;
+      auto = setInterval(step, RM ? 300 : 650);
+      step();
+    });
+    function stop() { if (auto) { clearInterval(auto); auto = null; } }
+    $("f8-stop").addEventListener("click", function () {
+      stop();
+      state.textContent = "en pause — la fonction attend qu'on lui redemande une valeur";
+    });
+  })();
+})();
+</script>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tabs button"));
+  var pos = document.getElementById("pos");
+  var cur = 0;
+  function show(i) {
+    cur = (i + slides.length) % slides.length;
+    slides.forEach(function (s, k) { s.hidden = k !== cur; });
+    tabs.forEach(function (t, k) { t.setAttribute("aria-selected", k === cur ? "true" : "false"); });
+    pos.textContent = (cur + 1) + " / " + slides.length;
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { show(parseInt(t.dataset.go, 10)); });
+  });
+  document.getElementById("prev").addEventListener("click", function () { show(cur - 1); });
+  document.getElementById("next").addEventListener("click", function () { show(cur + 1); });
+  document.addEventListener("keydown", function (e) {
+    if (e.target && /^(INPUT|TEXTAREA|BUTTON)$/.test(e.target.tagName) && e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    if (e.key === "ArrowRight") { show(cur + 1); e.preventDefault(); }
+    if (e.key === "ArrowLeft") { show(cur - 1); e.preventDefault(); }
+  });
+  show(0);
+})();
+</script>

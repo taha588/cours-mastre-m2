@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./build/out/**)",
+      "Read(./cours/cours.html)"
+    ]
+  }
+}

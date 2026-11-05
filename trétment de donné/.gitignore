@@ -1,0 +1,11 @@
+# Support original de la professeure — non redistribué
+Cours_traiDonn_tempsRéel_*.pdf
+
+# Sorties de construction
+build/
+*.tmp
+
+# Système
+Thumbs.db
+desktop.ini
+.DS_Store

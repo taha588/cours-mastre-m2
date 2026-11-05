@@ -1,0 +1,527 @@
+<h2 class="notion" id="n02">N2 — Données structurées, semi-structurées et non structurées</h2>
+
+<h3 id="n02-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>Les données se répartissent en <strong>trois familles</strong>, selon la façon dont leur
+      <strong>schéma</strong> — c'est-à-dire la description de leurs champs et de leurs types — est porté :</p>
+
+    <p><strong>1. Données structurées — organisation tabulaire.</strong> Le schéma est
+      <strong>explicite</strong> : colonnes, types, contraintes, et des requêtes structurées pour les
+      interroger. Exemple : <code>ID_Client | Nom | Ville | Solde</code>.</p>
+
+    <table>
+      <thead><tr><th>ID_Client</th><th>Nom</th><th>Ville</th><th>Solde</th></tr></thead>
+      <tbody>
+        <tr><td>C001</td><td>Ahmed</td><td>Casablanca</td><td>1200</td></tr>
+        <tr><td>C002</td><td>Sara</td><td>Rabat</td><td>850</td></tr>
+        <tr><td>C003</td><td>Youssef</td><td>Tanger</td><td>560</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>2. Données semi-structurées — structure portée par des métadonnées ou une organisation
+      flexible.</strong> Le schéma voyage <em>avec</em> la donnée et <strong>peut varier d'un
+      enregistrement à l'autre</strong>. Exemples : JSON, XML, logs.</p>
+
+<pre><span class="c-com">// JSON</span>
+{
+  <span class="c-str">"id"</span>: <span class="c-str">"C001"</span>,
+  <span class="c-str">"nom"</span>: <span class="c-str">"Ahmed"</span>,
+  <span class="c-str">"ville"</span>: <span class="c-str">"Casablanca"</span>,
+  <span class="c-str">"solde"</span>: <span class="c-num">1200</span>
+}
+
+<span class="c-com">&lt;!-- XML --&gt;</span>
+<span class="c-kw">&lt;client&gt;</span>
+  <span class="c-kw">&lt;id&gt;</span>C001<span class="c-kw">&lt;/id&gt;</span>
+  <span class="c-kw">&lt;nom&gt;</span>Ahmed<span class="c-kw">&lt;/nom&gt;</span>
+  <span class="c-kw">&lt;ville&gt;</span>Casablanca<span class="c-kw">&lt;/ville&gt;</span>
+  <span class="c-kw">&lt;solde&gt;</span>1200<span class="c-kw">&lt;/solde&gt;</span>
+<span class="c-kw">&lt;/client&gt;</span>
+
+<span class="c-com"># LOGS</span>
+2024-03-12 10:15:23 INFO User C001 login from 192.168.1.10
+</pre>
+
+    <p><strong>3. Données non structurées — pas de modèle tabulaire fixe.</strong> Exemples : images,
+      vidéo, audio, documents texte. Ici, <strong>la difficulté porte aussi sur l'extraction du
+      sens</strong> : avant de pouvoir analyser, il faut produire une représentation exploitable.</p>
+  </div>
+</div>
+
+<h3 id="n02-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette classification ressemble à un classement par type de fichier. Ce n'en est pas un. Regardez
+      les trois exemples de l'énoncé : le client <code>C001</code>, Ahmed, de Casablanca, avec un solde de
+      1 200, apparaît <strong>trois fois</strong> — dans une table, dans du JSON et du XML, dans une ligne
+      de log. <strong>Le fait ne change pas ; ce qui change, c'est qui porte le schéma et à quel
+      moment il s'applique.</strong> C'est cela, et cela seul, que la règle classe.</p>
+
+    <ul>
+      <li><strong>Structuré : le schéma est posé avant la donnée.</strong> La table existe avec ses
+        colonnes et ses types ; une ligne qui ne s'y conforme pas est rejetée à l'écriture. On achète une
+        garantie — tout ce qui est stocké est conforme et immédiatement interrogeable — et on paie en
+        rigidité : changer le schéma, c'est un chantier.</li>
+      <li><strong>Semi-structuré : le schéma voyage avec la donnée.</strong> Chaque enregistrement
+        transporte ses propres clés ; deux enregistrements voisins peuvent ne pas avoir les mêmes champs.
+        On gagne la liberté d'accueillir une source qui évolue sans rien casser, et on paie en incertitude :
+        c'est au moment de la <em>lecture</em> qu'il faudra vérifier, aligner et convertir.</li>
+      <li><strong>Non structuré : il n'y a pas de schéma du tout.</strong> Une image, un son, un document
+        ne se découpent pas naturellement en champs. Le contenu existe, mais il n'est pas interrogeable :
+        il faut d'abord <strong>en extraire le sens</strong> — transcription, reconnaissance, extraction
+        d'entités — et c'est cette extraction, et non le stockage, qui constitue l'essentiel du travail
+        et du coût.</li>
+    </ul>
+
+    <p>D'où la lecture utile pour un architecte : la question n'est pas « quel est le format ? » mais
+      <strong>« à quel moment la structure est-elle vérifiée : à l'écriture, à la lecture, ou jamais ? »</strong>
+      Chaque réponse engage un stockage, un mode de traitement, un délai avant qu'une question puisse être
+      posée, et un coût. Les trois familles ne sont pas trois niveaux de qualité, mais
+      <strong>trois compromis entre garantie et souplesse</strong> — et la plupart des organisations ont
+      les trois en même temps, ce qui est précisément la raison pour laquelle leurs architectures
+      doivent évoluer.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Un log parfaitement régulier reste semi-structuré.</strong> Rien ne garantit que la ligne
+        suivante aura la même forme : la régularité est constatée, pas imposée. Inversement, un flux JSON
+        validé par un schéma strict se comporte, en pratique, comme du structuré.</li>
+      <li><strong>Un CSV n'est pas automatiquement structuré.</strong> Avec un en-tête, des types stables
+        et un séparateur fiable, il l'est. Sans en-tête, avec des colonnes qui changent d'un export à
+        l'autre, il se comporte comme du semi-structuré.</li>
+      <li><strong>« Non structuré » ne veut pas dire « sans métadonnées ».</strong> Une photo porte
+        souvent une date, un appareil, parfois des coordonnées : ces métadonnées sont structurées alors
+        que le contenu ne l'est pas. C'est même ce qui rend l'image exploitable (voir N1, exercice 12.2).</li>
+      <li><strong>Du JSON rangé dans une colonne d'une table ne rend pas la table semi-structurée.</strong>
+        La table reste structurée ; c'est le <em>contenu</em> de la colonne qui ne l'est pas. Classez
+        toujours la donnée que vous voulez interroger, pas son contenant.</li>
+      <li><strong>Un document PDF ou Word est non structuré</strong> au sens de la règle, même s'il a des
+        titres et des sections : il possède une mise en forme, pas un schéma de données.</li>
+      <li><strong>« Non structuré » ne signifie pas « sans valeur ».</strong> Les réclamations, les appels
+        enregistrés et les photos contiennent souvent l'information la plus riche ; elle est seulement
+        plus coûteuse à atteindre.</li>
+      <li><strong>Les frontières bougent avec le traitement.</strong> Une transcription transforme de
+        l'audio non structuré en texte, puis une extraction d'entités en champs structurés. Classer une
+        donnée, c'est la classer <em>à un endroit donné de la chaîne</em>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> المعطيات كتنقسم لتلاتة حسب <strong>فين كاين السكيما (schéma)
+    وإمتا كتطبق</strong>، ماشي حسب نوع الملف. <strong>مهيكلة</strong>: السكيما مكتوبة قبل المعطى (جداول،
+    أعمدة، أنواع) — ضمانة وقت الكتابة، ولكن قاسحة فالتغيير. <strong>شبه مهيكلة</strong> (JSON, XML, logs):
+    السكيما كتمشي مع المعطى وكتقدر تبدل من سجل لسجل — مرونة، ولكن التحقق كيتأجل لوقت القراءة.
+    <strong>غير مهيكلة</strong> (صور، فيديو، صوت، وثائق): ما كايناش سكيما أصلا، والمشكل الكبير هو
+    <strong>استخراج المعنى</strong> قبل أي تحليل. نفس الزبون C001 فالصفحة كيبان بتلاتة ديال الأشكال:
+    الواقعة ما تبدلاتش، اللي تبدل هو شكون حامل السكيما وإمتا كيتأكد منها.</p>
+</div>
+
+<h3 id="n02-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de l'<strong>architecture conçue pour une seule famille</strong>. La chaîne
+      traditionnelle — application, base de données, reporting — suppose implicitement que toute donnée
+      utile est tabulaire. Tant que c'est vrai, tout va bien. Dès qu'arrivent des événements JSON, des
+      logs et des images, il n'existe aucun endroit où les poser : ils n'entrent pas dans le schéma, donc
+      personne ne les charge, donc ils n'existent pas pour l'analyse. C'est exactement ce qui se passe
+      dans le cas d'ouverture, où les logs du site et les photos des réclamations restent invisibles.</p>
+    <p>Sans cette règle, le refus est vécu comme un défaut technique de l'outil. Avec elle, il devient
+      une <strong>décision d'architecture explicite</strong> : ces données ne demandent pas la même
+      vérification, ni le même moment de vérification, donc pas le même stockage ni le même traitement.
+      La règle traite donc le problème du <strong>tri préalable</strong> : savoir, avant de concevoir,
+      à quelle famille appartient chaque source — et accepter qu'une organisation réelle les a toutes.</p>
+  </div>
+</div>
+
+<h3 id="n02-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Choisir un stockage</strong> en connaissance de cause : une base relationnelle attend un
+        schéma préalable, un stockage de fichiers accepte le brut, et le choix se fait sur la famille de
+        la donnée, pas sur les habitudes de l'équipe.</li>
+      <li><strong>Prévoir où se fera la vérification</strong> : à l'écriture pour le structuré, à la
+        lecture pour le semi-structuré, après extraction pour le non structuré. C'est ce qui détermine
+        quelle équipe paiera le travail, et quand.</li>
+      <li><strong>Estimer le délai avant exploitation.</strong> Une table est interrogeable tout de suite ;
+        un flux JSON demande un alignement ; un corpus d'images demande une chaîne d'extraction avant la
+        première analyse. Annoncer ces délais évite les promesses intenables.</li>
+      <li><strong>Chiffrer un projet d'IA</strong> : sur du non structuré, le coût principal n'est pas le
+        stockage mais l'extraction du sens et sa validation.</li>
+      <li><strong>Expliquer un refus au métier</strong> avec un argument vérifiable : « ces données ne
+        sont pas chargeables en l'état, voici ce qu'il faudrait ajouter », plutôt que « l'outil ne le
+        fait pas ».</li>
+      <li><strong>Préparer l'intégration</strong> : connaître la famille de chaque source, c'est connaître
+        le travail d'alignement qui attend, lorsqu'un même objet métier — un client — est décrit par
+        plusieurs d'entre elles.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n02-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La classification ne vient pas d'une théorie, mais d'une <strong>observation répétée</strong> :
+      quand on essaie de charger des données réelles dans une base, elles se répartissent spontanément en
+      trois comportements, et ces comportements correspondent à trois réponses à une seule question :
+      <em>où est le schéma ?</em></p>
+
+    <p>Refaisons l'expérience avec le client de l'énoncé. Nous voulons répondre à
+      « quel est le solde moyen des clients de Casablanca ? ».</p>
+    <ul>
+      <li>Dans la <strong>table</strong>, les colonnes <code>Ville</code> et <code>Solde</code> existent,
+        sont typées et valent pour toutes les lignes. La question se pose directement : le schéma a été
+        imposé <em>avant</em>, une fois pour toutes.</li>
+      <li>Dans le <strong>JSON</strong>, la même information est présente, mais rien ne garantit que
+        l'enregistrement suivant possédera la clé <code>ville</code>, ni que <code>solde</code> sera
+        toujours un nombre. Avant de calculer, il faut parcourir, vérifier et convertir : le schéma se
+        découvre <em>à la lecture</em>.</li>
+      <li>Dans la <strong>ligne de log</strong>, il y a bien <code>C001</code>, mais ni ville ni solde :
+        cette source ne répond pas à la question, elle répond à une autre (qui s'est connecté, quand,
+        depuis où). La structure existe, implicite, et doit être reconstruite par analyse du texte.</li>
+      <li>Avec une <strong>photo</strong> de la carte de fidélité du même client, il n'y a plus rien à
+        parcourir : tant qu'un traitement n'a pas produit une transcription ou des entités, aucune
+        requête n'est possible. Le schéma <em>n'existe pas</em> ; il faudra le créer.</li>
+    </ul>
+
+    <p>Les trois familles sont donc les <strong>trois seules positions possibles du schéma</strong> par
+      rapport à la donnée : avant elle, avec elle, ou pas du tout. C'est ce qui explique que la
+      classification soit stable alors que les technologies changent — et c'est aussi pourquoi elle
+      commande directement les choix d'architecture étudiés plus loin : le Data Warehouse est bâti pour
+      le premier cas, le Data Lake pour accueillir les trois (N10, N11), et le Lakehouse pour tenter de
+      réunir les garanties du premier avec l'ouverture du second (N12).</p>
+  </div>
+</div>
+
+<h3 id="n02-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans l'inventaire des sources d'un projet.</strong> On dresse la liste des sources et on
+        note, en face de chacune, sa famille. Le tableau obtenu est le premier document d'architecture
+        utile : il montre d'un coup d'œil combien de sources n'entreront pas dans une base relationnelle
+        en l'état.</li>
+      <li><strong>Dans le choix du stockage et du format de dépôt.</strong> Le structuré va vers des
+        tables, le semi-structuré vers un stockage qui accepte un schéma souple, le non structuré vers un
+        stockage de fichiers accompagné de métadonnées. C'est la décision « où conserver ? » du tableau
+        des décisions de l'architecte.</li>
+      <li><strong>Dans la conception de l'ingestion.</strong> La famille dicte le traitement d'entrée :
+        contrôle de conformité pour le structuré, tolérance aux champs manquants et gestion des versions
+        pour le semi-structuré, extraction et enrichissement pour le non structuré.</li>
+      <li><strong>Dans un projet d'intégration multi-sources.</strong> Lorsqu'un même objet métier existe
+        dans plusieurs familles — un client dans une table, dans des événements JSON et dans des documents
+        — la règle sert à prévoir le travail de rapprochement et les pertes possibles.</li>
+      <li><strong>Dans les projets d'IA et d'analyse de contenu.</strong> Reconnaissance d'images,
+        transcription d'appels, analyse de réclamations : la règle rappelle que l'étape déterminante est
+        l'extraction du sens, et qu'elle doit être budgétée, versionnée et évaluée comme un traitement à
+        part entière.</li>
+      <li><strong>Dans le catalogage et la gouvernance.</strong> Documenter une table, c'est documenter
+        des colonnes ; documenter un flux semi-structuré, c'est documenter des versions de schéma ;
+        documenter un corpus non structuré, c'est documenter ce que les fichiers contiennent et ce que
+        l'on a le droit d'en faire.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n02-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Le chargement a planté : il y a un champ en plus. »</strong> Signal typique d'une
+        source semi-structurée traitée comme structurée. La réponse n'est pas de corriger le fichier à la
+        main, mais d'accepter la variabilité au bon endroit de la chaîne.</li>
+      <li><strong>« Ce champ est parfois vide, parfois absent. »</strong> Vide et absent sont deux choses
+        différentes, et cette distinction n'existe que dans le semi-structuré : c'est un indice de famille
+        à lui seul.</li>
+      <li><strong>« On n'arrive pas à requêter ces documents. »</strong> Non structuré : il manque l'étape
+        d'extraction. Aucune base ne répondra tant qu'elle n'aura pas reçu une représentation exploitable.</li>
+      <li><strong>« La colonne contient un gros bloc de texte ou du JSON. »</strong> Contenant structuré,
+        contenu qui ne l'est pas : décidez ce que vous voulez interroger avant de choisir le stockage.</li>
+      <li><strong>« Le fournisseur a changé son format sans prévenir. »</strong> Si la chaîne casse, elle
+        supposait un schéma fixe pour une source qui n'en garantissait pas.</li>
+      <li><strong>« Il faut une modification de la base pour chaque nouveau champ. »</strong> Signe d'une
+        source évolutive forcée dans un schéma préalable : le coût de la rigidité devient visible.</li>
+      <li><strong>« On a des téraoctets de vidéos et aucune analyse. »</strong> Volume sans extraction :
+        le stockage n'était pas le problème.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n02-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Prendre un échantillon réel, pas la documentation.</strong> Récupérez quelques
+      dizaines d'enregistrements tels qu'ils arrivent. La documentation décrit l'intention ; l'échantillon
+      décrit la réalité, et c'est elle qui cassera la chaîne.</p>
+
+    <p><strong>Étape 2 — Chercher où est le schéma.</strong> Posez une seule question : existe-t-il une
+      description des champs et des types, et est-elle <strong>imposée au moment de l'écriture</strong> ?
+      Si oui, la donnée est structurée. Si la description accompagne chaque enregistrement, elle est
+      semi-structurée. S'il n'y a rien à décrire — un pixel, un son, un paragraphe — elle est non
+      structurée.</p>
+
+    <p><strong>Étape 3 — Mesurer la variabilité.</strong> Comparez deux enregistrements éloignés : mêmes
+      clés ? mêmes types ? même ordre ? un champ apparu récemment ? Cette comparaison distingue une
+      source réellement stable d'une source qui l'est seulement aujourd'hui, et vous évite de bâtir sur
+      une régularité provisoire.</p>
+
+    <p><strong>Étape 4 — Tester l'interrogeabilité directe.</strong> Essayez de poser une question simple
+      — filtrer, compter, agréger — sans écrire de traitement préalable. Si c'est impossible, mesurez ce
+      qu'il faudrait : un aplatissement, une conversion, une transcription, une reconnaissance. Ce « ce
+      qu'il faudrait » est le vrai coût de la source.</p>
+
+    <p><strong>Étape 5 — Classer, puis en tirer les trois conséquences.</strong> Écrivez la famille, puis
+      déduisez-en : <em>(a)</em> le stockage ; <em>(b)</em> le moment de la vérification — écriture,
+      lecture, ou après extraction ; <em>(c)</em> le délai et le coût avant la première analyse. Une
+      classification qui ne produit pas ces trois lignes n'a servi à rien.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Ce qui distingue les trois familles n'est pas le format, mais <strong>la position du schéma</strong> :
+      avant la donnée (structuré), avec elle (semi-structuré), ou nulle part — il faudra alors
+      <strong>extraire le sens</strong> (non structuré).</p>
+    <p class="ar" dir="rtl">الفرق بين التلاتة ماشي فالفورما، بل ف<strong>موقع السكيما</strong>: قبل
+      المعطى (مهيكلة)، معاه (شبه مهيكلة)، ولا ما كايناش — وفهاد الحالة خاص <strong>استخراج
+      المعنى</strong> (غير مهيكلة).</p>
+  </div>
+</div>
+
+<h3 id="n02-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — les événements de l'application mobile</div>
+  <div class="box-b">
+    <p>L'application mobile de l'enseigne envoie des événements. Voici deux enregistrements réels,
+      espacés de trois mois :</p>
+<pre>{<span class="c-str">"user"</span>:<span class="c-str">"C001"</span>, <span class="c-str">"event"</span>:<span class="c-str">"add_to_cart"</span>, <span class="c-str">"montant"</span>:<span class="c-num">1200</span>, <span class="c-str">"ts"</span>:<span class="c-str">"2026-01-12T10:15:23"</span>}
+{<span class="c-str">"user"</span>:<span class="c-str">"C001"</span>, <span class="c-str">"event"</span>:<span class="c-str">"add_to_cart"</span>, <span class="c-str">"montant"</span>:<span class="c-str">"1 200,00"</span>, <span class="c-str">"ts"</span>:<span class="c-str">"2026-04-02T09:02:11"</span>, <span class="c-str">"promo"</span>:<span class="c-str">"RAM20"</span>}</pre>
+    <p>Appliquez la démarche en cinq étapes et concluez par les trois conséquences d'architecture.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Échantillon réel.</strong> Nous disposons de deux enregistrements effectivement
+      reçus, à trois mois d'intervalle : c'est exactement ce qu'il faut, car l'écart temporel révèle
+      l'évolution du flux, qu'une documentation figée n'aurait pas montrée.</p>
+
+    <p><strong>Étape 2 — Où est le schéma ?</strong> Il n'existe aucune déclaration préalable : chaque
+      message transporte ses propres clés (<code>user</code>, <code>event</code>, <code>montant</code>,
+      <code>ts</code>). Le schéma voyage avec la donnée → <strong>semi-structuré</strong>.</p>
+
+    <p><strong>Étape 3 — Variabilité.</strong> Elle est double, et les deux problèmes sont de nature
+      différente. D'abord, le second enregistrement possède une clé <code>promo</code> que le premier
+      n'a pas : le flux a gagné un champ en cours de route. Ensuite, et c'est plus grave,
+      <code>montant</code> est un <em>nombre</em> (<code>1200</code>) dans le premier message et une
+      <em>chaîne de caractères</em> (<code>"1 200,00"</code>) dans le second, avec une espace comme
+      séparateur de milliers et une virgule décimale. Un calcul naïf additionnera 1200 et 0, ou échouera.</p>
+
+    <p><strong>Étape 4 — Interrogeabilité directe.</strong> Impossible d'agréger les montants tels quels.
+      Il faut un traitement préalable : normaliser <code>montant</code> en type numérique, décider du
+      comportement quand <code>promo</code> est absent — absent n'est pas la même chose que « pas de
+      promotion » — et uniformiser l'horodatage, dont on ignore s'il est local ou UTC.</p>
+
+    <p><strong>Étape 5 — Classement et conséquences.</strong> Famille : <strong>semi-structurée</strong>.
+      <em>(a) Stockage</em> : déposer les événements bruts tels qu'ils arrivent, dans un stockage qui
+      accepte un schéma variable, et conserver cette version brute — c'est elle qui permettra de rejouer
+      le passé quand le format changera encore. <em>(b) Moment de la vérification</em> : à la lecture.
+      On construit une couche de normalisation qui produit une vue typée et stable à partir du brut,
+      et c'est cette vue qui est exposée aux analystes. <em>(c) Délai et coût</em> : la source n'est pas
+      exploitable le jour même ; comptez le développement de la normalisation, puis une surveillance
+      permanente, car un flux qui a changé une fois changera encore. Prévoyez une règle explicite pour
+      les enregistrements non conformes : rejetés, mis de côté, ou acceptés avec une marque.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le même client dans trois systèmes</div>
+  <div class="box-b">
+    <p>Le client Ahmed existe dans trois systèmes de l'enseigne : la base de caisse
+      (<code>ID_Client = C001</code>, ville « Casablanca », solde 1200), le site marchand (événements
+      JSON avec <code>"id":"C001"</code> et une adresse de livraison récente à Mohammedia) et le programme
+      de fidélité (export CSV mensuel, identifiant <code>FID-88412</code>, adresse « Casa », champ
+      téléphone parfois vide). Classez chaque source, puis répondez à la question du cours :
+      <strong>comment intégrer sans perdre le contexte, la qualité et la traçabilité ?</strong></p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Échantillon.</strong> Trois extraits réels, un par système, portant sur la même
+      personne. C'est la bonne unité d'analyse : on compare ce qui prétend décrire le même objet métier.</p>
+
+    <p><strong>Étape 2 — Où est le schéma ?</strong> Caisse : schéma explicite, imposé à l'écriture →
+      <strong>structuré</strong>. Site : clés portées par chaque événement →
+      <strong>semi-structuré</strong>. Fidélité : export CSV ; s'il a un en-tête stable et des types
+      constants, il est <strong>structuré</strong> ; si les colonnes varient d'un mois à l'autre, il se
+      comporte comme du semi-structuré. Il faut donc comparer deux exports avant de trancher — et c'est
+      l'objet de l'étape suivante.</p>
+
+    <p><strong>Étape 3 — Variabilité.</strong> La caisse est stable. Le site a ajouté des champs au fil
+      des versions de l'application. Le CSV de fidélité présente un champ téléphone tantôt vide, tantôt
+      absent, ce qui révèle une génération peu contrôlée. Surtout, la variabilité n'est pas seulement
+      technique : <strong>les trois sources ne disent pas la même chose du même client</strong> —
+      identifiants différents (<code>C001</code> contre <code>FID-88412</code>), adresses différentes
+      (Casablanca, Mohammedia, « Casa »), fraîcheurs différentes.</p>
+
+    <p><strong>Étape 4 — Interrogeabilité directe.</strong> Chaque source est interrogeable isolément ;
+      aucune ne répond à « combien de clients actifs avons-nous, et où habitent-ils ? ». La question
+      exige un rapprochement, et ce rapprochement n'a rien d'évident : « Casa » et « Casablanca » doivent
+      être reconnus comme une même ville, et Mohammedia doit être identifié soit comme une
+      <em>correction</em>, soit comme une <em>adresse de livraison</em> distincte de l'adresse de
+      facturation — deux interprétations qui donnent deux réponses différentes.</p>
+
+    <p><strong>Étape 5 — Classement et conséquences.</strong> Deux sources structurées (sous réserve pour
+      le CSV) et une semi-structurée. L'intégration se construit alors en respectant les trois exigences
+      de la question :</p>
+    <ul>
+      <li><strong>Sans perdre le contexte</strong> : ne jamais écraser une valeur par une autre. On
+        conserve les trois adresses avec leur source, leur date et leur nature (facturation, livraison),
+        et l'on définit une règle explicite de choix de l'adresse « de référence » selon l'usage. Écraser
+        aurait détruit l'information qui permet justement de trancher.</li>
+      <li><strong>Sans perdre la qualité</strong> : on normalise les villes à l'aide d'un référentiel
+        commun, on distingue vide et absent pour le téléphone, et on crée une correspondance entre
+        <code>C001</code> et <code>FID-88412</code> avec un degré de confiance. Un rapprochement incertain
+        doit rester marqué comme incertain plutôt que présenté comme un fait.</li>
+      <li><strong>Sans perdre la traçabilité</strong> : chaque valeur consolidée garde l'indication de la
+        source dont elle provient et du moment où elle a été produite, de sorte qu'on puisse toujours
+        répondre à « d'où vient ce chiffre ? ». C'est cette propriété qui permettra, plus tard, de
+        corriger une erreur sans tout reconstruire.</li>
+    </ul>
+    <p>Conséquence d'architecture : il faut un <strong>endroit où les trois formes coexistent</strong>
+      avant d'être rapprochées, et une couche d'intégration qui produit la vue unifiée sans détruire les
+      versions d'origine. C'est le besoin qui mènera, dans la suite du cours, du Data Warehouse seul vers
+      des architectures capables d'accueillir le brut (N10 à N12).</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — les réclamations du service après-vente</div>
+  <div class="box-b">
+    <p>Le SAV dispose de 400 000 photos jointes aux réclamations, de 12 000 comptes rendus d'appels
+      enregistrés au format audio, et d'un tableau de suivi listant un numéro de réclamation, une date et
+      un code de motif choisi dans une liste. La direction qualité veut « détecter les défauts
+      récurrents par produit ». Classez les trois sources et dites par quoi commencer.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Échantillon.</strong> On prélève quelques photos, quelques enregistrements audio
+      et quelques lignes du tableau de suivi, en vérifiant qu'ils portent sur les mêmes réclamations.</p>
+
+    <p><strong>Étape 2 — Où est le schéma ?</strong> Tableau de suivi : colonnes et liste de codes imposées
+      → <strong>structuré</strong>. Photos et audio : aucun schéma →
+      <strong>non structurés</strong>.</p>
+
+    <p><strong>Étape 3 — Variabilité.</strong> Le tableau est régulier, mais le code de motif est saisi par
+      des agents : on observera des motifs « divers » surreprésentés, ce qui est une limite de qualité
+      plutôt que de structure. Les photos varient en résolution, en cadrage et en contenu ; les audios en
+      durée et en langue — darija, arabe, français — ce qui pèsera lourd sur la transcription.</p>
+
+    <p><strong>Étape 4 — Interrogeabilité directe.</strong> Le tableau répond immédiatement à « combien de
+      réclamations par motif ». Ni les photos ni les audios ne répondent à quoi que ce soit en l'état :
+      il manque l'extraction du sens. Et avant même l'extraction, il manque le <strong>lien</strong> : si
+      aucun identifiant ne rattache une photo à une réclamation, donc à un produit, aucune analyse
+      « par produit » n'est possible, quelle que soit la qualité du modèle employé.</p>
+
+    <p><strong>Étape 5 — Classement et conséquences.</strong> Une source structurée, deux non structurées.
+      <em>(a) Stockage</em> : garder les fichiers dans un stockage d'objets, accompagnés de métadonnées
+      structurées — numéro de réclamation, produit, date, magasin. <em>(b) Moment de la vérification</em> :
+      après extraction, avec une étape d'évaluation de la qualité de cette extraction. <em>(c) Délai et
+      coût</em> : l'essentiel du budget ira à l'extraction et à sa validation, non au stockage.</p>
+    <p><strong>Par quoi commencer</strong> : par le lien, pas par le modèle. Rattacher chaque fichier à sa
+      réclamation est peu coûteux et débloque tout le reste ; c'est aussi ce qui permet de croiser les
+      motifs déjà codés du tableau avec les contenus, et parfois de répondre à la question posée
+      <em>sans</em> analyse d'image. Ensuite seulement, on lance une extraction sur un échantillon pour
+      mesurer ce qu'elle apporte avant de la généraliser.</p>
+  </div>
+</div>
+
+<h3 id="n02-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Classez ces six sources et justifiez en une phrase : une table <code>commandes</code> d'un ERP ;
+        un flux XML de factures fournisseurs ; les relevés d'un capteur de température envoyés toutes les
+        secondes ; les photos de produits du catalogue ; un export CSV sans en-tête ; les messages d'un
+        service client.</li>
+      <li>Un fournisseur livre un JSON dont tous les enregistrements ont exactement les mêmes clés depuis
+        deux ans. Est-ce une donnée structurée ? Argumentez, puis dites quelle garantie il faudrait
+        obtenir pour le traiter comme telle.</li>
+      <li>Une équipe stocke des documents PDF dans une colonne d'une table relationnelle et affirme que
+        « les documents sont donc structurés ». Réfutez en une dizaine de lignes.</li>
+      <li>Donnez trois exemples de données non structurées qui portent des métadonnées structurées, et
+        dites à quoi ces métadonnées servent concrètement.</li>
+      <li>Pour chacune des trois familles, indiquez où la vérification a lieu, et ce qui se passe
+        exactement quand un enregistrement non conforme se présente.</li>
+      <li>Reprenez le cas d'ouverture (§2) : classez les cinq sources citées et dites, pour chacune, quelle
+        est la première action à mener.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n02-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Reproduisez l'information « client C001, Ahmed, Casablanca, solde 1200 » sous les trois formes :
+      une ligne de table, un objet JSON, une ligne de log. Puis dites, pour chaque forme, où se trouve le
+      schéma et à quel moment il est vérifié.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une plateforme de cours en ligne possède : une base des inscriptions, les logs de lecture des
+      vidéos, les vidéos elles-mêmes, et les copies rendues sous forme de fichiers texte. Appliquez les
+      cinq étapes à chaque source, puis construisez un tableau à quatre colonnes — source, famille,
+      moment de la vérification, délai avant première analyse — et déduisez-en l'ordre dans lequel vous
+      traiteriez ces sources pour répondre à « pourquoi les étudiants abandonnent-ils au module 3 ? ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Un responsable technique propose : « imposons un schéma strict à l'entrée de toutes nos sources ;
+      ainsi tout sera structuré et nos problèmes disparaîtront. » Rédigez une réponse argumentée qui
+      <em>(a)</em> reconnaisse ce que cette proposition apporte réellement, <em>(b)</em> montre, à l'aide
+      d'un exemple précis, ce qu'elle détruit, et <em>(c)</em> propose une position intermédiaire en
+      précisant quelles données seraient vérifiées à l'écriture, lesquelles à la lecture, et sur quel
+      critère vous tranchez. Montrez enfin comment votre position change le délai de mise à disposition
+      d'une nouvelle source.</p>
+  </div>
+</div>

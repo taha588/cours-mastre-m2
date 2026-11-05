@@ -1,0 +1,508 @@
+<h2 class="notion" id="n12">N12 — Le Lakehouse</h2>
+
+<h3 id="n12-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Idée.</strong> Le <strong>Lakehouse</strong> cherche à rapprocher la
+      <strong>flexibilité et l'échelle d'un Data Lake</strong> des <strong>capacités de gestion et
+      d'analyse attendues d'un Data Warehouse</strong>.</p>
+
+    <p><strong>Pourquoi ?</strong> <strong>Réduire la multiplication des copies</strong> et
+      <strong>rapprocher BI, analytics et ML sur un socle de données commun</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n12-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le Lakehouse n'est pas une troisième option située entre l'entrepôt et le lac. C'est la réponse à
+      un problème créé par les deux précédents : <strong>le coût de les avoir tous les deux</strong>.
+      Son problème dominant, dans le tableau de N8, est écrit sans détour — « séparer lake et warehouse
+      crée de la complexité et des coûts ». Nous sommes donc, une fois de plus, dans le mécanisme de
+      N8 : la réponse d'hier est devenue la contrainte d'aujourd'hui.</p>
+
+    <p>Relisons l'idée mot à mot, car chaque terme désigne précisément ce que l'autre monde avait perdu.
+      Du côté du lac, on veut garder la <strong>flexibilité</strong> — accueillir tous les formats — et
+      l'<strong>échelle</strong> — stocker beaucoup à coût maîtrisé. Du côté de l'entrepôt, on veut
+      récupérer les <strong>capacités de gestion</strong> — un schéma déclaré, des écritures cohérentes,
+      des versions, des droits, une traçabilité — et les <strong>capacités d'analyse</strong> — des
+      requêtes performantes et des définitions partagées. Or ce sont exactement les deux choses que N11
+      avait identifiées comme perdues : la description obligatoire et le lieu de la définition unique.
+      <strong>Le Lakehouse ne corrige donc pas un défaut technique : il va rechercher ce qu'un compromis
+      antérieur avait laissé derrière lui.</strong></p>
+
+    <p>Le mouvement architectural tient en une phrase, et c'est elle qu'il faut retenir :
+      <strong>au lieu de déplacer les données vers le système qui possède les garanties, on apporte les
+      garanties au stockage flexible où les données se trouvent déjà</strong>. C'est l'inverse de la
+      démarche de l'entrepôt, qui exigeait de copier la donnée chez lui pour pouvoir la garantir.</p>
+
+    <p>Le « Pourquoi ? » donne les deux bénéfices attendus, et le premier mérite d'être chiffré plutôt
+      que récité. <strong>Réduire la multiplication des copies</strong> : dans une organisation qui
+      possède les deux plateformes, la même vente existe souvent quatre fois — brute dans le lac,
+      préparée dans l'entrepôt, extraite pour le data scientist, et parfois recopiée dans un cache de
+      tableau de bord. Chaque copie coûte du stockage, exige une synchronisation, élargit la surface à
+      gouverner et — le plus grave — <strong>crée une occasion de divergence</strong> : quatre copies,
+      c'est quatre chances que le chiffre ne soit pas le même.</p>
+
+    <p>Le second bénéfice, <strong>rapprocher BI, analytics et ML sur un socle commun</strong>, répond à
+      une difficulté que nous avons déjà rencontrée sous une autre forme : ces trois publics
+      — nommés dès N3 dans la cinquième mission — n'ont ni les mêmes exigences ni les mêmes formats, et
+      les servir depuis des plateformes différentes revient à leur fournir des vérités différentes. Un
+      socle commun ne signifie pas qu'ils consomment la même chose : il signifie qu'ils consomment la
+      <em>même donnée</em>, gouvernée une fois.</p>
+
+    <p>Reste un mot de l'énoncé qu'il serait malhonnête de passer sous silence : le Lakehouse
+      <strong>« cherche à »</strong> rapprocher. Le support est prudent, et il a raison de l'être. Les
+      deux ensembles de qualités sont partiellement contradictoires — le schéma à l'écriture et le
+      schéma à la lecture ne peuvent pas être vrais au même endroit en même temps. Le Lakehouse
+      <strong>n'abolit pas la tension, il l'organise</strong> : zone par zone, usage par usage, avec des
+      garanties plus fortes là où l'on en a besoin et plus souples ailleurs. C'est une direction, pas un
+      état acquis — et c'est pourquoi la génération 7 doit encore parler d'intégration, de gouvernance
+      et de données de confiance.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Un Lakehouse ne soigne pas un marécage.</strong> Migrer des données non décrites vers
+        une plateforme qui <em>permet</em> de les décrire ne les décrit pas. Les garanties doivent être
+        <em>utilisées</em> ; la discipline de N11 reste entièrement requise.</li>
+      <li><strong>Ce n'est pas « le lac en mieux » ni « l'entrepôt en moins cher ».</strong> C'est la
+        réponse au coût de la coexistence. Sans coexistence coûteuse, il n'y a pas de problème à
+        résoudre.</li>
+      <li><strong>Réduire les copies n'est pas supprimer toute copie.</strong> Une zone préparée reste
+        une transformation de la zone brute : ce n'est pas un doublon, c'est une étape nommée et
+        tracée.</li>
+      <li><strong>Unifier la plateforme n'unifie pas l'organisation.</strong> Si les équipes BI et ML
+        gardent des définitions séparées, elles produiront deux chiffres sur un socle commun
+        (N11, exercice 12.3). Le découplage des responsabilités de N7 s'applique toujours.</li>
+      <li><strong>Un socle unique est aussi une dépendance unique.</strong> Une plateforme qui porte la
+        BI, l'analytique et le ML devient critique : sa disponibilité et son coût engagent désormais
+        tous les usages à la fois.</li>
+      <li><strong>Les performances d'une BI exigeante peuvent rester en deçà</strong> de celles d'un
+        entrepôt dédié et finement optimisé. C'est un arbitrage à vérifier sur ses propres requêtes,
+        pas à présumer.</li>
+      <li><strong>Tout n'a pas vocation à être unifié.</strong> Un reporting réglementaire figé, audité
+        et à définitions gelées peut légitimement conserver un espace à part — l'unification est une
+        décision par périmètre, pas un dogme.</li>
+      <li><strong>Le mot « cherche à » est dans l'énoncé.</strong> Présenter le Lakehouse comme la
+        réunion accomplie des deux mondes, c'est promettre ce que le support lui-même ne promet pas.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الـ<strong>Lakehouse</strong> كيحاول يقرّب <strong>المرونة
+    والنطاق</strong> ديال الـData Lake من <strong>قدرات التدبير والتحليل</strong> اللي كتتسنى من
+    الـData Warehouse. علاش؟ باش <strong>يقلل تكاثر النسخ</strong> و<strong>يقرّب BI وanalytics وML
+    على سوكل مشترك</strong>. المهم: هادا ماشي خيار ثالث بين الجوج — هو <strong>الجواب على تكلفة
+    وجودهم بجوج</strong> (وهادا هو حرفيا المشكل ديال الجيل 6 ف N8: «فصل الـlake والـwarehouse كيخلق
+    تعقيد وتكاليف»). والحركة المعمارية فجملة وحدة: <strong>بدل ما نحركو المعطيات نحو النظام اللي عندو
+    الضمانات، كنجيبو الضمانات للتخزين المرن فين المعطيات موجودة أصلا</strong>. وعلى تكاثر النسخ:
+    فمقاولة عندها الجوج، نفس البيعة كتكون غالبا <strong>4 مرات</strong> (خام فالـlake، مهيّأة
+    فالـwarehouse، مستخرجة للـdata scientist، ومنسوخة فكاش ديال تابلو دو بور) — وكل نسخة هي
+    <strong>فرصة باش الرقم ما يكونش هو هو</strong>. وآخر نقطة مهمة: السلايد كتقول <strong>«كيحاول
+    يقرّب»</strong> — ماشي «جمع». السكيما وقت الكتابة والسكيما وقت القراءة ما يمكنش يكونو بجوج
+    صحيحين فنفس البلاصة فنفس الوقت: الـLakehouse <strong>ما كيلغيش التوتر، كينظمو</strong> منطقة
+    بمنطقة.</p>
+</div>
+
+<h3 id="n12-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème traité est celui d'une organisation qui a <strong>réussi</strong> les deux étapes
+      précédentes. Elle a construit un entrepôt pour servir la BI (N10), puis un lac pour accueillir la
+      variété et préparer l'IA (N11). Chaque décision était juste ; leur addition pose un problème que
+      ni l'une ni l'autre n'avait prévu : <strong>deux plateformes à alimenter, à gouverner, à financer
+      et à faire concorder</strong>.</p>
+    <p>Les symptômes sont connus de toute organisation qui en est là : la même donnée existe en
+      plusieurs exemplaires, les chiffres de la BI et ceux des modèles divergent, les équipes
+      s'interrogent sur la source qui fait autorité, et la facture additionne deux socles. Le Lakehouse
+      traite exactement cela — <strong>non pas en ajoutant une troisième plateforme, mais en cherchant à
+      ramener les deux vers un socle commun</strong>, de sorte que la BI, l'analytique et le ML
+      travaillent sur la même matière gouvernée.</p>
+  </div>
+</div>
+
+<h3 id="n12-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Mesurer et réduire les copies</strong> : compter combien de fois la même donnée existe
+        est un diagnostic simple, parlant pour une direction, et directement traduisible en coût.</li>
+      <li><strong>Supprimer une cause majeure de divergence</strong> : moins de copies, moins
+        d'occasions que deux chiffres s'écartent.</li>
+      <li><strong>Servir BI, analytique et ML depuis la même matière</strong>, donc mettre fin aux
+        discussions sur la source qui fait autorité.</li>
+      <li><strong>Conserver le brut tout en garantissant le préparé</strong>, au lieu de choisir entre
+        les deux comme l'imposaient N10 et N11.</li>
+      <li><strong>Simplifier la gouvernance</strong> : un catalogue, un lignage, un régime de droits au
+        lieu de deux à maintenir cohérents.</li>
+      <li><strong>Décider par périmètre</strong> : savoir ce qu'il est utile d'unifier et ce qui doit
+        rester à part, au lieu d'unifier par principe.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n12-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Appliquons le mécanisme de N8 une dernière fois dans cette partie. <em>Nouveau besoin</em> :
+      servir la BI et le ML sans entretenir deux mondes parallèles. <em>Nouvelle contrainte</em> : la
+      coexistence lac + entrepôt, c'est-à-dire des copies multiples, des coûts additionnés et des
+      divergences. <em>Choix architectural</em> : apporter au stockage flexible les garanties de
+      gestion et d'analyse, avec pour compromis une dépendance accrue à un socle unique et une
+      discipline de gouvernance toujours obligatoire.</p>
+
+    <p><strong>Pourquoi les copies se multiplient-elles ?</strong> Suivons une seule vente dans une
+      organisation équipée des deux plateformes :</p>
+    <ul>
+      <li>elle arrive <strong>brute</strong> dans le lac, parce qu'on veut conserver le détail ;</li>
+      <li>elle est <strong>préparée</strong> dans l'entrepôt, parce que la BI a besoin d'agrégats
+        garantis ;</li>
+      <li>elle est <strong>extraite</strong> pour le data scientist, parce que l'entrepôt a consolidé ce
+        dont il a besoin au grain fin ;</li>
+      <li>elle est parfois <strong>recopiée</strong> dans un cache, parce qu'un tableau de bord doit
+        répondre vite.</li>
+    </ul>
+    <p>Quatre exemplaires, quatre chaînes d'alimentation, quatre moments de fraîcheur différents, quatre
+      jeux de droits à tenir cohérents. <strong>Ce n'est pas une mauvaise mise en œuvre : c'est la
+      conséquence mécanique d'avoir deux socles aux garanties différentes.</strong></p>
+
+    <p><strong>Deux sorties étaient possibles, et une seule tient.</strong> La première consisterait à
+      tout ramener dans l'entrepôt : impossible, puisqu'il refuse par construction le non structuré — le
+      problème de la variété reviendrait intact. La seconde consiste à porter les garanties là où la
+      donnée peut déjà vivre sous toutes ses formes, c'est-à-dire sur le stockage flexible.
+      <strong>C'est la seule direction praticable, et c'est celle que le Lakehouse prend.</strong></p>
+
+    <p>Enfin, pourquoi l'énoncé dit-il « cherche à » et non « réunit » ? Parce que les deux ensembles de
+      qualités s'opposent sur un point irréductible : garantir une structure suppose de la vérifier à
+      l'écriture, tandis qu'accueillir l'inconnu suppose de ne pas la vérifier. Aucun système ne peut
+      faire les deux au même endroit simultanément. Le Lakehouse résout cela non par une synthèse
+      magique, mais par <strong>une organisation en zones</strong> : du brut peu contraint d'un côté, du
+      préparé fortement garanti de l'autre, sur un même socle et sous une même gouvernance. La tension
+      demeure ; ce qui change, c'est qu'elle est gérée en un seul endroit au lieu d'être répartie entre
+      deux plateformes qu'il faut ensuite réconcilier.</p>
+  </div>
+</div>
+
+<h3 id="n12-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans une organisation qui possède déjà les deux mondes.</strong> C'est le terrain
+        naturel, et le seul où le bénéfice est immédiat : il existe une coexistence coûteuse à réduire.</li>
+      <li><strong>Quand BI et ML doivent travailler sur la même matière.</strong> Prévision alimentée par
+        les mêmes ventes que le tableau de bord, scoring client cohérent avec les indicateurs
+        commerciaux : le socle commun supprime la question « pourquoi vos chiffres diffèrent des
+        nôtres ? ».</li>
+      <li><strong>Dans un projet de réduction de coûts data.</strong> Le comptage des copies fournit un
+        chiffrage concret et compréhensible par une direction, là où « moderniser » n'en fournit aucun.</li>
+      <li><strong>Au moment de refondre la gouvernance.</strong> Unifier catalogue, lignage et droits est
+        beaucoup plus simple sur un socle que sur deux, et c'est souvent ce chantier qui justifie le
+        rapprochement.</li>
+      <li><strong>Pour sortir proprement d'un lac devenu ingouvernable</strong>, à condition de traiter
+        d'abord la gouvernance — sans quoi on déplace le marécage au lieu de l'assécher.</li>
+      <li><strong>Dans l'arbitrage « que faut-il unifier ? »</strong>, qui est la vraie question posée
+        par cette notion : la réponse se décide périmètre par périmètre, et certains resteront à part.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n12-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Cette donnée existe à quatre endroits. »</strong> Signal le plus direct : la
+        multiplication des copies est devenue visible.</li>
+      <li><strong>« La BI et le ML ne donnent pas les mêmes chiffres. »</strong> Deux socles, deux
+        préparations, deux vérités.</li>
+      <li><strong>« Quelle est la source qui fait autorité ? — Ça dépend de qui tu demandes. »</strong>
+        Il n'existe pas de socle commun ; chaque équipe a élu le sien.</li>
+      <li><strong>« Nous payons deux plateformes et deux équipes pour les tenir. »</strong> Le coût de la
+        coexistence est devenu une ligne budgétaire identifiable.</li>
+      <li><strong>« Le data scientist réextrait depuis l'entrepôt ce qui existe déjà dans le lac. »</strong>
+        Symptôme typique : les garanties ne sont pas là où est le détail.</li>
+      <li><strong>« Nous avons deux catalogues et ils ne concordent pas. »</strong> La gouvernance est
+        dupliquée, donc incohérente.</li>
+      <li><strong>Signal inverse — « nous n'avons qu'un entrepôt et nos données sont structurées. »</strong>
+        Aucune coexistence à réduire : le Lakehouse ne répond à aucun problème existant (voir N8,
+        exercice 12.2).</li>
+      <li><strong>Signal d'alerte — « notre lac est ingérable, migrons vers un Lakehouse. »</strong>
+        Confusion entre un problème de gouvernance et un problème de coexistence. Le premier ne se
+        résout pas par une migration.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n12-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Compter les copies, et leur coût.</strong> Choisissez deux ou trois données
+      importantes — les ventes, le client — et suivez-les : combien d'exemplaires, dans quels systèmes,
+      alimentés par quelles chaînes, maintenus par qui, avec quelles fraîcheurs ? Notez les divergences
+      déjà constatées. <strong>Ce tableau est le diagnostic</strong> : sans copies multiples ni
+      divergences, il n'y a pas de problème de coexistence, et donc pas de raison d'aller plus loin.</p>
+
+    <p><strong>Étape 2 — Vérifier que le problème est bien celui-ci.</strong> Trois diagnostics se
+      ressemblent et appellent trois réponses différentes : une <em>coexistence coûteuse</em> relève du
+      Lakehouse ; un <em>déficit de gouvernance</em> relève de la discipline de N11, migration ou non ;
+      un <em>besoin de préparation</em> relève simplement d'un entrepôt. Se tromper de diagnostic ici,
+      c'est engager une migration qui ne traitera rien.</p>
+
+    <p><strong>Étape 3 — Décider ce qui est unifié, et ce qui ne l'est pas.</strong> Périmètre par
+      périmètre : quelles données rejoignent le socle commun, lesquelles gardent un espace à part et
+      pourquoi — contrainte réglementaire, définitions gelées, exigence de performance particulière.
+      <strong>Unifier par principe est aussi fautif que ne rien unifier.</strong></p>
+
+    <p><strong>Étape 4 — Apporter les garanties, zone par zone.</strong> Sur la zone brute : métadonnées
+      obligatoires, droits, rétention. Sur la zone préparée : schéma déclaré, écritures cohérentes,
+      versions, définitions publiées et possédées par le métier. Le catalogue et le lignage couvrent les
+      deux. C'est ici que se joue la différence entre un Lakehouse et un lac rebaptisé : les garanties
+      doivent être <em>appliquées</em>, pas seulement <em>disponibles</em>.</p>
+
+    <p><strong>Étape 5 — Écrire le compromis, et vérifier par le recomptage.</strong> Dépendance à un
+      socle unique, discipline de gouvernance toujours obligatoire, performances à valider sur vos
+      propres requêtes, coût de la migration. Puis refaites le comptage de l'étape 1 six mois plus tard :
+      si le nombre de copies n'a pas baissé, l'opération a changé la technique sans traiter le problème.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le Lakehouse répond au <strong>coût d'avoir à la fois un lac et un entrepôt</strong> : plutôt que
+      de déplacer les données vers les garanties, il <strong>apporte les garanties au stockage
+      flexible</strong>, pour réduire les copies et servir BI, analytique et ML sur un socle commun. Il
+      <em>cherche à</em> rapprocher : la tension demeure, elle est organisée par zones.</p>
+    <p class="ar" dir="rtl">الـLakehouse كيجاوب على <strong>تكلفة وجود lake وwarehouse بجوج</strong>:
+      بدل ما يحرّك المعطيات نحو الضمانات، <strong>كيجيب الضمانات للتخزين المرن</strong>، باش يقلل
+      النسخ ويخدم BI وanalytics وML على سوكل مشترك. وهو <em>كيحاول</em> يقرّب: التوتر باقي، ولكن
+      منظّم منطقة بمنطقة.</p>
+  </div>
+</div>
+
+<h3 id="n12-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — compter les copies chez l'enseigne</div>
+  <div class="box-b">
+    <p>L'enseigne possède maintenant son entrepôt (N10) et son lac (N11). Une vente suit ce trajet :
+      caisse → lac (brut, conservé 3 ans) → entrepôt (préparé, agrégé, conservé 5 ans) ; le data
+      scientist extrait chaque mois 18 mois de ventes au grain fin vers son espace de travail ; le
+      tableau de bord commercial alimente un cache rafraîchi chaque nuit. Diagnostiquez et décidez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Le comptage.</strong> La même vente existe <strong>quatre fois</strong> : brute
+      dans le lac, préparée dans l'entrepôt, extraite dans l'espace du data scientist, agrégée dans le
+      cache du tableau de bord. Quatre chaînes d'alimentation, quatre fraîcheurs — la brute est du jour,
+      l'entrepôt de la veille, l'extraction mensuelle peut avoir jusqu'à trente jours, le cache une nuit
+      — et quatre jeux de droits à maintenir cohérents. Divergences déjà observées : le data scientist
+      obtient un chiffre d'affaires légèrement différent de celui du contrôle de gestion, parce qu'il
+      recalcule à partir du brut avec sa propre règle d'exclusion des annulations.</p>
+
+    <p><strong>Étape 2 — Est-ce le bon diagnostic ?</strong> Vérifions les trois cas. Déficit de
+      gouvernance ? Non : la règle d'entrée du lac est appliquée, le catalogue existe (N11, 12.1).
+      Besoin de préparation ? Non : l'entrepôt est en place et fait son travail. Coexistence coûteuse ?
+      <strong>Oui</strong> : deux socles, quatre copies, une divergence avérée. Le diagnostic est bien
+      celui du Lakehouse.</p>
+
+    <p><strong>Étape 3 — Que faut-il unifier ?</strong> Les ventes : oui — c'est la donnée dupliquée et
+      divergente. Les logs et les photos : ils sont déjà dans le lac et n'ont pas de jumeau dans
+      l'entrepôt, donc rien à unifier, seulement à conserver. <strong>Le reporting financier consolidé,
+      en revanche, mérite discussion</strong> : s'il sert des déclarations officielles, ses définitions
+      gelées et son besoin d'auditabilité peuvent justifier qu'il garde une zone à part, même sur le
+      socle commun.</p>
+
+    <p><strong>Étape 4 — Apporter les garanties.</strong> Zone brute : inchangée, règle d'entrée
+      maintenue. Zone préparée sur le même socle : table de ventes au grain ligne de ticket, schéma
+      déclaré, écritures cohérentes, versions. <strong>Et surtout, la règle d'exclusion des annulations
+      est implémentée une seule fois</strong>, publiée et possédée par le contrôle de gestion : c'est ce
+      geste, et non la migration, qui supprime la divergence. Le data scientist lit alors la même table
+      préparée au grain fin au lieu d'extraire et de recalculer — son extraction mensuelle disparaît.</p>
+
+    <p><strong>Étape 5 — Compromis et recomptage.</strong> On passe de quatre copies à deux — la brute et
+      la préparée — plus un cache de tableau de bord qui reste légitime, puisqu'il répond à une exigence
+      de temps de réponse et non à un manque de garanties. Compromis acceptés : un socle unique devient
+      critique pour la BI <em>et</em> le ML ; la migration de l'entrepôt a un coût et un risque ; les
+      performances des requêtes BI devront être vérifiées sur les requêtes réelles avant bascule
+      définitive. Recomptage prévu à six mois.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — « migrons notre marécage vers un Lakehouse »</div>
+  <div class="box-b">
+    <p>Reprenez l'assureur de N11 (exercice 12.2) : 600 To déversés en cinq ans, sans métadonnées ni
+      convention de nommage. La DSI propose de migrer l'ensemble vers un Lakehouse, « qui apporte la
+      gouvernance et les garanties ». Analysez cette proposition.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Le comptage.</strong> Première surprise, et elle est décisive : il n'y a pas de
+      multiplication des copies. L'assureur n'a <em>pas</em> d'entrepôt alimenté en parallèle ; il a un
+      lac et des exports ponctuels. <strong>Le symptôme auquel répond le Lakehouse est absent.</strong></p>
+
+    <p><strong>Étape 2 — Le bon diagnostic.</strong> Des trois cas de l'étape 2, c'est manifestement le
+      <em>déficit de gouvernance</em> : données non décrites, non contextualisées, non trouvables. Or
+      ce problème ne se résout pas par une migration. Un Lakehouse <strong>permet</strong> de déclarer
+      des schémas, de tracer et de gouverner ; il ne le <strong>fait</strong> pas à la place de
+      l'organisation. Migrer 600 To non décrits produit exactement 600 To non décrits, sur une
+      plateforme plus récente et plus coûteuse.</p>
+
+    <p><strong>Pourquoi la proposition est séduisante.</strong> Parce qu'elle déguise un travail
+      ingrat — décrire, cataloguer, trancher ce qu'on supprime, c'est-à-dire du travail humain, long et
+      peu spectaculaire — en un projet technique, borné et finançable. C'est précisément pour cette
+      raison qu'elle est dangereuse : elle consommera le budget qui aurait permis de faire le vrai
+      travail.</p>
+
+    <p><strong>Réponse proposée.</strong> (a) Refuser la migration <em>en l'état</em>, en l'expliquant
+      par le diagnostic et non par un refus de principe. (b) Appliquer d'abord le plan de N11 : fermer
+      le robinet par une règle d'entrée, reconstituer une zone propre sur le périmètre utile, décider du
+      sort du reste. (c) <strong>Réexaminer la question du Lakehouse ensuite</strong> : une fois la
+      gouvernance en place, s'il apparaît qu'un entrepôt est nécessaire pour la BI, le socle commun
+      deviendra une option pertinente — et il sera alors choisi pour la bonne raison.</p>
+
+    <p><strong>La leçon.</strong> Chaque génération répond à un problème précis. Appliquer la réponse de
+      la génération 6 à un problème de génération 4 ne donne pas un résultat partiel : cela donne le
+      même problème, plus cher.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — faut-il tout unifier ?</div>
+  <div class="box-b">
+    <p>Une banque met en place un Lakehouse. Quatre périmètres sont candidats : (a) les données de
+      navigation de l'application mobile ; (b) les transactions, servant à la fois la détection de
+      fraude et le pilotage commercial ; (c) le reporting prudentiel transmis au régulateur, aux
+      définitions figées et auditées, calculé trimestriellement ; (d) les enregistrements du centre
+      d'appels. Pour chacun, dites s'il rejoint le socle commun, et justifiez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Navigation mobile — oui, zone brute.</strong> Données semi-structurées, volumineuses,
+      aux usages futurs encore ouverts. Elles n'existent nulle part ailleurs, donc il n'y a pas de copie
+      à réduire ; le bénéfice est la gouvernance unique et la possibilité de les croiser avec le reste
+      sans extraction. Rien ne justifie de les tenir à part.</p>
+
+    <p><strong>(b) Transactions — oui, et c'est le cas le plus rentable.</strong> C'est exactement le
+      problème du Lakehouse : une même donnée servant deux mondes, la fraude (ML, grain fin, fraîcheur
+      forte) et le pilotage (BI, agrégats, fraîcheur quotidienne). Aujourd'hui, elle est très
+      probablement dupliquée et préparée deux fois, avec deux définitions de « transaction valide ».
+      L'unifier supprime la copie <em>et</em> la divergence. On conservera deux vues préparées
+      distinctes sur le même socle — ce n'est pas une duplication, ce sont deux usages nommés d'une même
+      matière.</p>
+
+    <p><strong>(c) Reporting prudentiel — non, ou seulement en amont.</strong> Voici le périmètre qui
+      justifie une exception, et il faut savoir l'argumenter. Les chiffres transmis au régulateur
+      doivent être <strong>reproductibles à l'identique des années plus tard</strong>, avec des
+      définitions gelées et un historique figé : on doit pouvoir rejouer le calcul du trimestre passé et
+      retrouver exactement le même résultat. Un socle vivant, où les tables évoluent et où les
+      définitions sont améliorées, est en tension directe avec cette exigence. <strong>Décision</strong> :
+      les données <em>sources</em> rejoignent le socle commun, mais le reporting prudentiel conserve un
+      espace de production figé, avec ses versions scellées et sa piste d'audit. L'unification s'arrête
+      là où elle compromettrait une obligation.</p>
+
+    <p><strong>(d) Enregistrements du centre d'appels — oui, zone brute, avec une réserve.</strong>
+      Non structurés, volumineux, destinés à une extraction de sens ultérieure : le socle commun est le
+      bon endroit. La réserve ne porte pas sur l'unification mais sur l'usage : ces enregistrements
+      contiennent des données personnelles et parfois bancaires, ce qui impose des droits d'accès
+      restreints et une finalité écrite (N1, quatrième condition). Un socle commun ne signifie jamais
+      des droits communs.</p>
+
+    <p><strong>Conclusion de l'exercice.</strong> Trois périmètres sur quatre rejoignent le socle, le
+      quatrième garde un espace à part pour une raison nommée et défendable. <strong>C'est ce que
+      signifie l'étape 3 : unifier est une décision par périmètre, pas un principe</strong> — et
+      une architecture qui sait dire ce qu'elle n'unifie pas est plus solide qu'une architecture qui
+      prétend tout réunir.</p>
+  </div>
+</div>
+
+<h3 id="n12-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez l'idée du Lakehouse et ses deux objectifs, puis expliquez pourquoi il ne s'agit pas
+        d'une troisième option entre lac et entrepôt.</li>
+      <li>Décrivez le trajet d'une même donnée dans une organisation équipée des deux plateformes, et
+        comptez les copies. Pour chacune, dites ce qu'elle coûte.</li>
+      <li>Expliquez la phrase « on apporte les garanties au stockage plutôt que de déplacer les données
+        vers les garanties », et dites en quoi elle inverse la démarche de l'entrepôt.</li>
+      <li>Pourquoi l'énoncé dit-il « cherche à rapprocher » ? Nommez la contradiction de fond et dites
+        comment elle est organisée en pratique.</li>
+      <li>Distinguez les trois diagnostics de l'étape 2 — coexistence coûteuse, déficit de gouvernance,
+        besoin de préparation — en donnant pour chacun un symptôme caractéristique et la réponse
+        adaptée.</li>
+      <li>Citez deux périmètres qu'il serait légitime de ne pas unifier, et justifiez chacun par une
+        contrainte précise.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n12-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chacune de ces situations, dites si le Lakehouse répond au problème, et pourquoi :
+      « nous avons un entrepôt et des données structurées uniquement » ; « la BI et le ML donnent deux
+      chiffres » ; « notre lac n'a pas de métadonnées » ; « la même donnée existe dans trois
+      systèmes » ; « nos rapports sont trop lents ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un groupe de distribution spécialisée possède un entrepôt (ventes, stocks, clients) et un lac
+      (logs du site, images produits, flux fournisseurs). Trois projets démarrent : un tableau de bord
+      des marges, un moteur de recommandation, et une analyse des ruptures de stock croisant ventes et
+      logs. Appliquez les cinq étapes : comptez les copies, posez le diagnostic, décidez du périmètre à
+      unifier, décrivez les garanties par zone et écrivez le compromis. Indiquez précisément quelle
+      divergence actuelle disparaîtra, et par quel geste exactement.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Les quatre générations de cette partie — architecture traditionnelle, Data Warehouse, Data Lake,
+      Lakehouse — forment une chaîne où la réponse de chacune crée le problème de la suivante.
+      Reconstituez cette chaîne en quatre maillons, en énonçant chaque fois le besoin, le compromis
+      accepté et la contrainte que ce compromis a engendrée. Puis, en appliquant le principe de N8 au
+      compromis du Lakehouse — socle unique, garanties à appliquer, discipline permanente — formulez la
+      contrainte qu'il produira à son tour, et déduisez-en le problème dominant de la génération
+      suivante. Comparez enfin votre déduction au problème de la génération 7 tel qu'il figure dans le
+      tableau de N8 : votre raisonnement y conduit-il ?</p>
+  </div>
+</div>

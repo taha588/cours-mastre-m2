@@ -1,0 +1,463 @@
+<h1 class="chapitre saut" id="partie0"><span class="num">Partie 0</span>Fondations : la donnée, sa gestion, son architecture</h1>
+
+<h2 class="notion" id="n01">N1 — La donnée : définition et condition de valeur</h2>
+
+<h3 id="n01-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Une <strong>donnée</strong> est un fait, une observation, un chiffre,
+      un mot ou une autre information <strong>pouvant être collectée et exploitée</strong>.</p>
+    <p><strong>Condition de valeur.</strong> Une donnée <strong>n'a de valeur que si</strong> elle peut être :</p>
+    <ol>
+      <li><strong>comprise</strong> — on sait ce qu'elle représente ;</li>
+      <li><strong>contextualisée</strong> — on sait à quoi, à qui et à quand elle se rattache ;</li>
+      <li><strong>accessible</strong> — on peut l'obtenir au moment où on en a besoin ;</li>
+      <li><strong>utilisée correctement</strong> — on l'emploie pour un usage légitime et adapté.</li>
+    </ol>
+    <p>Les quatre conditions se cumulent : <strong>il suffit qu'une seule manque pour que la valeur
+      tombe</strong>, quel que soit le volume disponible.</p>
+  </div>
+</div>
+
+<h3 id="n01-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette règle dit une chose simple et désagréable : <strong>posséder une donnée et en tirer de la
+      valeur sont deux choses différentes</strong>. La donnée est une <em>matière première</em>, pas un
+      résultat. Une entreprise peut accumuler des téraoctets et rester incapable de répondre à une question
+      élémentaire sur son activité : ce n'est pas un paradoxe, c'est la conséquence directe de l'énoncé.</p>
+
+    <p>Lisez d'abord la définition : « pouvant être <strong>collectée</strong> et <strong>exploitée</strong> ».
+      Ces deux participes ne sont pas décoratifs. Un fait qui se produit mais que rien n'enregistre
+      — un client qui hésite puis repose un produit en rayon — n'est pas une donnée du système
+      d'information : il n'est pas collectable en l'état. Et un fichier que personne ne peut ouvrir, lire
+      ou interroger n'est pas exploitable : c'est un octet, pas une donnée utile. <strong>La définition
+      pose donc déjà une exigence d'architecture</strong> : pour qu'un fait devienne une donnée, il faut
+      une capture, un format et un endroit où le poser.</p>
+
+    <p>Vient ensuite la partie décisive, la <strong>condition de valeur</strong>. Elle fonctionne comme un
+      test à quatre questions, et sa logique est celle d'un <strong>ET</strong>, jamais d'un <em>OU</em> :</p>
+    <ul>
+      <li><strong>Comprise</strong> — un nombre seul ne veut rien dire. « 1 250 » n'est une donnée
+        exploitable que si l'on sait qu'il s'agit d'un montant, dans quelle devise, hors taxes ou toutes
+        taxes comprises. Ce qui rend une donnée compréhensible, ce sont ses <em>métadonnées</em> : nom,
+        définition, unité, référentiel, producteur.</li>
+      <li><strong>Contextualisée</strong> — la même valeur doit être rattachée à un objet, à un moment et
+        à un périmètre. « 1 250 dirhams » n'a de sens que rapporté à <em>quel client</em>, <em>quel
+        magasin</em>, <em>quelle date</em>. Sans contexte, on ne peut ni comparer, ni agréger, ni expliquer.</li>
+      <li><strong>Accessible</strong> — une donnée qui existe mais que l'on ne peut pas obtenir
+        <em>au moment où la décision se prend</em> ne vaut rien pour cette décision. L'accessibilité est
+        donc toujours relative à un délai : un chiffre d'affaires livré à J+30 est inaccessible pour un
+        pilotage quotidien, même s'il est parfaitement stocké.</li>
+      <li><strong>Utilisée correctement</strong> — la valeur n'apparaît qu'au moment de l'usage, et
+        seulement si cet usage est légitime (a-t-on le droit ?) et adapté (la donnée est-elle assez fiable
+        et représentative <em>pour cet usage-là</em> ?). Une donnée exacte employée hors de son domaine
+        produit une conclusion fausse.</li>
+    </ul>
+
+    <p>La conséquence pratique est que ces quatre mots ne sont pas une liste à réciter : ce sont
+      <strong>quatre causes possibles de panne</strong>. Quand une donnée ne sert à rien, exactement l'une
+      d'elles — parfois plusieurs — est en défaut, et c'est elle qui désigne le travail d'architecture à
+      faire : documenter, rattacher, acheminer, ou gouverner. Toute la suite du cours ne fait que construire
+      les moyens techniques de tenir ces quatre conditions à grande échelle.</p>
+  </div>
+</div>
+
+<div class="box b-piege">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Une donnée fausse qui coche les quatre cases est pire que pas de donnée du tout.</strong>
+        Comprise, contextualisée, accessible et effectivement utilisée, elle produit une décision erronée
+        avec l'assurance que donne un chiffre. La condition « utilisée correctement » suppose donc
+        implicitement une qualité suffisante pour l'usage visé.</li>
+      <li><strong>« Accessible » n'est pas « stockée ».</strong> Une archive sur bande, un export derrière
+        un ticket de trois semaines ou un fichier connu d'une seule personne sont stockés mais inaccessibles
+        au sens de la règle.</li>
+      <li><strong>« Comprise » n'est pas « lisible ».</strong> On peut parfaitement lire une colonne
+        <code>flag_2</code> remplie de 0 et de 1 sans savoir ce qu'elle signifie. Lisibilité technique
+        et compréhension métier sont deux choses distinctes.</li>
+      <li><strong>Le droit d'usage fait partie de la règle.</strong> Une donnée personnelle collectée sans
+        base légale peut être comprise, contextualisée et accessible : elle n'a pourtant aucune valeur
+        exploitable, car la quatrième condition interdit son usage.</li>
+      <li><strong>Ne pas confondre donnée, information et décision.</strong> La donnée est la matière ;
+        l'information naît quand on l'interprète dans un contexte ; la décision vient après. La règle
+        décrit les conditions du passage de la première à la deuxième, pas un automatisme.</li>
+      <li><strong>Le volume n'est pas une cinquième condition.</strong> Multiplier les copies d'une donnée
+        mal définie multiplie le problème, pas la valeur — point sur lequel le cours reviendra (N24).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> المعطى (donnée) هو واقعة أو ملاحظة أو رقم أو كلمة <strong>يمكن
+    جمعها واستغلالها</strong>. ولكن ما عندهاش قيمة إلا إلا كانت: <strong>مفهومة</strong> (عارفين شنو كتمثل،
+    بالوحدة ديالها)، <strong>فسياقها</strong> (مربوطة بمن ومتى وفين)، <strong>متاحة</strong> (نقدرو نجيبوها
+    فالوقت اللي محتاجينها فيه)، و<strong>مستعملة بشكل صحيح</strong> (استعمال مشروع ومناسب). الأربعة كيتجمعو
+    بـ«و» ماشي بـ«أو»: إلا نقصات وحدة، القيمة كتطيح حتى لو عندك تيرابايتات. علاش هادشي مهم؟ حيت منين شي
+    معطى ما كيخدمش، وحدة من هاد الأربعة هي اللي خاصة، وهي اللي كتقول ليك شنو خاص تدير فالأركيتكتير:
+    توثيق، ربط بالسياق، قناة ديال الوصول، ولا حكامة.</p>
+</div>
+
+<h3 id="n01-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de la <strong>confusion entre posséder et valoriser</strong>. Une organisation
+      qui équipe ses points de vente, son site et son application collecte mécaniquement des millions
+      d'enregistrements. Elle en conclut qu'elle « a les données ». Puis, devant une question concrète
+      — pourquoi ce client n'est-il pas reconnu ? quel est le chiffre d'affaires d'hier ? — elle découvre
+      qu'elle ne peut pas répondre.</p>
+    <p>Sans la règle, ce blocage est vécu comme un échec technique vague : « nos données sont mauvaises ».
+      Ce diagnostic ne mène à aucune action, parce qu'il ne dit pas <em>quoi</em> réparer. La règle
+      transforme ce constat flou en <strong>diagnostic à quatre entrées</strong> : ce qui manque est la
+      compréhension, le contexte, l'accès ou la légitimité d'usage. Elle traite donc le problème du
+      <strong>point de départ</strong> : avant d'acheter un outil, avant de dessiner un pipeline, savoir
+      de quoi l'on parle et pourquoi, aujourd'hui, la donnée ne sert pas.</p>
+  </div>
+</div>
+
+<h3 id="n01-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p>Ce que cette règle rend possible et qui ne l'était pas avant :</p>
+    <ul>
+      <li><strong>Diagnostiquer en quatre questions</strong> pourquoi une donnée disponible ne produit
+        aucune valeur, et nommer précisément la condition en défaut.</li>
+      <li><strong>Justifier une dépense d'architecture</strong> devant un décideur : un catalogue de
+        données sert la compréhension, des identifiants et des horodatages servent le contexte, un pipeline
+        sert l'accès, la gouvernance sert l'usage correct. Chaque brique répond à une condition.</li>
+      <li><strong>Arbitrer ce que l'on garde</strong> : une donnée que l'on ne saura ni comprendre ni
+        rattacher à un contexte coûte un stockage sans contrepartie.</li>
+      <li><strong>Poser les bonnes questions au métier</strong> dès le cadrage : « que représente ce
+        champ ? », « à quelle maille ? », « dans quel délai le voulez-vous ? », « pour quel usage ? ».</li>
+      <li><strong>Éviter l'erreur la plus coûteuse d'un projet data</strong> : lancer un chantier de
+        volume (plus de sources, plus de stockage) alors que la condition en défaut était la compréhension
+        ou l'accès.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n01-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La définition est <strong>opérationnelle</strong> : elle ne cherche pas à dire ce qu'est une donnée
+      en philosophie, mais à délimiter ce dont un système d'information peut s'occuper. C'est pourquoi elle
+      s'arrête à « pouvant être collectée et exploitée » : tout ce qui échappe à ces deux verbes échappe
+      aussi à l'architecte.</p>
+
+    <p>La condition de valeur, elle, s'obtient par un raisonnement simple, que vous pouvez refaire :
+      <strong>on prend une donnée qui fonctionne, on lui retire une qualité à la fois, et l'on observe la
+      valeur s'effondrer</strong>. Partons de « le 12 mars 2026, le client C-4417 a payé 1 250 MAD TTC au
+      magasin de Fès ».</p>
+    <ul>
+      <li>Retirons la <strong>compréhension</strong> — il reste « C-4417 ; 1250 ». Montant ? Points de
+        fidélité ? Centimes ? Impossible d'agréger quoi que ce soit sans risquer un contresens.</li>
+      <li>Retirons le <strong>contexte</strong> — il reste « 1 250 MAD TTC ». Pour qui, quand, où ? On ne
+        peut ni comparer deux magasins, ni suivre une évolution, ni rattacher l'achat à un client.</li>
+      <li>Retirons l'<strong>accès</strong> — la donnée est complète mais enfermée dans un système que
+        l'analyste n'interroge pas, ou livrée trente jours trop tard. La décision se prend sans elle.</li>
+      <li>Retirons l'<strong>usage correct</strong> — la donnée sert à une campagne pour laquelle le client
+        n'a jamais donné son accord, ou un montant TTC est comparé à des montants HT. La donnée était
+        bonne ; le résultat est faux ou illicite.</li>
+    </ul>
+
+    <p>Chacune des quatre suppressions suffit à annuler la valeur : les quatre conditions sont donc
+      <strong>nécessaires</strong>. Réunies, elles rendent la donnée <em>utilisable</em> — ce qui est la
+      part qui relève de l'architecte. Qu'elle soit ensuite <em>rentable</em> dépend de la question posée
+      par le métier, et cela, aucune architecture ne le garantit.</p>
+
+    <p>Enfin, cette règle n'est pas isolée : elle est la forme condensée d'un principe que le cours
+      retrouvera plus loin — <em>la valeur dépend du contexte, de la qualité, de l'accès et de l'usage</em>
+      (N24) — et elle annonce déjà les trois piliers transverses de toute architecture moderne :
+      métadonnées (comprendre), observabilité (savoir ce qui se passe) et gouvernance (savoir qui peut
+      faire quoi).</p>
+  </div>
+</div>
+
+<h3 id="n01-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Au cadrage d'un projet data, avant toute conception.</strong> On liste les données dont
+        le projet dépend et on passe chacune au test des quatre conditions. Ce passage dure une heure et
+        révèle presque toujours que le chantier réel n'est pas celui que l'on croyait : il porte sur la
+        définition des champs ou sur le délai d'accès, rarement sur le volume.</li>
+      <li><strong>Dans l'audit d'un patrimoine existant (cartographie, catalogage).</strong> Pour chaque
+        source, on note ce qui est documenté, horodaté, identifié et accessible. Le résultat se lit comme
+        une carte des manques et alimente directement le plan de gouvernance.</li>
+      <li><strong>Dans une revue de qualité avant un projet de BI ou d'IA.</strong> La BI exige surtout du
+        contexte et de la cohérence ; l'IA exige en plus de la représentativité. Poser les quatre questions
+        en nommant l'usage visé évite de livrer un modèle entraîné sur des données inadaptées.</li>
+      <li><strong>Dans les arbitrages de conservation et de coût.</strong> Face à un flux volumineux, on
+        demande ce qu'il faudrait pour que ces données deviennent exploitables. Si personne ne sait les
+        décrire ni les rattacher à un contexte, les conserver revient à payer un stockage pour un futur
+        improbable.</li>
+      <li><strong>Dans les dossiers de conformité et de données personnelles.</strong> La quatrième
+        condition est ici au premier plan : finalité, base légale, durée de conservation, destinataires.
+        Une donnée sans cadre d'usage est un risque, pas un actif.</li>
+      <li><strong>Dans le dialogue avec le métier.</strong> La règle fournit un vocabulaire commun pour
+        traduire une demande floue — « je veux un tableau de bord » — en exigences vérifiables : quelles
+        données, à quelle maille, dans quel délai, pour quelle décision.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n01-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p>Dans un cas concret, ces formulations sont les signaux qu'il faut appliquer la règle :</p>
+    <ol>
+      <li><strong>« Nous avons toutes les données, mais nous ne décidons pas mieux. »</strong> C'est le
+        signal canonique : le volume est là, une des quatre conditions ne l'est pas. Commencez par
+        identifier laquelle avant toute proposition technique.</li>
+      <li><strong>« Personne ne sait ce que contient ce champ. »</strong> Compréhension en défaut. L'action
+        porte sur les métadonnées et le catalogue, pas sur le stockage.</li>
+      <li><strong>« Deux rapports donnent deux chiffres différents pour la même chose. »</strong> Contexte
+        et définition en défaut : même nom, maille ou périmètre différents. Le volume n'y changera rien.</li>
+      <li><strong>« Le chiffre arrive trop tard pour servir. »</strong> Accès en défaut, au sens du délai.
+        C'est une question de fraîcheur et de latence, qui mènera plus loin au choix batch / stream (N22).</li>
+      <li><strong>« Il faut un ticket et trois semaines pour obtenir cet extrait. »</strong> Accès en
+        défaut, au sens de l'organisation : la donnée existe, le chemin pour l'atteindre n'existe pas.</li>
+      <li><strong>« Le modèle fonctionne mal alors que les données sont justes. »</strong> Usage en défaut :
+        données exactes mais non représentatives du cas d'usage, ou employées hors de leur domaine.</li>
+      <li><strong>« A-t-on le droit de l'utiliser pour ça ? »</strong> Usage correct en défaut. Tant que la
+        réponse n'est pas écrite, la donnée ne doit pas entrer dans la chaîne de valeur.</li>
+    </ol>
+    <p>À l'inverse, lorsqu'une donnée est définie, horodatée, identifiée, livrée dans le délai utile et
+      employée dans son cadre, la règle est satisfaite : le problème est ailleurs, et il faut chercher du
+      côté du traitement ou de la question posée, non du côté de la donnée.</p>
+  </div>
+</div>
+
+<h3 id="n01-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer précisément la donnée.</strong> Écrivez la source, le champ et la maille :
+      « le champ <code>mnt_tot</code> de la table <code>ventes</code> du système de caisse, une ligne par
+      ticket ». Tant que la donnée n'est pas nommée à ce niveau, le test porterait sur une idée, pas sur
+      une donnée, et donnerait une réponse inutilisable.</p>
+
+    <p><strong>Étape 2 — Test « comprise ? ».</strong> Demandez : que représente exactement cette valeur,
+      dans quelle unité ou quel référentiel, et qui la produit ? On attend une réponse écrite et unique.
+      Si deux interlocuteurs répondent différemment, la condition est en défaut.</p>
+
+    <p><strong>Étape 3 — Test « contextualisée ? ».</strong> Demandez à quel objet, à quel moment et à
+      quel périmètre la valeur se rattache : identifiant, horodatage, magasin, canal. On vérifie ici qu'on
+      peut comparer et agréger sans contresens. Une valeur sans clé ni date est orpheline.</p>
+
+    <p><strong>Étape 4 — Test « accessible ? ».</strong> Demandez qui peut l'obtenir, par quel chemin
+      technique, et <strong>en combien de temps</strong>. Comparez ce délai à celui de la décision à
+      prendre. L'accessibilité se juge toujours par rapport à un besoin daté, jamais dans l'absolu.</p>
+
+    <p><strong>Étape 5 — Test « utilisée correctement ? ».</strong> Nommez l'usage visé, puis posez deux
+      questions : en a-t-on le droit (finalité, consentement, durée) et la donnée est-elle assez fiable et
+      représentative <em>pour cet usage</em> ? Une réponse négative suffit à bloquer l'usage, même si tout
+      le reste est vert.</p>
+
+    <p><strong>Étape 6 — Conclure par l'action d'architecture.</strong> La condition en défaut désigne le
+      travail : compréhension → métadonnées et catalogue ; contexte → identifiants, horodatage, intégration ;
+      accès → pipeline, stockage adapté, latence ; usage → gouvernance, sécurité, qualité. S'il n'en manque
+      aucune, écrivez-le : la donnée est exploitable, le problème est ailleurs.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Une donnée ne vaut que si elle est <strong>comprise, contextualisée, accessible et correctement
+      utilisée</strong> : la condition qui manque est exactement le chantier d'architecture à ouvrir.</p>
+    <p class="ar" dir="rtl">المعطى ما عندو قيمة إلا إلا كان <strong>مفهوم، فسياقو، متاح، ومستعمل بشكل
+      صحيح</strong>: الشرط الناقص هو بعينو الخدمة اللي خاصة تتدار فالأركيتكتير.</p>
+  </div>
+</div>
+
+<h3 id="n01-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — le montant sans unité</div>
+  <div class="box-b">
+    <p>Dans la base des caisses de l'enseigne, la table <code>ventes</code> contient un champ
+      <code>mnt_tot</code> dont une ligne vaut <code>1250</code>. Le contrôle de gestion veut l'utiliser
+      pour calculer le chiffre d'affaires par magasin du mois précédent. Appliquez la démarche et concluez
+      par l'action d'architecture à mener.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer.</strong> Donnée : champ <code>mnt_tot</code> de la table
+      <code>ventes</code>, système de caisse, une ligne par ticket. Usage visé : somme par magasin et
+      par mois.</p>
+    <p><strong>Étape 2 — Comprise ?</strong> <strong>Non.</strong> Rien n'indique la devise (MAD ?), ni si
+      le montant est hors taxes ou toutes taxes comprises, ni s'il inclut les remises et les frais de
+      livraison. Interrogés, le responsable caisse et le contrôle de gestion donnent deux réponses
+      différentes : la condition est en défaut.</p>
+    <p><strong>Étape 3 — Contextualisée ?</strong> <strong>Partiellement.</strong> La ligne porte bien un
+      identifiant de ticket et un magasin, mais l'horodatage est celui de l'<em>enregistrement</em> en
+      base, pas celui de l'encaissement. Pour un total mensuel, un ticket du 31 à 23 h 50 enregistré le 1er
+      bascule sur le mauvais mois : le contexte temporel est ambigu.</p>
+    <p><strong>Étape 4 — Accessible ?</strong> <strong>Oui, mais à un coût.</strong> La table est
+      interrogeable, cependant la requête d'agrégation s'exécute sur la base transactionnelle et ralentit
+      les encaissements. Le délai est compatible avec un calcul mensuel, mais le moyen d'accès fait peser
+      un risque sur le système opérationnel.</p>
+    <p><strong>Étape 5 — Utilisée correctement ?</strong> <strong>Non, en l'état.</strong> Additionner des
+      montants dont on ignore s'ils sont HT ou TTC produit un chiffre d'affaires faux, et personne ne le
+      verra : le résultat aura l'apparence d'un indicateur valide.</p>
+    <p><strong>Étape 6 — Conclusion et action.</strong> Deux conditions sont en défaut, la compréhension
+      d'abord. Les actions, dans l'ordre : (a) écrire dans le catalogue la définition de
+      <code>mnt_tot</code> — devise, HT/TTC, remises incluses ou non, producteur ; (b) ajouter ou exposer
+      l'horodatage d'encaissement et définir la règle de rattachement au mois ; (c) sortir le calcul de la
+      base de caisse en l'alimentant vers une plateforme analytique, pour protéger le workload
+      transactionnel. Remarquez qu'<strong>aucune de ces actions n'est un problème de volume</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — les photos des réclamations</div>
+  <div class="box-b">
+    <p>Le service après-vente de la même enseigne conserve, sur un serveur de fichiers, les photos jointes
+      aux réclamations : environ 400 000 images nommées <code>IMG_0001.jpg</code>, <code>IMG_0002.jpg</code>…
+      La direction qualité voudrait « analyser les photos pour détecter les défauts récurrents ».
+      Ces images sont-elles des données au sens de la règle, et que faut-il faire ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer.</strong> Donnée : fichiers image du serveur SAV, une image par pièce
+      jointe de réclamation, aucune table associée. Usage visé : détection de défauts récurrents par
+      produit.</p>
+    <p><strong>Étape 2 — Comprise ?</strong> <strong>Oui au sens technique, non au sens métier.</strong>
+      Chaque fichier est lisible, mais rien ne dit ce qu'il montre : un produit, un emballage, un ticket
+      de caisse, un document d'identité ? Sans description ni typologie, on ne sait pas ce que l'on
+      analyse.</p>
+    <p><strong>Étape 3 — Contextualisée ?</strong> <strong>Non.</strong> C'est le défaut majeur ici. Le nom
+      du fichier ne porte ni le numéro de réclamation, ni la référence du produit, ni la date, ni le
+      magasin. Une photo que l'on ne peut rattacher à un produit ne permet aucune analyse « par produit » :
+      la demande de la direction qualité est, en l'état, impossible à satisfaire.</p>
+    <p><strong>Étape 4 — Accessible ?</strong> <strong>Faiblement.</strong> Les fichiers existent sur un
+      partage réseau, mais aucun traitement analytique ne les atteint : ni catalogue, ni interface, ni
+      chaîne d'ingestion. Ils sont stockés sans être accessibles au sens de la règle.</p>
+    <p><strong>Étape 5 — Utilisée correctement ?</strong> <strong>À vérifier avant tout usage.</strong>
+      Des photos envoyées par des clients peuvent contenir des personnes, des documents d'identité ou des
+      adresses. La finalité « analyse qualité » doit être couverte par une base légale, et les images hors
+      périmètre doivent être écartées ou anonymisées.</p>
+    <p><strong>Étape 6 — Conclusion et action.</strong> Ce sont bien des données au sens de la définition
+      — elles sont collectées et potentiellement exploitables — mais trois conditions sur quatre sont en
+      défaut. Les actions : (a) rattacher chaque image à sa réclamation, à son produit, à sa date et à son
+      magasin, par des métadonnées stockées à côté du fichier ; (b) décrire le contenu attendu et les
+      types d'images ; (c) rendre le stock accessible à un traitement analytique au lieu de le laisser sur
+      un partage ; (d) écrire la finalité et le cadre d'usage avant toute exploitation. Tant que (a) n'est
+      pas fait, aucun modèle, si performant soit-il, ne produira l'analyse demandée.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le fichier de numéros de téléphone</div>
+  <div class="box-b">
+    <p>Le service marketing dispose d'un fichier de 180 000 numéros de téléphone, bien structuré, à jour,
+      documenté, immédiatement exportable. Il provient d'un jeu-concours organisé il y a deux ans dont le
+      formulaire mentionnait uniquement le tirage au sort. Le marketing veut lancer une campagne SMS
+      promotionnelle. Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer.</strong> Donnée : fichier <code>contacts_jeu_2024</code>, un numéro de
+      téléphone par participant, avec nom et date de participation. Usage visé : envoi d'une campagne SMS
+      promotionnelle.</p>
+    <p><strong>Étape 2 — Comprise ?</strong> <strong>Oui.</strong> Les champs sont nommés, le format des
+      numéros est normalisé, le producteur est identifié.</p>
+    <p><strong>Étape 3 — Contextualisée ?</strong> <strong>Oui.</strong> Chaque enregistrement porte une
+      date de collecte et l'origine du consentement, ce qui permet justement de poser la question de
+      l'étape 5.</p>
+    <p><strong>Étape 4 — Accessible ?</strong> <strong>Oui.</strong> Le fichier est exportable
+      immédiatement, sans délai technique.</p>
+    <p><strong>Étape 5 — Utilisée correctement ?</strong> <strong>Non.</strong> La finalité déclarée lors
+      de la collecte était le tirage au sort, pas la prospection commerciale. L'usage envisagé sort du
+      cadre annoncé : il n'est pas légitime. S'y ajoute une question de durée de conservation, deux ans
+      après une opération ponctuelle.</p>
+    <p><strong>Étape 6 — Conclusion et action.</strong> Trois conditions sur quatre sont satisfaites, et
+      pourtant la valeur exploitable de ce fichier pour l'usage demandé est <strong>nulle</strong> : c'est
+      la démonstration que les conditions se cumulent par un ET. Les actions : (a) refuser l'usage en
+      l'état et le documenter ; (b) si la prospection est voulue, recueillir un consentement explicite pour
+      cette finalité ; (c) appliquer une durée de conservation et purger ce qui l'excède. Cet exercice
+      montre aussi qu'une donnée peut être techniquement parfaite et juridiquement inutilisable : la
+      quatrième condition n'est pas une formalité ajoutée après coup.</p>
+  </div>
+</div>
+
+<h3 id="n01-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Une table de capteurs contient une colonne <code>temp</code> avec des valeurs entre 18 et 95.
+        Passez-la au test des quatre conditions et dites laquelle est en défaut.</li>
+      <li>Le service RH exporte chaque mois un fichier <code>effectifs.xlsx</code> que seule une personne
+        sait produire et interpréter. Quelle(s) condition(s) manque(nt) ? Quelle action proposez-vous ?</li>
+      <li>Un site e-commerce enregistre tous les clics dans des fichiers de logs conservés sept jours.
+        L'équipe marketing veut analyser les parcours d'achat sur une année. Quelle condition est en
+        défaut, et pourquoi n'est-ce pas un problème de volume ?</li>
+      <li>Deux tableaux de bord affichent « nombre de clients actifs » : l'un dit 42 000, l'autre 51 000.
+        Formulez, à l'aide de la règle, les trois questions à poser pour trancher.</li>
+      <li>Un fournisseur propose de vendre à l'enseigne un jeu de données météo historiques très
+        volumineux. En vous appuyant uniquement sur la règle, listez les questions à poser avant d'acheter.</li>
+      <li>Reprenez le cas d'ouverture (§2) : pour chacune des trois demandes de la direction, dites quelle
+        condition de valeur est en défaut dans la situation actuelle.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n01-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Énoncez la définition d'une donnée et ses quatre conditions de valeur, puis donnez, pour chacune
+      des quatre, un exemple d'une seule phrase tiré d'un commerce de proximité.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une clinique dispose de trois sources : le logiciel de rendez-vous (base relationnelle), les
+      comptes rendus médicaux (documents texte) et les relevés d'un appareil de mesure (fichiers exportés
+      sur une clé USB). Pour chaque source, appliquez les six étapes de la démarche en supposant l'usage
+      « réduire le délai d'attente des patients », puis classez les trois sources de la plus exploitable à
+      la moins exploitable en justifiant par les conditions en défaut.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Une direction affirme : « nous avons multiplié par dix le volume de données collectées en deux ans,
+      donc notre capacité de décision a progressé. » Rédigez une réfutation argumentée en vous appuyant
+      exclusivement sur la règle, puis proposez un <strong>indicateur</strong> qui mesurerait réellement
+      la progression visée. Votre indicateur devra être défendable sur les quatre conditions : expliquez
+      comment il serait compris, contextualisé, rendu accessible, et quel usage correct en serait fait.</p>
+  </div>
+</div>

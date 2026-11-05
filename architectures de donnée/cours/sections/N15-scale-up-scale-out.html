@@ -1,0 +1,492 @@
+<h2 class="notion" id="n15">N15 — Scale-up et scale-out</h2>
+
+<h3 id="n15-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>Il existe <strong>deux façons d'augmenter la capacité</strong> :</p>
+
+    <table>
+      <thead><tr><th>Scale-up</th><th>Scale-out</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Augmenter les ressources d'une même machine ou plateforme.</strong><br>
+            CPU 1 + CPU 2 + CPU 3 → <strong>1 serveur plus puissant</strong></td>
+          <td><strong>Ajouter des nœuds et répartir la charge.</strong><br>
+            Nœud 1, nœud 2, nœud 3, nœud 4 → <strong>plusieurs nœuds</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 id="n15-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette notion est la traduction opérationnelle des deux précédentes. <strong>Le scale-up est la
+      façon dont une architecture centralisée grandit ; le scale-out, celle dont une architecture
+      distribuée grandit.</strong> La question « comment faire face à plus de charge ? » n'a que deux
+      réponses possibles — rendre l'unité plus grosse, ou avoir plus d'unités — et cette liste est
+      exhaustive, ce qui est rare et commode.</p>
+
+    <p>Mais les deux réponses ne sont pas symétriques, et c'est le cœur de la notion :
+      <strong>le scale-up ne change rien à l'architecture, le scale-out change tout.</strong></p>
+    <ul>
+      <li>Avec le <strong>scale-up</strong>, le code reste le même, le modèle de données reste le même,
+        les garanties de cohérence restent les mêmes, l'exploitation reste la même. <em>Seule la facture
+        change.</em> C'est pourquoi il faut toujours l'essayer en premier : il n'introduit aucun des
+        quatre coûts de N14.</li>
+      <li>Avec le <strong>scale-out</strong>, il faut décider ce qui va sur quel nœud (partitionnement),
+        faire circuler les données (réseau), coordonner les nœuds, et trancher la question de la
+        cohérence. <em>On hérite des quatre coûts dès le premier nœud supplémentaire</em>, parce que le
+        scale-out <strong>est</strong> la distribution.</li>
+    </ul>
+
+    <p>Chacun a sa faiblesse, et elles sont de nature opposée. Le scale-up se heurte à un
+      <strong>plafond</strong> : à tout moment, il existe une machine la plus grosse disponible, et
+      au-delà il n'y a plus rien à acheter. Pire, le prix ne suit pas la capacité : près du haut de
+      gamme, <strong>doubler la puissance coûte bien plus que le double</strong>. Le scale-out, lui,
+      n'a pas de plafond théorique et son prix est à peu près proportionnel au nombre de machines —
+      mais il ajoute une complexité immédiate, et une coordination qui finit par croître plus vite que
+      la capacité gagnée.</p>
+
+    <p>Un détail de l'énoncé mérite attention : « une même machine <strong>ou plateforme</strong> ».
+      Dans le nuage, augmenter la taille d'un entrepôt ou passer à une instance plus grande est un
+      <em>scale-up</em>, même si la plateforme est distribuée en interne. La distinction n'a donc rien
+      d'obsolète : elle est plus vivante que jamais, car ces plateformes offrent les deux mouvements, et
+      souvent par un simple réglage.</p>
+
+    <p>Reste la condition que le schéma ne dit pas, et qui décide de tout : <strong>le scale-out
+      n'apporte quelque chose que si le travail est divisible</strong>. Dix nœuds ne feront pas plus
+      vite un calcul qui doit traiter les enregistrements dans un ordre strict, ni une opération qui a
+      besoin de voir toutes les données en même temps. Dans ce cas, dix nœuds donnent le résultat d'un
+      seul nœud, <em>plus</em> le coût de coordination. <strong>Le critère de choix n'est donc pas la
+      taille du problème, mais la divisibilité du travail.</strong></p>
+
+    <p>Enfin, une différence économique que l'on oublie souvent : le scale-out rend possible
+      l'<strong>élasticité</strong>, c'est-à-dire la capacité de <em>retirer</em> des nœuds quand la
+      charge retombe. Une grosse machine, elle, se paie aussi la nuit et le dimanche. C'est l'argument
+      qui a porté la génération 5 du tableau de N8 — l'infonuagique et les services managés — et il
+      porte sur la descente autant que sur la montée.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Scale-out n'est pas synonyme de plus rapide.</strong> Sans travail divisible, dix
+        nœuds valent un nœud plus la coordination — c'est-à-dire moins bien.</li>
+      <li><strong>Ne pas scaler pour masquer une inefficacité.</strong> Une requête qui lit tout
+        l'historique faute de filtre lira tout l'historique sur dix machines : on aura multiplié la
+        facture par dix sans rien corriger. L'efficacité se vérifie <em>avant</em> la capacité.</li>
+      <li><strong>Scaler le mauvais axe ne sert à rien.</strong> Ajouter des processeurs quand la
+        saturation vient des entrées-sorties ou du réseau ne change rien. Identifier la ressource
+        réellement saturée est la première étape.</li>
+      <li><strong>Le dernier palier du scale-up est le plus cher.</strong> La courbe de prix se redresse
+        en haut de gamme : c'est souvent le prix, et non le plafond technique, qui déclenche la
+        bascule.</li>
+      <li><strong>Une grosse machine reste un point de panne unique.</strong> Le scale-up n'améliore
+        jamais la résilience ; il agrandit même le périmètre de l'incident.</li>
+      <li><strong>« Nous sommes dans le nuage, donc nous sommes scalables. »</strong> Le nuage rend les
+        deux mouvements faciles ; il ne choisit pas à votre place et ne rend pas votre travail
+        divisible.</li>
+      <li><strong>L'élasticité se perd si l'on oublie de redescendre.</strong> Le bénéfice économique du
+        scale-out vient autant du retrait des nœuds que de leur ajout.</li>
+      <li><strong>Les deux mouvements n'ont pas la même réversibilité.</strong> Un scale-up se défait en
+        un réglage ; un scale-out peut exiger de repartitionner les données, ce qui se prévoit avant,
+        pas après.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> كاينين <strong>جوج طرق</strong> باش تزيد القدرة:
+    <strong>Scale-up</strong> = تزيد الموارد ديال <strong>نفس الماكينة ولا المنصة</strong> (CPU 1+2+3
+    → سيرفر واحد أقوى)، و<strong>Scale-out</strong> = <strong>تزيد عقد وتوزّع الحمل</strong> (عقدة 1،
+    2، 3، 4 → عدة عقد). وهادي هي الترجمة العملية ديال N13 وN14: الـscale-up هو كيفاش كتكبر الأركيتكتير
+    المركزية، والـscale-out كيفاش كتكبر الموزعة. وأهم نقطة: <strong>الجوج ماشي متناظرين</strong> —
+    الـscale-up <strong>ما كيبدل والو</strong> فالأركيتكتير (نفس الكود، نفس النموذج، نفس الضمانات؛ غير
+    الفاكتورة كتبدل)، والـscale-out <strong>كيبدل كلشي</strong> (كترث الأربع تكاليف ديال N14 من أول
+    عقدة زايدة). ولكل واحد نقطة ضعف معاكسة: الـscale-up عندو <strong>سقف</strong> (كاينة ماكينة كبيرة
+    وما فوقها والو، والثمن قرب السقف كيطلع أسرع من القدرة)، والـscale-out بلا سقف نظري ولكن بتعقيد
+    فوري. والشرط اللي ما كيقولوش الرسم: <strong>الـscale-out ما كيعطي والو إلا إلا كانت الخدمة قابلة
+    للتقسيم</strong> — المعيار ماشي حجم المشكل، بل <strong>قابلية تقسيم الخدمة</strong>.</p>
+</div>
+
+<h3 id="n15-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est très concret : <strong>la charge a augmenté et le système ne suit plus</strong>.
+      Le traitement de nuit déborde, le rapport met quarante minutes, la plateforme sature en fin de
+      mois. Il faut plus de capacité — et la question immédiate est : laquelle, et comment ?</p>
+    <p>Sans cette règle, la réponse est dictée par l'habitude ou par la mode : on prend une machine plus
+      grosse parce que c'est ce qu'on a toujours fait, ou l'on monte un cluster parce que c'est ce qui
+      se fait. La règle transforme ce réflexe en <strong>choix entre deux options nommées</strong>,
+      chacune avec sa faiblesse connue — un plafond et une courbe de prix d'un côté, une complexité
+      immédiate de l'autre. Elle traite donc le problème du <strong>bon ordre</strong> : essayer
+      d'abord ce qui ne change rien à l'architecture, et ne payer la complexité que lorsqu'on ne peut
+      plus faire autrement.</p>
+  </div>
+</div>
+
+<h3 id="n15-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Choisir dans le bon ordre</strong> : vérifier l'efficacité, puis tenter le scale-up,
+        puis seulement envisager le scale-out.</li>
+      <li><strong>Éviter de payer la complexité pour rien</strong> quand une machine plus grosse
+        suffisait.</li>
+      <li><strong>Reconnaître le moment de la bascule</strong> : plafond atteint, prix qui se redresse,
+        besoin d'élasticité ou de résilience.</li>
+      <li><strong>Tester la divisibilité du travail</strong> avant d'investir dans un cluster qui ne
+        servira à rien.</li>
+      <li><strong>Argumenter un refus</strong> : « le scale-out ne nous apportera rien ici, notre
+        traitement n'est pas divisible » est une objection technique vérifiable.</li>
+      <li><strong>Chiffrer l'élasticité</strong> : savoir ce que coûte une grosse machine inutilisée la
+        nuit et le week-end, comparé à des nœuds qu'on retire.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n15-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Pourquoi exactement deux façons ?</strong> Parce qu'elles épuisent les possibilités. Pour
+      disposer de plus de capacité, il n'y a que deux leviers : rendre l'unité plus grande, ou
+      multiplier les unités. Toute solution concrète est l'une, l'autre, ou un mélange des deux. Cette
+      exhaustivité est ce qui fait la valeur de la règle : elle garantit qu'on n'oublie pas une option.</p>
+
+    <p><strong>Pourquoi le scale-up finit-il toujours par s'arrêter ?</strong> Pour une raison qui n'est
+      pas de conception mais de fait : à un instant donné, le marché propose une machine la plus
+      grosse, et il n'existe rien au-dessus. Avant même ce plafond, un second phénomène intervient :
+      la <strong>courbe de prix se redresse</strong>. Passer d'une machine moyenne à une machine deux
+      fois plus puissante coûte souvent trois ou quatre fois plus cher, parce qu'on entre dans un
+      segment spécialisé. En pratique, <strong>c'est le prix qui déclenche la bascule bien avant le
+      plafond technique</strong>.</p>
+
+    <p><strong>Pourquoi le scale-out est-il complexe dès le premier nœud ?</strong> Parce qu'il est, par
+      définition, une architecture distribuée : il hérite immédiatement des quatre coûts de N14 —
+      réseau, coordination, partitionnement, cohérence. Il n'y a pas de « petit scale-out » à moindres
+      frais ; le passage de une à deux unités est le plus coûteux conceptuellement, car c'est lui qui
+      introduit toutes les questions. Les nœuds suivants, eux, ne coûtent presque rien de plus en
+      complexité.</p>
+
+    <p><strong>Vérifions sur l'enseigne, avec deux charges voisines et deux conclusions opposées.</strong></p>
+    <ul>
+      <li><em>Chargement nocturne des ventes</em> : 400 000 lignes par nuit, une heure de traitement, la
+        fenêtre en permet six. La ressource saturée n'est même pas atteinte. Si le volume doublait, une
+        machine un peu plus grosse suffirait : <strong>scale-up</strong>, sans aucune conséquence
+        architecturale.</li>
+      <li><em>Entraînement du modèle</em> : 14 heures sur une machine, fenêtre de 3 heures. Il faudrait
+        un facteur 5. Le palier suivant de la gamme apporte peut-être un facteur 2, le plus haut de
+        gamme un facteur 3 à un prix disproportionné : <strong>le scale-up ne suffit pas</strong>. Le
+        travail, lui, se divise naturellement par tranches de données :
+        <strong>scale-out justifié</strong>.</li>
+    </ul>
+    <p>Même organisation, même semaine, deux réponses opposées — parce que ce n'est ni la taille de
+      l'entreprise ni la modernité de la plateforme qui décident, mais <strong>le rapport entre le
+      facteur à gagner et ce que le palier suivant peut offrir</strong>, puis la divisibilité du travail.</p>
+
+    <p>De là se déduit la règle de décision que formalise la section 11 : vérifier l'efficacité, tenter
+      le scale-up, basculer vers le scale-out quand le plafond est atteint, quand le prix se redresse,
+      quand l'élasticité est nécessaire ou quand la résilience exige plusieurs unités —
+      <strong>et seulement si le travail se divise</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n15-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Devant toute saturation.</strong> Traitement qui déborde de sa fenêtre, rapport trop
+        lent, plateforme saturée aux heures de pointe : la règle donne l'ordre des options à examiner.</li>
+      <li><strong>Dans le dimensionnement d'un projet.</strong> Avant de choisir une plateforme, savoir
+        si la charge visée relève du scale-up ou du scale-out évite de payer un cluster pour un besoin
+        d'une seule machine.</li>
+      <li><strong>Dans les arbitrages de coût infonuagique.</strong> La question « une grosse instance
+        ou plusieurs petites ? » est exactement celle-ci, et la réponse dépend de la divisibilité et du
+        profil de charge dans la journée.</li>
+      <li><strong>Pour justifier une dépense.</strong> « Le palier suivant coûte trois fois plus pour un
+        gain de deux » est un argument chiffré, compréhensible par une direction, qui ouvre la
+        discussion sur le scale-out.</li>
+      <li><strong>Dans la conception d'un traitement.</strong> Savoir dès l'écriture si le travail sera
+        divisible change la façon de l'écrire — et conditionne toute montée en charge future.</li>
+      <li><strong>Dans un plan de résilience.</strong> Si l'on veut survivre à la perte d'une machine,
+        le scale-up ne peut rien : seule la multiplication des unités le permet.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n15-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Le traitement de nuit ne tient plus dans la fenêtre. »</strong> Point de départ
+        classique : mesurer le facteur manquant avant de choisir.</li>
+      <li><strong>« Nous sommes déjà sur la plus grosse instance disponible. »</strong> Plafond atteint :
+        le scale-up est épuisé, la question est réglée.</li>
+      <li><strong>« Le palier suivant coûte trois fois plus cher. »</strong> La courbe de prix s'est
+        redressée : c'est le moment d'évaluer le scale-out.</li>
+      <li><strong>« La machine est inutilisée 18 heures sur 24. »</strong> Besoin d'élasticité : le
+        scale-out permet de redescendre, la grosse machine se paie en continu.</li>
+      <li><strong>« Une panne de cette machine arrête tout. »</strong> Exigence de résilience : le
+        scale-up ne la traite pas.</li>
+      <li><strong>Signal d'alerte — « ajoutons des nœuds » devant un rapport lent.</strong> Vérifier
+        d'abord l'efficacité : un filtre ou un index manquant se multiplie, il ne se corrige pas.</li>
+      <li><strong>Signal d'alerte — un nœud à 90 %, les autres à 10 %.</strong> Le travail n'était pas
+        divisible, ou la clé de partition est mauvaise : le scale-out ne produit pas ses effets.</li>
+      <li><strong>Signal d'alerte — « notre traitement doit tout voir en même temps ».</strong> Travail
+        non divisible : le scale-out n'apportera rien, quel que soit le nombre de nœuds.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n15-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Identifier la ressource réellement saturée.</strong> Processeur, mémoire,
+      entrées-sorties, réseau ? Mesurez avant d'acheter : ajouter de la puissance de calcul à un système
+      limité par ses disques ne change rien, et cette erreur est la plus fréquente de toutes.</p>
+
+    <p><strong>Étape 2 — Vérifier l'efficacité avant la capacité.</strong> Le traitement lit-il plus de
+      données qu'il n'en a besoin ? Manque-t-il un filtre, un partitionnement, un format adapté ?
+      <strong>Un gain d'un facteur 10 s'obtient très souvent sans rien ajouter</strong>, et il coûte
+      beaucoup moins cher que n'importe quel matériel. Cette étape est aussi celle qui évite de
+      multiplier un gaspillage.</p>
+
+    <p><strong>Étape 3 — Tenter le scale-up, et regarder la gamme entière.</strong> Quel est le palier
+      suivant, quel gain apporte-t-il, et à quel prix ? Jusqu'où va la gamme disponible ? Le scale-up
+      ne change rien à l'architecture : s'il suffit, la décision s'arrête ici, et c'est la meilleure
+      issue possible.</p>
+
+    <p><strong>Étape 4 — Tester la divisibilité du travail.</strong> Peut-on découper la charge en
+      morceaux traitables indépendamment, sans que chacun ait besoin de voir le tout ? Si la réponse est
+      non, <strong>le scale-out est inutile</strong> et le vrai sujet est de changer l'algorithme ou le
+      découpage fonctionnel. Si oui, sur quelle clé, et les morceaux sont-ils de tailles comparables ?</p>
+
+    <p><strong>Étape 5 — Décider, écrire le prix, prévoir la descente.</strong> Notez l'axe choisi
+      (stockage ou calcul), le mode (scale-up ou scale-out), ce que vous payez — plafond et courbe de
+      prix pour l'un, les quatre coûts de N14 pour l'autre — et le seuil qui déclenchera la prochaine
+      bascule. Si vous passez au scale-out, décrivez aussi <strong>comment on redescend</strong> : sans
+      retrait des nœuds, l'élasticité promise n'existe pas et le coût reste celui du pic.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p><strong>Scale-up : une unité plus grosse — rien ne change dans l'architecture, mais il y a un
+      plafond et une courbe de prix. Scale-out : plus d'unités — pas de plafond, mais les quatre coûts
+      de la distribution dès le premier nœud.</strong> On essaie le premier, on bascule vers le second
+      — <em>et seulement si le travail est divisible</em>.</p>
+    <p class="ar" dir="rtl"><strong>Scale-up</strong>: وحدة أكبر — ما كيتبدل والو فالأركيتكتير، ولكن
+      كاين سقف ومنحنى ثمن. <strong>Scale-out</strong>: وحدات أكثر — بلا سقف، ولكن الأربع تكاليف ديال
+      التوزيع من أول عقدة. كنجربو الأول، وكنبدلو للثاني — <em>وغير إلا كانت الخدمة قابلة للتقسيم</em>.</p>
+  </div>
+</div>
+
+<h3 id="n15-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — deux charges, deux réponses</div>
+  <div class="box-b">
+    <p>Chez l'enseigne, deux traitements posent problème le même mois. <em>(a)</em> Le chargement
+      nocturne des ventes est passé de 1 h à 2 h 30 après l'ajout du site marchand ; la fenêtre est de
+      6 h. <em>(b)</em> L'entraînement du modèle de prévision dure 14 h ; la fenêtre est de 3 h.
+      Appliquez la démarche aux deux.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Cas (a) — le chargement nocturne.</strong></p>
+    <p><em>Étape 1</em> : la mesure montre une saturation des entrées-sorties, pas du processeur — le
+      traitement lit et écrit beaucoup, il calcule peu. <em>Étape 2</em> : l'efficacité est correcte,
+      le chargement ne lit que les ventes du jour. <em>Étape 3</em> : inutile d'aller plus loin —
+      <strong>2 h 30 dans une fenêtre de 6 h, il n'y a pas de problème à résoudre</strong>. La bonne
+      décision est de <em>ne rien faire</em>, et de poser un seuil d'alerte à 4 h 30 pour reprendre le
+      sujet avant qu'il ne devienne urgent. Si ce seuil était franchi, un palier supérieur de stockage
+      plus rapide suffirait : <strong>scale-up</strong>, sans conséquence architecturale.</p>
+
+    <p><strong>Cas (b) — l'entraînement du modèle.</strong></p>
+    <p><em>Étape 1</em> : saturation du processeur, l'entraînement est un calcul intensif.
+      <em>Étape 2</em> : vérifier d'abord l'efficacité, et c'est rentable — si le modèle relit trois ans
+      d'historique à chaque itération alors qu'un échantillon stratifié ou des variables précalculées
+      suffiraient, le gain peut atteindre un facteur 3 sans rien ajouter. Supposons cette vérification
+      faite et un gain de 2 obtenu : nous passons de 14 h à 7 h. <em>Étape 3</em> : il reste un facteur
+      2,5 à trouver pour entrer dans la fenêtre de 3 h. Le palier suivant de la gamme apporte un facteur
+      1,8 pour un coût double, le plus haut de gamme un facteur 3 pour un coût quadruple :
+      <strong>le scale-up pourrait techniquement suffire, mais à un prix disproportionné, et sans
+      marge pour la croissance à venir</strong>. <em>Étape 4</em> : le travail est-il divisible ? Oui —
+      l'entraînement se parallélise par tranches de données, et les tranches jour × magasin sont de
+      tailles comparables. <em>Étape 5</em> : <strong>scale-out sur le calcul</strong>, données
+      centrales ; prix payé : les quatre coûts de N14, modérés ici puisque seul le calcul est réparti ;
+      élasticité prévue — le cluster n'existe que pendant les 3 heures mensuelles d'entraînement, ce qui
+      rend cette option moins chère que la grosse machine payée toute l'année.</p>
+
+    <p><strong>Ce que montre la comparaison.</strong> Deux traitements de la même entreprise, la même
+      semaine, aboutissent à « ne rien faire » et à « monter un cluster ». <strong>Ni la taille de
+      l'entreprise ni la modernité de sa plateforme n'ont joué</strong> : seuls ont compté le facteur à
+      gagner, ce que le palier suivant pouvait offrir, et la divisibilité du travail.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le cluster qui ne sert à rien</div>
+  <div class="box-b">
+    <p>Dans une mutuelle, un rapport mensuel met 40 minutes. L'équipe a monté un cluster de 8 nœuds :
+      le rapport met toujours 38 minutes, et la facture a été multipliée par 6. En examinant la requête,
+      on constate qu'elle calcule un total du mois en cours mais lit l'intégralité de la table des
+      cotisations — neuf ans d'historique — faute de filtre sur la période. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Le diagnostic.</strong> L'étape 2 a été sautée. Le problème n'était pas un manque de
+      capacité mais une <strong>inefficacité</strong> : la requête lit environ cent fois plus de données
+      qu'elle n'en a besoin. Le scale-out a donc fait exactement ce qu'on lui demandait — répartir un
+      gaspillage sur huit machines. Le gaspillage a été parallélisé, pas supprimé.</p>
+
+    <p><strong>Pourquoi seulement 2 minutes de gain ?</strong> Parce que le temps n'était pas dominé par
+      le calcul mais par la lecture, et que lire neuf ans de données reste long même réparti : on a
+      ajouté du réseau et de la coordination pour économiser un peu de calcul. C'est l'illustration de
+      l'étape 1 autant que de l'étape 2 — <strong>la ressource saturée n'avait pas été identifiée</strong>,
+      et l'on a scalé le mauvais axe.</p>
+
+    <p><strong>Le remède, dans l'ordre.</strong> <em>(a)</em> Ajouter le filtre de période à la requête,
+      et vérifier que le stockage est partitionné par date pour que ce filtre évite réellement la
+      lecture — gain attendu d'un ordre de grandeur, pour un coût nul. <em>(b)</em> Mesurer de nouveau :
+      si le rapport passe à deux minutes, le problème est clos. <em>(c)</em> Démonter le cluster et
+      revenir à une seule machine : non seulement il ne sert à rien, mais il coûte six fois plus et
+      ajoute quatre coûts de complexité pour rien.</p>
+
+    <p><strong>La leçon.</strong> La règle impose un ordre, et cet ordre a une raison :
+      <strong>la capacité multiplie ce qui existe, elle ne le corrige pas</strong>. Vérifier
+      l'efficacité avant d'ajouter de la capacité est l'étape la moins coûteuse et la plus rentable de
+      toute la démarche — et c'est celle qu'on saute le plus souvent, parce qu'acheter est plus rapide
+      que comprendre.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le travail qui ne se divise pas</div>
+  <div class="box-b">
+    <p>Une banque exécute chaque nuit un traitement d'arrêté des comptes : il parcourt les opérations
+      dans l'ordre chronologique et met à jour un solde courant, chaque opération dépendant du solde
+      laissé par la précédente. La durée est passée de 2 h à 5 h, la fenêtre est de 6 h. La DSI propose
+      un cluster. Qu'en pensez-vous ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 4 d'abord, car elle tranche.</strong> Le travail est-il divisible ? Pour
+      <em>un</em> compte, non : chaque opération a besoin du solde laissé par la précédente, l'ordre est
+      imposé par la nature même du calcul. Découper en dix morceaux ne donnerait aucun résultat
+      utilisable. <strong>Le scale-out ne peut rien apporter en l'état</strong>, et la proposition de la
+      DSI reviendrait à payer les quatre coûts pour un gain nul.</p>
+
+    <p><strong>Mais la bonne question n'est pas « est-ce divisible ? », elle est « divisible selon quelle
+      clé ? »</strong> Et c'est ici que l'exercice se retourne. Si le traitement est séquentiel
+      <em>à l'intérieur d'un compte</em>, les comptes, eux, sont <strong>indépendants les uns des
+      autres</strong> : le solde du compte A ne dépend pas de celui du compte B. En partitionnant par
+      compte, le travail devient parfaitement divisible, chaque nœud traitant un sous-ensemble de
+      comptes en respectant l'ordre à l'intérieur de chacun.</p>
+
+    <p><strong>Démarche complète.</strong> <em>Étape 1</em> : identifier la ressource saturée — ici
+      probablement les entrées-sorties et les mises à jour. <em>Étape 2</em> : vérifier l'efficacité —
+      le traitement relit-il des données inutiles, les mises à jour sont-elles groupées ?
+      <em>Étape 3</em> : tenter le scale-up — passer de 5 h à 3 h suffirait, et c'est à la portée d'un
+      palier supérieur ; <strong>c'est la solution à retenir à court terme</strong>, car elle ne change
+      rien. <em>Étape 4</em> : préparer le scale-out par compte pour le moyen terme, puisque la durée
+      continuera de croître. <em>Étape 5</em> : écrire le seuil — si la durée atteint 4 h 30, on bascule
+      — et vérifier l'équilibre des partitions, quelques très gros comptes pouvant déséquilibrer les
+      nœuds.</p>
+
+    <p><strong>La leçon.</strong> « Non divisible » est rarement une propriété absolue : c'est une
+      propriété <em>relative à une clé</em>. Avant de conclure qu'un traitement ne se parallélise pas,
+      il faut chercher la dimension selon laquelle les éléments sont indépendants — et c'est un travail
+      d'analyse fonctionnelle, pas d'infrastructure.</p>
+  </div>
+</div>
+
+<h3 id="n15-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Définissez scale-up et scale-out, puis expliquez pourquoi ces deux options épuisent les
+        possibilités.</li>
+      <li>Pourquoi dit-on que le scale-up ne change rien à l'architecture alors que le scale-out change
+        tout ? Appuyez-vous sur les quatre coûts de N14.</li>
+      <li>Décrivez les deux faiblesses opposées : le plafond du scale-up et la complexité immédiate du
+        scale-out. Laquelle se manifeste en premier dans la pratique, et pourquoi ?</li>
+      <li>Qu'est-ce qu'un travail divisible ? Donnez deux traitements divisibles et deux qui ne le sont
+        pas, en précisant selon quelle clé.</li>
+      <li>Expliquez pourquoi l'élasticité est un argument en faveur du scale-out, et ce qui se passe si
+        l'on oublie de retirer les nœuds.</li>
+      <li>Une équipe veut ajouter des nœuds parce qu'un rapport est lent. Quelles questions posez-vous
+        avant d'accepter, et dans quel ordre ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n15-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque situation, dites s'il s'agit d'un scale-up ou d'un scale-out : passer d'une instance
+      à 16 Go à une instance à 64 Go ; ajouter quatre machines au cluster de traitement ; augmenter la
+      taille de l'entrepôt infonuagique d'un cran ; répliquer la base sur un second site ; doubler le
+      nombre de processeurs du serveur.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une plateforme de vidéo à la demande doit : <em>(a)</em> transcoder chaque nouveau film en six
+      qualités, <em>(b)</em> servir les flux aux abonnés avec un pic entre 20 h et 23 h, <em>(c)</em>
+      calculer chaque nuit les recommandations personnalisées pour 2 millions d'abonnés. Pour chacun des
+      trois, appliquez les cinq étapes : ressource saturée, vérification d'efficacité, possibilité du
+      scale-up, divisibilité et clé de découpage, puis décision avec son prix et la descente prévue.
+      Indiquez lequel des trois bénéficie le plus de l'élasticité, et pourquoi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>On entend souvent que « le scale-out est la solution moderne, le scale-up appartient au passé ».
+      Réfutez cette affirmation en vous appuyant sur les trois notions de cette partie. Construisez
+      ensuite un <strong>critère de bascule</strong> chiffré permettant de dire, pour une charge donnée,
+      à quel moment précis il devient rationnel de passer du scale-up au scale-out — votre critère doit
+      combiner le facteur de capacité manquant, la courbe de prix de la gamme, le profil de charge dans
+      le temps et la divisibilité du travail. Appliquez-le aux trois cas des exercices 12.1, 12.2 et
+      12.3 et vérifiez qu'il retrouve bien les conclusions obtenues. Terminez en indiquant dans quel cas
+      votre critère donnerait une réponse différente de l'intuition courante.</p>
+  </div>
+</div>

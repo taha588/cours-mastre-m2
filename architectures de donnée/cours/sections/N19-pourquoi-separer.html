@@ -1,0 +1,506 @@
+<h2 class="notion" id="n19">N19 — Pourquoi séparer OLTP et OLAP</h2>
+
+<h3 id="n19-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>Un <strong>workload analytique lourd</strong> peut consommer <strong>CPU, mémoire, I/O et
+      réseau</strong>. La <strong>séparation logique ou physique</strong> permet de
+      <strong>protéger les workloads transactionnels</strong>.</p>
+
+    <p style="text-align:center"><strong>Applications</strong> (transactions opérationnelles) →
+      <strong>DB OLTP</strong> (écritures / mises à jour) → <em>alimentation analytique</em> →
+      <strong>Plateforme OLAP</strong> (agrégations / analyses) → <strong>BI</strong>
+      (KPI / tableaux de bord)</p>
+  </div>
+</div>
+
+<h3 id="n19-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette règle est courte et contient trois décisions. Elle nomme une <strong>cause</strong> — la
+      consommation de quatre ressources — un <strong>remède</strong> — la séparation, logique ou
+      physique — et un <strong>objectif</strong> — protéger le transactionnel. Chacun des trois mérite
+      d'être lu.</p>
+
+    <p><strong>Quatre ressources, et non une seule.</strong> On résume souvent la concurrence entre
+      workloads à une question de processeur ; l'énoncé en cite quatre, et c'est capital pour le
+      diagnostic. Un scan analytique sature les <strong>entrées-sorties</strong> puisqu'il lit tout ;
+      il occupe la <strong>mémoire</strong> parce qu'il y charge d'énormes volumes intermédiaires ; il
+      mobilise le <strong>réseau</strong> dès que les données circulent ; et il consomme bien sûr du
+      <strong>CPU</strong>. Nommer les quatre explique pourquoi « ajouter des processeurs » ne règle
+      généralement rien — leçon déjà rencontrée à l'étape 1 de N15.</p>
+
+    <p>Parmi ces quatre, <strong>la mémoire mérite une attention particulière</strong>, car elle
+      explique un phénomène que l'on observe sans le comprendre. Un système transactionnel est rapide
+      en grande partie parce que ses données chaudes — les commandes récentes, les stocks courants —
+      restent en mémoire. Quand une requête analytique parcourt des centaines de millions de lignes,
+      elle chasse ces données chaudes du cache. <strong>Résultat : les transactions restent lentes
+      plusieurs minutes <em>après</em> la fin du rapport</strong>, le temps que le cache se
+      reconstitue. C'est pourquoi les dégâts sont sans commune mesure avec la durée de la requête, et
+      pourquoi les exploitants ont tant de mal à faire le lien entre les deux.</p>
+
+    <p><strong>« Logique ou physique » : deux degrés, pas deux camps.</strong> La séparation
+      <em>physique</em> met les deux workloads sur des systèmes entièrement distincts — c'est l'entrepôt
+      de N10, et la protection est totale. La séparation <em>logique</em> les laisse sur le même
+      système mais cesse d'en partager une partie : réplique de lecture, ressources de calcul dédiées,
+      quotas, fenêtres d'exécution réservées. La protection est alors partielle, et son niveau se
+      mesure très simplement : <strong>elle vaut exactement ce qui a cessé d'être partagé</strong>. Si
+      la réplique de lecture s'appuie sur les mêmes disques, le CPU est protégé et les
+      entrées-sorties ne le sont pas — ce qui, sur un scan, ne protège presque rien.</p>
+
+    <p><strong>Le sens de la protection est asymétrique, et il faut le dire franchement.</strong> La
+      règle ne propose pas de protéger les deux workloads l'un de l'autre : elle protège
+      <em>le transactionnel</em>. Pourquoi ? Parce que les conséquences ne sont pas comparables. Un
+      rapport en retard coûte une heure de patience ; une caisse lente un samedi soir coûte des ventes,
+      et un système de paiement bloqué peut arrêter l'entreprise. <strong>La priorité se décide par la
+      conséquence, et c'est un jugement métier, non un arbitrage technique.</strong> C'est aussi
+      pourquoi le symptôme de N9 était toujours « le rapport ralentit les caisses », jamais l'inverse.</p>
+
+    <p>Un dernier point, que la chaîne du support rend visible : entre la base OLTP et la plateforme
+      OLAP figure une flèche nommée <em>alimentation analytique</em>. <strong>Séparer ne signifie donc
+      jamais couper</strong> : le lien demeure, mais il devient <em>contrôlé</em> — il a une période,
+      une fenêtre, un mode et un responsable, qui sont exactement l'objet de N18. Une séparation sans
+      lien ne protégerait rien : elle priverait simplement l'entreprise de son analyse.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Séparer n'est pas couper.</strong> Le lien d'alimentation reste indispensable ; ce qui
+        change, c'est qu'il devient périodique et maîtrisé au lieu d'être une requête directe.</li>
+      <li><strong>Une séparation logique mal conçue ne protège rien.</strong> Si la ressource réellement
+        saturée reste partagée — très souvent les entrées-sorties — la protection est illusoire, même si
+        le schéma montre deux boîtes.</li>
+      <li><strong>Le CPU est rarement le coupable.</strong> Commencez par mesurer les quatre ressources :
+        sur un scan, les entrées-sorties et le cache mémoire arrivent presque toujours avant.</li>
+      <li><strong>Les dégâts survivent à la requête.</strong> L'effet de cache fait durer la lenteur
+        après la fin du rapport — ne cherchez pas la cause au moment où la plainte arrive.</li>
+      <li><strong>Protéger le transactionnel à l'excès affame l'analytique.</strong> Si les traitements
+        analytiques n'ont jamais la priorité, ils ne se terminent jamais : il faut aussi leur garantir
+        un plancher de ressources ou une fenêtre réservée.</li>
+      <li><strong>La séparation a ses propres coûts</strong> : une chaîne d'alimentation à maintenir, un
+        décalage de fraîcheur, une copie supplémentaire. En dessous d'un certain niveau d'activité, elle
+        ne se justifie pas (N9, exercice 12.1).</li>
+      <li><strong>Une réplique de lecture ne change pas le modèle.</strong> Elle résout la contention,
+        pas le coût : les requêtes analytiques y restent aussi lourdes, puisque le modèle demeure
+        normalisé (N17).</li>
+      <li><strong>Une protection non mesurée n'est pas une protection.</strong> Comparez la latence
+        transactionnelle avant et après : c'est le seul critère de réussite.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> <strong>workload</strong> تحليلي ثقيل يقدر يستهلك
+    <strong>المعالج والذاكرة والقراءة/الكتابة والشبكة</strong>، و<strong>الفصل المنطقي ولا
+    الفيزيائي</strong> كيسمح بـ<strong>حماية الـworkloads المعاملاتية</strong>. تلات نقط: (1)
+    <strong>أربع موارد ماشي وحدة</strong> — ولهذا «نزيدو معالجات» ما كيحلش والو؛ والذاكرة خاصها
+    انتباه خاص: النظام المعاملاتي سريع حيت المعطيات الساخنة باقية فالذاكرة، والمسح التحليلي
+    <strong>كيطردها من الكاش</strong>، فالمعاملات كتبقى بطيئة <em>من بعد</em> ما يسالي التقرير بدقائق
+    — وعلاش الضرر أكبر بزاف من مدة الاستعلام. (2) <strong>«منطقي ولا فيزيائي» هوما درجتين ماشي
+    معسكرين</strong>: الفيزيائي = أنظمة منفصلة تماما (الحماية كاملة)، والمنطقي = نفس النظام مع وقف
+    تقاسم جزء (نسخة للقراءة، موارد مخصصة، حصص، نوافذ). و<strong>قيمة الحماية = بالضبط اللي حبس
+    يتقاسم</strong>. (3) <strong>اتجاه الحماية غير متناظر</strong>: كنحميو المعاملاتي ماشي الجوج —
+    حيت تقرير متأخر كيكلف ساعة ديال الصبر، وكايسة بطيئة نهار السبت كتكلف مبيعات. <strong>الأولوية
+    كتتقرر بالعاقبة، وهادا حكم مهني ماشي تقني.</strong> وآخر حاجة: <strong>الفصل عمرو قطع</strong> —
+    سهم «التغذية التحليلية» باقي، ولكن ولا <em>متحكم فيه</em> (N18).</p>
+</div>
+
+<h3 id="n19-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui que le cours a rencontré dès son premier chapitre : <strong>le rapport du
+      soir ralentit les encaissements</strong>. Deux workloads aux profils opposés partagent les mêmes
+      ressources, et le plus lourd dégrade le plus urgent. Ce n'est pas une panne, et c'est ce qui le
+      rend difficile à traiter : les deux systèmes font exactement ce pour quoi ils ont été conçus.</p>
+    <p>Cette notion ferme donc la boucle ouverte en N9. Elle apporte deux choses que le diagnostic
+      initial n'avait pas : le <strong>mécanisme précis</strong> — quatre ressources en concurrence,
+      dont la mémoire par l'effet de cache — et la <strong>gradation du remède</strong>, puisque la
+      séparation n'est pas un tout ou rien mais un choix de ce qui cesse d'être partagé. Elle permet
+      ainsi de répondre à la question pratique que toute organisation se pose : <em>jusqu'où faut-il
+      séparer, et comment sait-on que c'est suffisant ?</em></p>
+  </div>
+</div>
+
+<h3 id="n19-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Diagnostiquer précisément une contention</strong> en examinant les quatre ressources,
+        au lieu de supposer que c'est le processeur.</li>
+      <li><strong>Expliquer la lenteur persistante</strong> après la fin d'un rapport, par l'effet de
+        cache — ce qui évite de chercher la cause au mauvais moment.</li>
+      <li><strong>Choisir le degré de séparation</strong> adapté : parfois une fenêtre d'exécution
+        suffit, parfois il faut une plateforme distincte.</li>
+      <li><strong>Évaluer une protection annoncée</strong> : que cesse-t-on réellement de partager ?</li>
+      <li><strong>Protéger aussi l'analytique</strong> d'une priorité absolue donnée au transactionnel,
+        qui l'empêcherait de jamais aboutir.</li>
+      <li><strong>Vérifier par la mesure</strong> : la latence transactionnelle avant et après est le
+        seul juge.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n19-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Pourquoi quatre ressources ?</strong> Parce que le profil analytique décrit en N17 les
+      sollicite toutes les quatre, chacune pour une raison distincte. Les <em>scans de grands
+      volumes</em> saturent les entrées-sorties. Les <em>agrégations</em> construisent en mémoire des
+      ensembles intermédiaires considérables. Les <em>jointures</em> et les redistributions font
+      circuler les données, donc chargent le réseau. Les <em>calculs</em> occupent le processeur. Le
+      profil transactionnel, lui, consomme peu de chacune — mais il exige l'<strong>immédiateté</strong>,
+      et c'est précisément ce que la saturation d'une seule de ces quatre ressources lui retire.</p>
+
+    <p><strong>Le mécanisme du cache, en détail, car il explique l'essentiel.</strong> Une base
+      transactionnelle garde en mémoire les données les plus utilisées : le stock des produits qui se
+      vendent, les commandes du jour, les index parcourus en permanence. C'est ce qui lui permet de
+      répondre en quelques millisecondes sans toucher les disques.</p>
+    <ul>
+      <li>Une requête analytique lit 400 millions de lignes. Elles passent toutes par la mémoire.</li>
+      <li>La mémoire étant limitée, les données chaudes sont <strong>évincées</strong> au profit de
+        données qui ne seront lues qu'une fois.</li>
+      <li>Les transactions suivantes ne trouvent plus leurs données en mémoire et doivent aller sur
+        disque : elles deviennent dix à cent fois plus lentes.</li>
+      <li>Et cela dure <strong>après</strong> la fin de la requête, jusqu'à ce que l'activité normale
+        ait rechargé le cache.</li>
+    </ul>
+    <p>Voilà pourquoi un rapport de quarante minutes peut dégrader le service pendant une heure, et
+      pourquoi la plainte arrive souvent quand le rapport est déjà terminé — ce qui égare le
+      diagnostic.</p>
+
+    <p><strong>D'où vient la gradation « logique ou physique » ?</strong> Elle se déduit de ce qui est
+      partagé, et l'on peut la classer rigoureusement : la force d'une protection est égale au
+      <em>nombre de ressources qui cessent d'être partagées</em>.</p>
+    <ul>
+      <li>Fenêtre d'exécution décalée : rien n'est séparé, mais les usages ne se croisent plus dans le
+        temps. Protection réelle, gratuite — et fragile, car elle tombe dès qu'un usage déborde.</li>
+      <li>Quotas ou ressources de calcul dédiées : le CPU et la mémoire cessent d'être partagés ; les
+        entrées-sorties, souvent, non.</li>
+      <li>Réplique de lecture : CPU, mémoire et verrous sont séparés ; le stockage peut rester commun.</li>
+      <li>Plateforme distincte alimentée par une chaîne : <strong>les quatre ressources sont
+        séparées</strong>. Protection complète — et c'est l'entrepôt de N10.</li>
+    </ul>
+
+    <p><strong>Pourquoi protéger le transactionnel plutôt que l'inverse ?</strong> Par comparaison des
+      conséquences, et le raisonnement est économique, non technique. L'indisponibilité du
+      transactionnel interrompt la production de valeur : on ne vend plus, on n'admet plus, on ne paie
+      plus. L'indisponibilité de l'analytique retarde une décision, ce qui coûte rarement dans l'heure.
+      Il s'ensuit un principe simple : <strong>en cas de conflit, c'est le workload dont l'arrêt coûte
+      le plus cher à la minute qui l'emporte</strong>. Ce principe est juste dans l'immense majorité des
+      cas — avec une réserve qui fait l'objet de l'exercice 12.3 : une priorité <em>absolue</em>
+      empêcherait l'analytique d'exister.</p>
+  </div>
+</div>
+
+<h3 id="n19-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Devant toute plainte de lenteur applicative.</strong> La première question est de
+        savoir si un workload analytique s'exécute au même moment sur les mêmes ressources.</li>
+      <li><strong>Dans la décision de construire un entrepôt.</strong> Cette notion fournit l'argument
+        chiffré : voici la latence pendant le rapport, voici ce qu'elle redeviendrait après séparation.</li>
+      <li><strong>Dans l'évaluation d'une solution intermédiaire.</strong> Avant d'investir dans une
+        plateforme, vérifier si une fenêtre décalée ou une réplique suffirait — souvent, c'est le cas
+        pour plusieurs années.</li>
+      <li><strong>Dans la rédaction des règles d'exploitation.</strong> Quels traitements n'ont pas le
+        droit de s'exécuter aux heures ouvrées, et sur quel système.</li>
+      <li><strong>Dans la conception d'une plateforme partagée.</strong> Même entre workloads
+        analytiques, isoler les traitements lourds des tableaux de bord interactifs relève du même
+        raisonnement.</li>
+      <li><strong>Dans un audit de performance.</strong> Mesurer les quatre ressources aux heures de
+        pointe donne un diagnostic en une journée, là où les hypothèses en coûtent plusieurs.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n19-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« L'application rame quand les rapports tournent. »</strong> Le signal canonique, déjà
+        rencontré en N9 : il reste à identifier laquelle des quatre ressources est saturée.</li>
+      <li><strong>« C'est lent, mais le rapport est déjà fini. »</strong> Effet de cache : la cause est
+        antérieure à la plainte.</li>
+      <li><strong>« On a doublé les processeurs et rien n'a changé. »</strong> La ressource saturée
+        n'était pas le CPU — presque toujours les entrées-sorties ou la mémoire.</li>
+      <li><strong>« On a mis une réplique de lecture et c'est toujours lent. »</strong> Le stockage est
+        probablement resté partagé : la séparation n'a pas porté sur la bonne ressource.</li>
+      <li><strong>« Nous avons interdit les rapports en journée. »</strong> Séparation par fenêtre :
+        solution légitime et peu coûteuse, mais qui sacrifie la fraîcheur et cédera à la première
+        exigence nouvelle.</li>
+      <li><strong>« Le traitement analytique n'arrive jamais à se terminer. »</strong> Priorité absolue
+        donnée au transactionnel : il manque un plancher garanti.</li>
+      <li><strong>« Depuis la séparation, tout va bien. — Vous l'avez mesuré ? — Non. »</strong> Une
+        protection non mesurée reste une hypothèse.</li>
+      <li><strong>Signal inverse — « deux rapports par mois sur une petite base. »</strong> Aucune
+        contention : séparer coûterait plus que de ne rien faire.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n19-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesurer la contention, ressource par ressource.</strong> Pendant l'exécution
+      du workload analytique, relevez les quatre : processeur, mémoire — y compris le taux de présence
+      des données en cache — entrées-sorties et réseau. Relevez en parallèle la
+      <strong>latence transactionnelle</strong>, qui est la grandeur à protéger. Sans ces deux mesures
+      côte à côte, tout ce qui suit relève de la conjecture.</p>
+
+    <p><strong>Étape 2 — Choisir ce qui doit cesser d'être partagé.</strong> C'est là le véritable
+      choix, et il se formule ainsi : <em>quelle ressource saturée doit être rendue exclusive ?</em>
+      Entrées-sorties saturées → il faut un stockage distinct, donc une séparation forte. Seul le
+      processeur saturé → des ressources de calcul dédiées peuvent suffire. Chevauchement horaire
+      uniquement → une fenêtre décalée règle le problème pour un coût nul.</p>
+
+    <p><strong>Étape 3 — Mettre en place la séparation <em>et</em> le lien.</strong> La plateforme cible
+      n'a de valeur que si elle est alimentée : définissez la chaîne, sa période, son mode et son
+      responsable (N18). Une séparation sans alimentation ne protège pas le transactionnel — elle
+      supprime l'analyse.</p>
+
+    <p><strong>Étape 4 — Garantir un plancher à l'analytique.</strong> Si le transactionnel a une
+      priorité absolue, les traitements lourds seront indéfiniment repoussés. Réservez-leur une fenêtre
+      ou une part minimale de ressources, et vérifiez qu'ils terminent. <strong>Protéger un workload ne
+      doit pas revenir à en étrangler un autre.</strong></p>
+
+    <p><strong>Étape 5 — Vérifier, puis écrire la règle.</strong> Comparez la latence transactionnelle
+      avant et après : c'est le seul critère de réussite, et il est chiffrable. Puis écrivez ce qui n'a
+      plus le droit de s'exécuter sur le système opérationnel — rapports, exports, index analytiques —
+      car sans cette règle écrite, la contention reviendra par petites additions, exactement comme les
+      douze index de N16.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Un workload analytique consomme <strong>quatre ressources</strong> — CPU, mémoire, I/O, réseau —
+      et l'éviction du <strong>cache</strong> fait durer les dégâts après la requête. La séparation est
+      une <strong>gradation</strong> : elle vaut exactement <em>ce qui cesse d'être partagé</em>. On
+      protège le <strong>transactionnel</strong>, parce que son arrêt coûte le plus cher à la minute —
+      sans pour autant étrangler l'analytique.</p>
+    <p class="ar" dir="rtl">الـworkload التحليلي كيستهلك <strong>أربع موارد</strong> — معالج، ذاكرة،
+      I/O، شبكة — وطرد <strong>الكاش</strong> كيخلي الضرر كيدوم من بعد الاستعلام. والفصل
+      <strong>درجات</strong>: قيمتو = بالضبط <em>اللي حبس يتقاسم</em>. وكنحميو
+      <strong>المعاملاتي</strong> حيت توقفو كيكلف أكثر فالدقيقة — بلا ما نخنقو التحليلي.</p>
+  </div>
+</div>
+
+<h3 id="n19-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — mesurer avant de séparer</div>
+  <div class="box-b">
+    <p>Chez l'enseigne, avant la construction de l'entrepôt, les caissières signalaient des lenteurs le
+      soir. Les mesures relevées pendant l'exécution du rapport de 18 h sont : processeur à 55 %,
+      mémoire occupée à 98 % avec un taux de présence en cache tombé de 97 % à 31 %, disques à 100 %
+      d'utilisation, réseau à 12 %. La latence d'encaissement passe de 180 ms à 2 400 ms, et met
+      40 minutes à revenir à la normale après la fin du rapport. Analysez et choisissez le degré de
+      séparation.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lecture des mesures.</strong> Le processeur à 55 % n'est pas saturé :
+      <strong>ajouter des cœurs n'aurait rien changé</strong>, et c'est la première erreur évitée. Les
+      disques à 100 % désignent la ressource saturée : le scan lit tout. La mémoire à 98 % avec un taux
+      de cache effondré de 97 % à 31 % explique l'ampleur de la dégradation — les données chaudes ont
+      été évincées. Le réseau n'est pas en cause.</p>
+
+    <p><strong>Ce que les 40 minutes de retour à la normale prouvent.</strong> Elles sont la signature
+      de l'effet de cache : la requête est terminée, mais le système continue de chercher sur disque ce
+      qu'il trouvait auparavant en mémoire, jusqu'à ce que l'activité normale ait rechargé les données
+      chaudes. <strong>Le dégât dure donc plus longtemps que sa cause</strong>, ce qui explique pourquoi
+      les caissières décrivaient une lenteur « toute la soirée » alors que le rapport durait vingt
+      minutes.</p>
+
+    <p><strong>Étape 2 — Quelle ressource rendre exclusive ?</strong> Les entrées-sorties et la mémoire.
+      Or ce sont précisément les deux qu'une réplique de lecture partageant le même stockage ne
+      protégerait pas. Des ressources de calcul dédiées ne suffiraient pas non plus, puisque le CPU
+      n'est pas le problème. <strong>Il faut donc une séparation portant sur le stockage</strong> :
+      une plateforme analytique distincte, alimentée par une chaîne — c'est-à-dire l'entrepôt de N10.
+      La mesure a conduit à la décision, et non l'inverse.</p>
+
+    <p><strong>Étapes 3 et 4 — Le lien et le plancher.</strong> Alimentation nocturne après la clôture
+      des caisses (N18), qui ne consomme les ressources du système opérationnel qu'en dehors des heures
+      d'ouverture. Côté analytique, la plateforme dédiée dispose de ses propres ressources : le plancher
+      est garanti par construction.</p>
+
+    <p><strong>Étape 5 — Vérification et règle.</strong> Après bascule, on attend une latence
+      d'encaissement stable autour de 180 ms y compris à 18 h, et un taux de cache qui ne s'effondre
+      plus. <strong>Si la latence ne revient pas à sa valeur de référence, la séparation a échoué</strong>
+      et il faut chercher ce qui est resté partagé. Règle écrite : aucun rapport, export ou index
+      analytique ne s'exécute désormais sur la base des caisses.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — la séparation qui ne sépare rien</div>
+  <div class="box-b">
+    <p>Une compagnie d'assurance a mis en place une réplique de lecture pour y envoyer tous les
+      rapports. Trois mois plus tard, les utilisateurs du système de gestion se plaignent toujours de
+      lenteurs aux mêmes heures. Le responsable technique affirme que « les workloads sont séparés,
+      ce n'est donc pas lié ». Les mesures montrent : sur le système principal, processeur à 40 %,
+      disques à 95 % ; la réplique et le système principal sont hébergés sur la même baie de stockage.
+      Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Le diagnostic.</strong> La séparation est réelle sur trois ressources — processeur,
+      mémoire, verrous — et inexistante sur la quatrième, les entrées-sorties, puisque les deux systèmes
+      écrivent et lisent sur la même baie. Or les mesures désignent justement les disques à 95 %.
+      <strong>La protection vaut ce qui a cessé d'être partagé : ici, pas ce qui comptait.</strong></p>
+
+    <p><strong>Pourquoi l'affirmation du responsable est-elle fausse ?</strong> Parce que « les
+      workloads sont séparés » décrit le schéma, non les ressources. Deux boîtes distinctes sur un
+      diagramme peuvent partager tout ce qui compte en dessous. <strong>C'est l'illusion de séparation
+      la plus fréquente</strong>, et elle est d'autant plus tenace qu'elle s'appuie sur un dispositif
+      réellement installé.</p>
+
+    <p><strong>Comment le prouver en une mesure.</strong> Lancer un rapport lourd sur la réplique en
+      dehors des heures de pointe et observer la latence du système principal. Si elle se dégrade alors
+      qu'aucun utilisateur n'est actif, le partage est démontré — et la discussion se termine.</p>
+
+    <p><strong>Les remèdes, par ordre de coût.</strong> <em>(a)</em> Déplacer la réplique sur un
+      stockage distinct : la séparation porte alors sur les quatre ressources. <em>(b)</em> Si c'est
+      impossible à court terme, décaler les rapports hors des heures ouvrées — séparation par le temps,
+      gratuite et immédiate, en attendant mieux. <em>(c)</em> À terme, construire la plateforme
+      analytique avec un modèle préparé, ce qui réduira en outre le volume lu d'un facteur considérable
+      (N17) et diminuera la pression sur les disques quel que soit l'hébergement.</p>
+
+    <p><strong>La leçon.</strong> Une séparation ne se juge pas sur un schéma mais sur une mesure. La
+      question à poser devant toute architecture de protection est toujours la même :
+      <strong>qu'est-ce qui, concrètement, n'est plus partagé ?</strong></p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — l'analytique étranglée</div>
+  <div class="box-b">
+    <p>Dans un hôpital, après un incident de lenteur sur le dossier patient, la DSI a configuré le
+      système pour que toute requête analytique soit automatiquement suspendue dès que la charge
+      transactionnelle dépasse 60 %. Six mois plus tard : le dossier patient est parfaitement fluide,
+      mais le service qualité signale qu'aucun de ses rapports mensuels n'a abouti depuis février, et
+      que l'entraînement du modèle d'aide au diagnostic est à l'arrêt. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Ce qui a été bien fait.</strong> La priorité donnée au transactionnel est juste : dans
+      un hôpital, la lenteur du dossier patient a des conséquences cliniques, sans commune mesure avec
+      un rapport en retard. Le raisonnement de l'étape 8 — le workload dont l'arrêt coûte le plus cher
+      à la minute l'emporte — est correctement appliqué.</p>
+
+    <p><strong>Ce qui a été manqué : l'étape 4.</strong> Une priorité <em>absolue</em> n'est pas une
+      priorité, c'est une exclusion. Dans un hôpital, la charge transactionnelle dépasse 60 % presque
+      en permanence aux heures ouvrées ; la condition de suspension est donc satisfaite quasiment
+      toujours, et les traitements analytiques sont repoussés indéfiniment. <strong>On n'a pas protégé
+      un workload de l'autre : on en a supprimé un.</strong></p>
+
+    <p><strong>Les conséquences dépassent le confort.</strong> Les rapports qualité servent la
+      conformité et le pilotage du soin ; l'aide au diagnostic est un projet dans lequel l'établissement
+      a investi. L'analytique ne bloque personne dans l'instant (N17) — c'est exactement ce qui a permis
+      à six mois de passer sans que l'alerte soit donnée. L'absence de blocage est ici doublement
+      trompeuse : elle a justifié la priorité, puis masqué ses effets.</p>
+
+    <p><strong>La correction.</strong> <em>(a)</em> Remplacer la suspension par un <strong>plancher
+      garanti</strong> : les traitements analytiques disposent d'une part minimale de ressources, même
+      en forte charge — réduite, mais jamais nulle. <em>(b)</em> Réserver une <strong>fenêtre
+      nocturne</strong> où ils sont prioritaires, les activités cliniques y étant bien plus faibles.
+      <em>(c)</em> Mieux encore, appliquer la règle de cette notion à la lettre : si les deux workloads
+      se disputent les mêmes ressources, c'est qu'ils ne sont pas séparés. Une plateforme analytique
+      distincte supprimerait l'arbitrage au lieu de le réglerait chaque jour. <em>(d)</em> Enfin,
+      <strong>surveiller l'aboutissement des traitements analytiques</strong> : un traitement qui ne
+      s'exécute jamais doit déclencher une alerte, au même titre qu'un traitement qui échoue.</p>
+  </div>
+</div>
+
+<h3 id="n19-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la règle, citez les quatre ressources et expliquez pourquoi chacune peut être saturée
+        par un workload analytique.</li>
+      <li>Expliquez l'effet de cache en quelques lignes, et dites pourquoi il fait durer la dégradation
+        au-delà de la requête.</li>
+      <li>Classez ces dispositifs du moins au plus protecteur, en précisant ce que chacun cesse de
+        partager : fenêtre décalée, quotas de calcul, réplique de lecture sur stockage partagé,
+        plateforme distincte.</li>
+      <li>Pourquoi protège-t-on le transactionnel plutôt que l'analytique ? Donnez un cas où ce choix
+        serait discutable.</li>
+      <li>Que signifie « une protection non mesurée n'est pas une protection » ? Quelles mesures
+        relèveriez-vous pour la démontrer ?</li>
+      <li>Pourquoi une séparation ne doit-elle jamais couper le lien entre les deux mondes ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n19-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque constat, dites quelle ressource est probablement saturée : le rapport lit toute la
+      table de cinq ans ; les transactions ralentissent après la fin du rapport ; un traitement
+      redistribue des données entre dix nœuds ; un calcul de modèle occupe toutes les unités de calcul ;
+      les disques sont à 100 % alors que le processeur est à 40 %.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une banque en ligne constate que chaque fin de mois, entre 20 h et 23 h, le temps de réponse des
+      virements passe de 250 ms à 1 800 ms. Pendant cette période s'exécutent : la clôture comptable,
+      l'extraction réglementaire, et le calcul des scores de risque. Mesures relevées : CPU à 85 %,
+      mémoire à 92 % avec cache tombé à 40 %, disques à 70 %, réseau à 60 %. Appliquez les cinq étapes :
+      identifiez la ou les ressources saturées, choisissez ce qui doit cesser d'être partagé, décrivez
+      la séparation et son lien, garantissez un plancher aux trois traitements, et dites comment vous
+      vérifierez le résultat. Précisez lequel des trois traitements mérite un sort particulier et
+      pourquoi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>La règle affirme qu'il faut protéger le workload transactionnel. Construisez une
+      <strong>règle d'arbitrage générale</strong> permettant de décider, entre deux workloads
+      quelconques en concurrence, lequel doit être protégé — votre règle devra s'appuyer sur des
+      grandeurs mesurables et non sur la nature technique des traitements. Appliquez-la d'abord au cas
+      classique OLTP contre OLAP, et vérifiez qu'elle retrouve la conclusion du support. Appliquez-la
+      ensuite à trois cas où la réponse n'est pas évidente : un entraînement de modèle de détection de
+      fraude contre un rapport mensuel ; une extraction réglementaire à échéance légale contre des
+      encaissements en magasin ; un tableau de bord consulté par la direction contre une facturation
+      mensuelle. Concluez sur ce que votre règle révèle de la différence entre urgence et importance.</p>
+  </div>
+</div>

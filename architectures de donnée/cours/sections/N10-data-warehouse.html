@@ -1,0 +1,504 @@
+<h2 class="notion" id="n10">N10 — Le Data Warehouse</h2>
+
+<h3 id="n10-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Un <strong>Data Warehouse</strong> est une
+      <strong>plateforme analytique</strong> conçue pour stocker des <strong>données structurées
+      préparées</strong> pour les requêtes, rapports et analyses.</p>
+
+    <p><strong>Exemple.</strong> Ventes <strong>consolidées par jour, produit, magasin et région</strong>
+      pour produire des KPI et des tableaux de bord.</p>
+
+    <p><strong>Caractéristiques :</strong></p>
+    <ul>
+      <li><strong>Orientation analytique.</strong></li>
+      <li>Données généralement <strong>transformées avant ou pendant le chargement</strong>.</li>
+      <li><strong>Optimisé pour les requêtes et les agrégations.</strong></li>
+      <li>Souvent <strong>alimenté par des pipelines</strong> depuis les systèmes opérationnels.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n10-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le Data Warehouse est <strong>la réponse à la limite de N9</strong>. L'architecture
+      traditionnelle n'avait aucun endroit séparé pour l'analyse ; le Data Warehouse est cet endroit.
+      C'est le premier découplage de N7 rendu concret : un composant pour faire tourner le métier, un
+      autre pour l'analyser.</p>
+
+    <p>Mais le mot décisif de la définition n'est pas « plateforme » ni « analytique » : c'est
+      <strong>« préparées »</strong>. Les données n'arrivent pas telles quelles — elles sont
+      transformées <em>avant ou pendant</em> le chargement. Le Data Warehouse n'est donc pas une copie
+      de la base opérationnelle dans un autre serveur : c'est une <strong>réorganisation</strong> de la
+      donnée en vue des questions qu'on lui posera.</p>
+
+    <p>L'exemple le montre mieux que la définition. « Ventes consolidées par <em>jour</em>, <em>produit</em>,
+      <em>magasin</em> et <em>région</em> » : ces quatre mots sont des <strong>axes d'analyse</strong>.
+      La base opérationnelle, elle, est organisée autour de l'<em>opération</em> — un ticket, une ligne,
+      un paiement. Le Data Warehouse est organisé autour de la <em>question</em> — combien, par quoi,
+      sur quelle période. <strong>Le changement n'est pas technique, il est de modèle : on passe d'une
+      structure qui décrit ce qui s'est passé à une structure qui répond à ce qu'on veut savoir.</strong></p>
+
+    <p>Vient alors le cœur économique de la notion, celui qui explique les quatre caractéristiques d'un
+      coup. Répondre à « chiffre d'affaires par région et par mois » sur un modèle opérationnel exige de
+      joindre plusieurs tables et de balayer des millions de lignes — <em>à chaque exécution</em>. Le
+      Data Warehouse fait ce travail <strong>une fois, au chargement</strong>, et le range sous une forme
+      directement interrogeable. Autrement dit : <strong>il échange du calcul à la lecture contre du
+      calcul à l'écriture</strong>. De cet échange découlent l'orientation analytique, la transformation
+      avant ou pendant le chargement, l'optimisation pour les agrégations, et la nécessité de pipelines
+      réguliers pour entretenir cette préparation.</p>
+
+    <p>Ce que l'on achète est considérable : des réponses rapides, un historique profond que
+      l'opérationnel ne conserve pas, une définition unique et partagée des indicateurs, et la fin de
+      la pression analytique sur les systèmes de production. Ce que l'on paie l'est aussi, et il faut
+      l'énoncer franchement : une chaîne de transformation à construire et à maintenir ; un
+      <strong>décalage de fraîcheur</strong>, puisque la donnée n'est là qu'après le chargement ; et
+      surtout une <strong>rigidité</strong>, puisque préparer, c'est choisir.</p>
+
+    <p>Ce dernier point est la clé pour comprendre la suite du cours. <strong>Préparer les données,
+      c'est décider à l'avance des questions que l'on pourra poser.</strong> Choisir des axes, choisir
+      un grain, choisir des agrégations : tout ce qui n'a pas été prévu sera coûteux, parfois
+      impossible. Et tout ce qui n'est pas structuré — logs, documents, images — reste dehors par
+      construction. C'est précisément de ces deux manques que naîtra le Data Lake (N11) : conserver le
+      brut, justement parce qu'on ne connaît pas encore les questions de demain.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Un Data Warehouse n'est pas « une grosse base de données ».</strong> Il se définit par
+        son orientation et par la préparation des données, pas par sa taille. Une base opérationnelle de
+        50 To reste une base opérationnelle.</li>
+      <li><strong>« Optimisé pour les requêtes et les agrégations » implique mal adapté au reste.</strong>
+        Rechercher une ligne unique des milliers de fois par seconde, ou écrire en continu, n'est pas son
+        métier : c'est l'erreur de l'application mobile branchée sur l'entrepôt (N6, exercice 12.3).</li>
+      <li><strong>Il ne remplace pas la base transactionnelle, il s'y ajoute.</strong> Les générations
+        s'empilent (N8) : l'OLTP continue de faire tourner le métier.</li>
+      <li><strong>Le grain choisi décide de l'avenir.</strong> Si l'on charge des ventes agrégées à la
+        journée, aucune question horaire ne sera jamais possible — l'information a été perdue au
+        chargement, et aucune puissance de calcul ne la fera revenir.</li>
+      <li><strong>La fraîcheur est celle du dernier chargement, jamais meilleure.</strong> Promettre un
+        tableau de bord « temps réel » sur un entrepôt alimenté la nuit est une contradiction.</li>
+      <li><strong>Un entrepôt ne corrige pas la qualité</strong> : il la diffuse plus vite et avec plus
+        d'autorité. Une règle de calcul fausse appliquée au chargement produit un indicateur faux que
+        tout le monde citera.</li>
+      <li><strong>Les données non structurées n'y ont pas leur place</strong>, et ce n'est pas un défaut :
+        il répond au problème de l'analyse structurée, pas à celui de la variété.</li>
+      <li><strong>« Avant ou pendant le chargement » recouvre deux stratégies différentes</strong> —
+        transformer puis charger, ou charger puis transformer dans l'entrepôt. Elles n'ont ni le même
+        coût, ni la même souplesse ; c'est un choix à documenter, pas un détail.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الـ<strong>Data Warehouse</strong> هو منصة تحليلية مصممة باش
+    تخزن <strong>معطيات مهيكلة ومهيّأة</strong> للاستعلامات والتقارير والتحليلات (مثال: مبيعات مجمعة
+    حسب اليوم والمنتوج والمتجر والجهة). خصائصو: توجه تحليلي · معطيات <strong>محوّلة قبل ولا أثناء
+    التحميل</strong> · محسّن للاستعلامات والتجميعات · مغذّى بـpipelines من الأنظمة التشغيلية. الكلمة
+    المفتاح هي <strong>«مهيّأة»</strong>: ماشي نسخة ديال القاعدة التشغيلية، بل <strong>إعادة تنظيم</strong>
+    ديال المعطى حسب الأسئلة اللي غادي تتطرح. القاعدة التشغيلية منظمة حول <em>العملية</em> (تيكي، سطر،
+    خلاص)، والـDW منظم حول <em>السؤال</em> (شحال، حسب أش، فأشمن فترة). والمبدأ الاقتصادي:
+    <strong>كيبدل حساب وقت القراءة بحساب وقت الكتابة</strong> — الخدمة كتدار مرة وحدة فالتحميل بدل ما
+    تتعاود فكل استعلام. اللي كنشريو: سرعة، تاريخ عميق، تعريف موحد، وراحة للأنظمة التشغيلية. واللي
+    كنخلصو: سلسلة تحويل خاصها صيانة، <strong>تأخر فالطراوة</strong>، و<strong>قساحة</strong> — حيت
+    <strong>التهييء = اختيار</strong>: كتقرر مسبقا أشمن أسئلة غادي تقدر تطرح. واللي ما تهيأش، ولا ما
+    كانش مهيكل، كيبقى بره — ومن هنا غادي يخرج الـData Lake (N11).</p>
+</div>
+
+<h3 id="n10-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le Data Warehouse traite le problème dominant de la génération 2 : <strong>le besoin d'analyse et
+      de reporting sur des données structurées</strong>. Concrètement, trois difficultés simultanées,
+      que l'architecture traditionnelle ne pouvait pas résoudre. D'abord la <em>concurrence</em> : les
+      requêtes d'analyse pèsent sur les systèmes qui font tourner le métier. Ensuite l'<em>historique</em> :
+      une base opérationnelle conserve l'état courant, rarement trois ans de profondeur. Enfin la
+      <em>forme</em> : un modèle conçu pour enregistrer des opérations répond mal aux questions
+      d'agrégation.</p>
+    <p>La réponse apportée est unique et traite les trois à la fois : <strong>un lieu séparé, alimenté
+      régulièrement, où la donnée est réorganisée pour la question</strong>. La concurrence disparaît
+      parce que le lieu est distinct ; l'historique devient possible parce que ce lieu est conçu pour
+      conserver ; la forme convient parce que la donnée a été préparée. C'est ce qui fait du Data
+      Warehouse, trente ans après, la bonne réponse à un besoin encore très répandu.</p>
+  </div>
+</div>
+
+<h3 id="n10-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Sortir l'analyse des systèmes de production</strong>, et donc supprimer la dégradation
+        croisée diagnostiquée en N9.</li>
+      <li><strong>Donner une définition unique aux indicateurs</strong> : la règle de calcul est
+        implémentée une fois, au chargement, et non réécrite par chaque demandeur.</li>
+      <li><strong>Conserver un historique</strong> que l'opérationnel ne garde pas, et rendre possibles
+        les comparaisons dans le temps.</li>
+      <li><strong>Obtenir des réponses rapides sur de gros volumes</strong>, parce que le travail
+        d'agrégation a déjà été fait.</li>
+      <li><strong>Supprimer les exports</strong> : la plupart des classeurs partagés existent parce
+        qu'il manquait ce lieu. Les remplacer par des vues publiées met fin à la divergence des
+        chiffres.</li>
+      <li><strong>Savoir dire ce que l'on ne pourra pas faire</strong> : les questions hors modèle et
+        les données non structurées sont identifiées dès la conception, et non découvertes après.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n10-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Appliquons le principe de N8. <em>Nouveau besoin</em> : analyser et produire des rapports sur des
+      données structurées. <em>Nouvelle contrainte</em> : des requêtes lourdes qui concurrencent les
+      transactions, et un historique que l'opérationnel ne conserve pas. <em>Choix architectural</em> :
+      un lieu séparé, des pipelines d'alimentation, et un modèle orienté question — avec pour compromis
+      un décalage de fraîcheur et une rigidité. Le Data Warehouse est donc la génération 2, prise dans
+      le mécanisme à trois temps.</p>
+
+    <p><strong>Pourquoi séparer <em>oblige</em> à transformer ?</strong> C'est la question qui donne à la
+      notion toute sa logique, et on peut y répondre par un calcul simple. Dans un système
+      opérationnel, « chiffre d'affaires par région et par mois » suppose de joindre les lignes de
+      vente, les tickets, les magasins et les régions, puis d'agréger — soit, à chaque exécution,
+      plusieurs millions de lignes parcourues et plusieurs jointures. Si dix personnes posent la
+      question chaque jour, ce travail est refait dix fois par jour, à l'identique.</p>
+    <ul>
+      <li>En le faisant <strong>une fois au chargement</strong>, on le paie une fois par jour au lieu de
+        dix, et chaque lecture devient immédiate.</li>
+      <li>Le prix de cet échange est que le résultat est <strong>figé</strong> : il reflète l'état du
+        dernier chargement, et il ne répond qu'aux questions pour lesquelles il a été préparé.</li>
+    </ul>
+    <p>Les quatre caractéristiques de l'énoncé sont les quatre conséquences de cet échange — elles ne
+      sont pas une liste de propriétés à mémoriser, mais une déduction. <strong>Orientation
+      analytique</strong>, parce que le modèle suit la question ; <strong>transformation avant ou
+      pendant le chargement</strong>, parce que c'est là que le travail est déplacé ;
+      <strong>optimisation pour requêtes et agrégations</strong>, parce que c'est l'usage visé ;
+      <strong>alimentation par pipelines</strong>, parce qu'il faut un mécanisme qui refasse cette
+      préparation à intervalle régulier.</p>
+
+    <p>Enfin, le choix du mot « <em>consolidées</em> » dans l'exemple n'est pas anodin : il dit que
+      l'entrepôt contient le résultat d'un travail, pas la matière première. C'est ce qui fait sa force
+      — et ce qui crée, quelques années plus tard, le besoin auquel répondra la génération suivante :
+      <strong>quand on ne sait pas encore quelle sera la question, consolider trop tôt fait perdre
+      l'information</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n10-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans le pilotage par indicateurs.</strong> Chiffre d'affaires, marge, stocks,
+        fréquentation, taux de service : des questions stables, posées régulièrement, sur des données
+        structurées. C'est le terrain naturel de l'entrepôt, et il n'a pas de meilleur concurrent.</li>
+      <li><strong>Dans le reporting réglementaire et financier.</strong> Ici, la préparation est un
+        avantage décisif : une règle de calcul unique, versionnée, auditable, appliquée au chargement.
+        C'est exactement ce que réclamait le régulateur dans l'exercice 12.3 de N9.</li>
+      <li><strong>Pour supprimer la concurrence des workloads.</strong> Dès que les rapports pèsent sur
+        la production, l'entrepôt est le premier découplage à envisager (N9, étape 4).</li>
+      <li><strong>Pour constituer un historique.</strong> Lorsque l'analyse exige des années de
+        profondeur que l'opérationnel ne garde pas — préparation d'une prévision, comparaisons
+        pluriannuelles.</li>
+      <li><strong>Pour unifier des définitions dispersées.</strong> Quand trois services calculent
+        différemment le même indicateur, l'entrepôt fournit le lieu où la définition est tranchée et
+        implémentée une seule fois.</li>
+      <li><strong>Comme couche de service d'un socle plus large.</strong> Même dans une architecture
+        moderne, la partie « questions stables sur données structurées » conserve une forme d'entrepôt —
+        ce que le Lakehouse cherchera à réunir avec le reste (N12).</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n10-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Les mêmes questions reviennent tous les mois. »</strong> Questions stables : la
+        préparation est rentable, puisque le travail fait une fois servira des centaines de fois.</li>
+      <li><strong>« Le rapport met quarante minutes. »</strong> Le calcul est refait à chaque lecture.
+        C'est le signal typique d'un travail à déplacer vers le chargement.</li>
+      <li><strong>« Trois services donnent trois chiffres. »</strong> Il manque le lieu où la définition
+        est unique.</li>
+      <li><strong>« Nous n'avons que six mois d'historique. »</strong> L'opérationnel ne conserve pas ;
+        l'entrepôt, si.</li>
+      <li><strong>« Nos données sont toutes structurées et le resteront. »</strong> Condition favorable :
+        l'entrepôt couvre le besoin sans qu'il soit nécessaire d'aller plus loin.</li>
+      <li><strong>Signal inverse — « nous ne savons pas encore ce que nous chercherons. »</strong>
+        L'exploration de données dont on ignore les questions futures s'accorde mal avec une
+        préparation préalable : c'est le terrain du Data Lake (N11).</li>
+      <li><strong>Signal inverse — « il nous faut la donnée à la seconde. »</strong> Un entrepôt alimenté
+        par chargements ne répondra pas ; la question relève du streaming (N21).</li>
+      <li><strong>Signal inverse — « l'essentiel de notre matière est du texte et des images. »</strong>
+        Hors du domaine de l'entrepôt par construction.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n10-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Partir des questions, jamais des sources.</strong> Écrivez les questions
+      auxquelles l'entrepôt devra répondre, telles que le métier les pose : « quel chiffre d'affaires
+      par région et par mois ? », « quelle marge par produit et par magasin ? ». Un entrepôt conçu à
+      partir des tables disponibles reproduit le modèle opérationnel et manque sa raison d'être.</p>
+
+    <p><strong>Étape 2 — En déduire les axes d'analyse et, surtout, le grain.</strong> Les axes sont les
+      « par quoi » des questions : jour, produit, magasin, région. Le <strong>grain</strong> est la
+      maille la plus fine conservée. C'est la décision la plus lourde de conséquences de tout le
+      projet : <em>on peut toujours agréger un grain fin, jamais désagréger un grain grossier.</em>
+      Choisissez-le d'après les questions plausibles de demain, pas seulement d'après celles
+      d'aujourd'hui.</p>
+
+    <p><strong>Étape 3 — Vérifier les sources et nommer ce qui restera dehors.</strong> Les données
+      nécessaires sont-elles structurées et disponibles ? Les identifiants permettent-ils de rattacher
+      les faits aux axes ? Écrivez explicitement ce que l'entrepôt ne contiendra pas — logs, documents,
+      images — afin que personne ne le découvre à la livraison.</p>
+
+    <p><strong>Étape 4 — Définir la préparation et en déduire la fraîcheur offerte.</strong> Quelles
+      règles de transformation, appliquées où — avant ou pendant le chargement — à quelle fréquence, et
+      sous quelle responsabilité ? La fréquence de chargement détermine la fraîcheur : annoncez-la comme
+      un engagement chiffré, et non comme « quotidien environ ».</p>
+
+    <p><strong>Étape 5 — Écrire le compromis, en trois lignes.</strong> Les questions que ce modèle ne
+      pourra pas traiter ; le coût d'une modification ultérieure des axes ou du grain ; les données
+      exclues. Ajoutez le sort des palliatifs existants — quels exports s'arrêtent, à quelle date.
+      <strong>Un entrepôt livré sans ces trois lignes sera jugé sur des attentes qu'il n'a jamais
+      promis de satisfaire.</strong></p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le Data Warehouse <strong>échange du calcul à la lecture contre du calcul à l'écriture</strong> :
+      il prépare les données selon des <strong>axes</strong> et un <strong>grain</strong> choisis à
+      l'avance. D'où sa vitesse et sa cohérence — et sa rigidité, car
+      <strong>préparer, c'est choisir les questions</strong>.</p>
+    <p class="ar" dir="rtl">الـData Warehouse <strong>كيبدل حساب وقت القراءة بحساب وقت الكتابة</strong>:
+      كيهيّئ المعطيات حسب <strong>محاور</strong> و<strong>درجة تفصيل</strong> مختارين مسبقا. من تمة
+      السرعة والاتساق — ومن تمة القساحة، حيت <strong>التهييء هو اختيار الأسئلة</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n10-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — concevoir l'entrepôt de l'enseigne</div>
+  <div class="box-b">
+    <p>L'enseigne veut son chiffre d'affaires de la veille par région, disponible à 8 h. Appliquez la
+      démarche et concevez l'entrepôt. Accordez une attention particulière au choix du grain.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Les questions.</strong> Question principale : chiffre d'affaires par région et
+      par jour. Mais interrogeons le métier plus largement, car l'étape 2 en dépend : les directeurs
+      régionaux voudront aussi le détail par magasin, le marketing le détail par produit et par
+      catégorie, et le contrôle de gestion la comparaison avec l'an passé. Quatre questions, mêmes
+      données.</p>
+
+    <p><strong>Étape 2 — Axes et grain.</strong> Axes : <em>temps</em> (jour, mois, année), <em>produit</em>
+      (référence, catégorie), <em>magasin</em> (magasin, région), <em>canal</em> (magasin ou site).
+      Le grain, maintenant — et c'est là que tout se joue. Trois candidats :</p>
+    <ul>
+      <li><strong>Agrégat jour × région</strong> : le plus léger, répond à la question posée… et à elle
+        seule. Le détail par produit et par magasin est perdu à jamais.</li>
+      <li><strong>Jour × magasin × produit</strong> : permet les quatre questions, et toutes celles qui
+        se formulent avec ces axes. Volume raisonnable.</li>
+      <li><strong>Ligne de ticket</strong> : le plus fin ; permet en plus les questions sur le panier —
+        quels produits achetés ensemble, panier moyen, heure d'achat. Volume plus élevé.</li>
+    </ul>
+    <p><strong>Décision : grain ligne de ticket pour les faits, agrégats construits par-dessus.</strong>
+      Justification : les 2 To et la croissance de 40 % restent gérables pour une plateforme
+      analytique, et le coût de stockage est très inférieur au coût de l'information perdue. La règle
+      à retenir est simple : <em>on peut toujours agréger un grain fin, jamais désagréger un grain
+      grossier.</em></p>
+
+    <p><strong>Étape 3 — Sources et exclusions.</strong> Sources : ventes des caisses, ventes du site,
+      référentiel produits, référentiel magasins. Toutes structurées. <strong>Resteront dehors</strong> :
+      les logs de navigation et les photos du SAV — à écrire noir sur blanc, car la direction les a
+      mentionnés dans sa demande initiale et croira sinon qu'ils sont couverts.</p>
+
+    <p><strong>Étape 4 — Préparation et fraîcheur.</strong> Transformations : normaliser les montants
+      (HT/TTC, devise, remises), rattacher chaque vente au bon jour selon l'heure d'encaissement,
+      rapprocher les référentiels, écarter les annulations. Fréquence : un chargement nocturne après
+      clôture. <strong>Fraîcheur offerte : données de la veille, disponibles à 7 h, engagement à
+      8 h.</strong> Responsabilité : l'exploitation tient le chargement, l'équipe data les règles, le
+      contrôle de gestion la définition du chiffre d'affaires.</p>
+
+    <p><strong>Étape 5 — Compromis écrit.</strong> (a) Questions impossibles : tout ce qui concerne le
+      comportement de navigation, puisque les logs ne sont pas chargés ; toute analyse infra-horaire si
+      l'horodatage n'est pas conservé — raison supplémentaire de garder le grain fin. (b) Coût d'une
+      modification : ajouter un axe est faisable, changer le grain impose de recharger l'historique.
+      (c) Fraîcheur : aucune réponse possible en journée sur les ventes du jour même. (d) Palliatifs :
+      les exports du contrôle de gestion s'arrêtent à la date de mise en service, et la vue
+      <code>ventes_jour_region</code> devient la seule source officielle.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — l'entrepôt utilisé à contre-emploi</div>
+  <div class="box-b">
+    <p>Six mois après la mise en service, l'équipe de l'application mobile propose : « l'entrepôt
+      contient déjà les achats des clients ; branchons l'application dessus pour afficher l'historique
+      d'achat de chaque client, plutôt que de développer autre chose. » Argumentez votre réponse.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Quelle est la question posée ?</strong> « Quels sont les achats du client
+      C-4417 ? » Ce n'est pas une question analytique : c'est une <strong>recherche unitaire</strong>,
+      répétée autant de fois qu'il y a d'ouvertures de l'application — potentiellement des milliers par
+      minute. Le besoin ressemble à celui de l'entrepôt parce qu'il porte sur les mêmes données, mais
+      il n'a pas la même forme.</p>
+
+    <p><strong>Étape 2 — Confrontation aux caractéristiques.</strong> L'entrepôt est
+      <em>optimisé pour les requêtes et les agrégations</em>. Il est conçu pour balayer beaucoup de
+      lignes rarement, pas pour retrouver une ligne très souvent. Sur ce profil, il sera lent, coûteux,
+      et se dégradera à mesure que l'application gagnera des utilisateurs — et il dégradera en même
+      temps les analyses, qui subiront cette charge nouvelle.</p>
+
+    <p><strong>Étape 3 — La fraîcheur.</strong> L'entrepôt est alimenté la nuit. Un client qui achète à
+      10 h ne verrait son achat qu'au lendemain. Pour un affichage client, c'est inacceptable — c'est
+      exactement la contradiction relevée dans l'exercice 12.3 de N6.</p>
+
+    <p><strong>Étape 4 — Le danger de fond.</strong> Au-delà de la performance, brancher une application
+      <em>client</em> sur l'entrepôt recrée le couplage que l'entrepôt avait précisément supprimé : un
+      composant unique porterait de nouveau deux workloads opposés. La différence est qu'on aurait, cette
+      fois, dégradé le décisionnel au profit de l'opérationnel — la même faute, dans l'autre sens.</p>
+
+    <p><strong>Réponse proposée.</strong> Refuser le branchement, et proposer la solution adaptée :
+      l'historique d'achat du client doit être servi par un magasin de données à accès unitaire rapide,
+      alimenté au fil de l'eau depuis les transactions. <strong>Ce n'est pas un rejet de l'entrepôt :
+      c'est la reconnaissance qu'il répond à un problème — l'analyse structurée — et qu'un autre
+      problème appelle une autre réponse.</strong> Ce que l'entrepôt peut légitimement fournir à
+      l'application, en revanche, ce sont des agrégats préparés, par exemple le total dépensé par client
+      sur l'année, rafraîchis chaque nuit.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — la question hors modèle</div>
+  <div class="box-b">
+    <p>Deux ans après la mise en service, une enseigne concurrente — qui avait, elle, choisi le grain
+      « jour × magasin » — reçoit cette demande du marketing : « quel est le panier moyen par tranche
+      horaire, et quels produits sont achetés ensemble ? » Analysez la situation et dites ce qu'il est
+      possible de faire.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Que demandent ces deux questions ?</strong> Le panier moyen par tranche horaire
+      exige l'<em>heure</em> de chaque vente. Les produits achetés ensemble exigent de savoir quels
+      articles figuraient sur le <em>même ticket</em>. Deux informations qui existent dans les caisses —
+      et qui ont été perdues au chargement, puisque le grain retenu agrège à la journée et au magasin.</p>
+
+    <p><strong>Étape 2 — Le diagnostic.</strong> Ce n'est pas un problème de performance, ni de volume,
+      ni d'outil : <strong>l'information n'est plus là</strong>. Aucune requête, aucune puissance de
+      calcul, aucune migration de plateforme ne la fera réapparaître. C'est la conséquence directe du
+      choix de grain fait deux ans plus tôt — un choix qui, à l'époque, paraissait raisonnable et
+      économique.</p>
+
+    <p><strong>Étape 3 — Ce qu'il est possible de faire.</strong> Trois voies, de la moins à la plus
+      satisfaisante : (a) répondre à partir des systèmes de caisse, si leur rétention le permet — mais
+      c'est précisément le genre de requête lourde que l'entrepôt devait éviter, et la rétention est
+      souvent courte ; (b) recharger l'historique depuis les archives des caisses à un grain fin,
+      possible si ces archives existent, coûteux, et limité à la profondeur disponible ; (c) changer le
+      grain pour l'avenir, et accepter que l'analyse demandée ne commence qu'aujourd'hui, sans
+      historique.</p>
+
+    <p><strong>Étape 4 — La leçon, qui est le vrai sujet de l'exercice.</strong> Préparer, c'est
+      choisir les questions. L'entrepôt a parfaitement rempli son rôle sur les questions prévues, et il
+      est muet sur les autres. <strong>Le coût d'un grain trop grossier n'apparaît pas au moment du
+      choix — il apparaît des années plus tard, sous la forme d'une question à laquelle on ne peut pas
+      répondre.</strong></p>
+
+    <p><strong>Étape 5 — Et la suite du cours.</strong> C'est exactement de cette limite que naît la
+      génération suivante : si l'on ne peut pas savoir à l'avance quelles questions seront posées, alors
+      il faut <strong>conserver la donnée brute</strong>, quitte à la préparer plus tard et seulement
+      quand on saura pourquoi. Ce renversement — préparer après plutôt qu'avant — est l'idée du Data
+      Lake (N11), avec le compromis inverse que nous examinerons alors.</p>
+  </div>
+</div>
+
+<h3 id="n10-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition du Data Warehouse et ses quatre caractéristiques, puis expliquez en deux
+        phrases pourquoi le mot « préparées » est le plus important.</li>
+      <li>Expliquez l'échange « calcul à la lecture contre calcul à l'écriture » et dites dans quel cas
+        cet échange n'est pas rentable.</li>
+      <li>Qu'est-ce que le grain ? Donnez trois grains possibles pour les consultations d'un hôpital et
+        dites, pour chacun, quelles questions il autorise et lesquelles il interdit.</li>
+      <li>Pourquoi un entrepôt est-il mal adapté à une application qui consulte une ligne des milliers de
+        fois par minute ? Appuyez-vous sur ses caractéristiques.</li>
+      <li>Une direction demande un tableau de bord « en temps réel » alimenté par l'entrepôt chargé
+        chaque nuit. Rédigez votre réponse.</li>
+      <li>Citez trois situations où un entrepôt est clairement le bon choix, et trois où il ne l'est
+        pas, en justifiant par le problème traité.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n10-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour l'exemple du cours — ventes consolidées par jour, produit, magasin et région — identifiez les
+      axes d'analyse, proposez deux grains possibles, et donnez pour chacun une question qu'il autorise
+      et une question qu'il interdit.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une compagnie d'assurance veut un entrepôt pour suivre la sinistralité : nombre et coût des
+      sinistres par produit, par région, par ancienneté de contrat et par mois, avec comparaison
+      pluriannuelle. Appliquez les cinq étapes. Portez une attention particulière à l'étape 2 : discutez
+      au moins trois grains candidats, et justifiez votre choix en nommant une question future plausible
+      que chacun autoriserait ou interdirait. Terminez par le compromis écrit en trois lignes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>On entend souvent que « le Data Warehouse est dépassé par le Data Lake ». En vous appuyant sur
+      N8 et sur cette notion, montrez que cette affirmation confond deux choses distinctes. Construisez
+      ensuite une comparaison rigoureuse : pour les cinq critères — nature des données acceptées, moment
+      de la préparation, questions possibles, fraîcheur, coût d'une question imprévue — dites ce que
+      chacune des deux approches offre. Concluez en décrivant une organisation pour laquelle l'entrepôt
+      seul reste le meilleur choix en 2026, et une autre pour laquelle il est clairement insuffisant,
+      en justifiant par le problème dominant et non par la date.</p>
+  </div>
+</div>

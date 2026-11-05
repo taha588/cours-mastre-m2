@@ -1,0 +1,514 @@
+<h2 class="notion" id="n11">N11 — Le Data Lake</h2>
+
+<h3 id="n11-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Un <strong>Data Lake</strong> permet de stocker
+      <strong>à grande échelle</strong> des données provenant de <strong>sources diverses</strong>,
+      souvent dans leur <strong>forme brute ou faiblement transformée</strong>.</p>
+
+    <p><strong>Exemple.</strong> Logs, JSON IoT, images, fichiers CSV, données applicatives et documents
+      <strong>conservés pour différents usages futurs</strong>.</p>
+
+    <p><strong>Caractéristiques :</strong></p>
+    <ul>
+      <li><strong>Grande variété de formats.</strong></li>
+      <li><strong>Séparation possible du stockage et du calcul.</strong></li>
+      <li><strong>Préservation de données brutes</strong> utile pour plusieurs usages.</li>
+      <li><strong>Nécessite une gouvernance et des métadonnées</strong> pour éviter le
+        « <strong>data swamp</strong> ».</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n11-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le Data Lake est <strong>l'inversion exacte du compromis du Data Warehouse</strong>. L'entrepôt
+      prépare <em>avant</em> de stocker : il choisit les axes, le grain, les règles — et par là, les
+      questions. Le lac stocke <em>avant</em> de préparer : il accueille la donnée telle qu'elle vient
+      et remet l'interprétation à plus tard. Ce n'est pas une amélioration de l'entrepôt, c'est l'autre
+      terme d'une alternative.</p>
+
+    <p>La justification de ce renversement tient dans trois mots de l'exemple : « conservés pour
+      différents <strong>usages futurs</strong> ». L'entrepôt optimise les questions que l'on connaît ;
+      le lac <strong>préserve la possibilité de celles que l'on ne connaît pas encore</strong>. Et comme
+      toute transformation détruit quelque chose — l'exercice 12.3 de N10 l'a montré : un grain trop
+      grossier efface définitivement l'heure d'achat — conserver le brut est la seule façon de ne pas
+      décider aujourd'hui à la place de celui qui posera la question dans trois ans.</p>
+
+    <p>De là découlent les deux premières caractéristiques. <strong>La grande variété de formats</strong>
+      est possible parce qu'il n'y a plus de schéma à respecter à l'écriture : logs, JSON, images et
+      documents peuvent atterrir côte à côte, ce qu'aucun entrepôt n'accepte. <strong>La séparation du
+      stockage et du calcul</strong>, elle, est la réponse à un problème d'échelle : on stocke
+      beaucoup plus que l'on ne traite. En séparant les deux, on peut conserver des téraoctets à faible
+      coût et ne payer de la puissance de calcul qu'au moment où l'on traite réellement — c'est le
+      découplage de N7 appliqué à l'intérieur même de la plateforme.</p>
+
+    <p>Mais la caractéristique décisive est la quatrième, et le mot employé mérite qu'on s'y arrête :
+      le lac <strong>« nécessite »</strong> une gouvernance et des métadonnées. Pas « bénéficie de »,
+      pas « il est recommandé de » : <em>nécessite</em>. C'est une condition d'existence, et la raison
+      est structurelle. Dans un entrepôt, on <strong>ne peut pas</strong> charger une donnée sans
+      déclarer sa structure : le schéma force la description, et celle-ci est obtenue gratuitement, par
+      contrainte mécanique. Dans un lac, rien n'oblige personne à décrire quoi que ce soit — déposer un
+      fichier suffit. <strong>Le lac a remplacé une contrainte mécanique par une discipline
+      humaine.</strong></p>
+
+    <p>C'est pourquoi le <strong>data swamp</strong> — le marécage — n'est pas un accident, mais le
+      résultat <em>par défaut</em>. Un lac sans métadonnées devient un entrepôt de fichiers que
+      personne ne sait lire : la donnée y est présente, mais elle n'est plus ni comprise, ni
+      contextualisée, ni trouvable. En termes de N1, trois des quatre conditions de valeur tombent
+      — et la donnée, bien que stockée, ne vaut plus rien.</p>
+
+    <p>Reste une conséquence que l'on mesure rarement à l'avance. En supprimant la préparation à
+      l'écriture, le lac a aussi supprimé le lieu où la <strong>définition</strong> était unique.
+      Dans l'entrepôt, « client actif » était calculé une fois, par une règle versionnée. Dans le lac,
+      chaque consommateur lit les fichiers bruts et les interprète à sa façon : deux équipes, deux
+      interprétations, deux chiffres. <strong>Le lac ne supprime pas le travail de préparation : il le
+      déplace vers la lecture, où il est refait autant de fois qu'il y a de lecteurs.</strong> C'est
+      de cette difficulté, ajoutée au coût de faire coexister deux plateformes, que naîtra le Lakehouse
+      (N12).</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Un lac n'est ni une sauvegarde ni une archive.</strong> Une sauvegarde sert à
+        restaurer, une archive à conserver pour obligation ; un lac sert à être <em>exploité</em>. Les
+        confondre conduit à y déverser des données que personne n'exploitera jamais.</li>
+      <li><strong>« Tout stocker » n'est pas une stratégie.</strong> Le stockage est bon marché, la
+        recherche ne l'est pas. Sans décision de rétention, le volume devient un coût que plus personne
+        ne sait justifier.</li>
+      <li><strong>Brut ne veut pas dire inutilisable, mais travail reporté — pas évité.</strong> Et
+        reporté à la lecture, il est payé par chaque consommateur, souvent plusieurs fois.</li>
+      <li><strong>Le schéma à la lecture fait diverger les chiffres.</strong> Deux équipes lisant les
+        mêmes fichiers bruts produiront deux résultats différents s'il n'existe pas de définition
+        publiée. L'entrepôt réglait cela par construction ; le lac doit le reconstruire volontairement.</li>
+      <li><strong>Le lac ne remplace pas l'entrepôt.</strong> La BI a toujours besoin de données
+        préparées. Les faire coexister est d'ailleurs ce qui crée la complexité et les coûts dénoncés
+        par la génération 6 (N8).</li>
+      <li><strong>Séparer stockage et calcul ne rend pas le calcul gratuit.</strong> Cela rend son coût
+        visible et proportionnel à l'usage — ce qui est un progrès, pas une économie automatique.</li>
+      <li><strong>Déposer une image dans un lac ne la rend pas analysable.</strong> Le non structuré
+        reste non structuré : il faudra toujours extraire le sens (N2).</li>
+      <li><strong>« On fera la gouvernance plus tard » ne se réalise jamais.</strong> Le seul moment où
+        décrire une donnée coûte peu est celui où elle entre, parce que celui qui la connaît est encore
+        là.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الـ<strong>Data Lake</strong> كيخزن <strong>على نطاق واسع</strong>
+    معطيات من <strong>مصادر متنوعة</strong>، غالبا <strong>خام ولا شبه محوّلة</strong> (logs، JSON ديال
+    IoT، صور، CSV، وثائق… محتافظ بيهم <strong>لاستعمالات مستقبلية</strong>). خصائصو: تنوع كبير
+    فالفورما · <strong>فصل ممكن بين التخزين والحساب</strong> · الاحتفاظ بالخام مفيد لعدة استعمالات ·
+    <strong>كيتطلب حكامة وميتاداتا</strong> باش ما يوليش «data swamp». الفكرة: الـLake هو
+    <strong>العكس التام</strong> ديال تنازل الـWarehouse — هاداك كيهيّئ قبل ما يخزن (وكيختار الأسئلة)،
+    وهادا كيخزن قبل ما يهيّئ (وكيحتافظ بإمكانية الأسئلة اللي مازال ما عرفناهاش). وأهم نقطة هي كلمة
+    <strong>«كيتطلب»</strong> ماشي «كينصح»: فالـWarehouse <strong>ما تقدرش</strong> تحمّل معطى بلا ما
+    تصرّح بهيكلتو — السكيما كتفرض الوصف مجانا؛ فالـLake والو ما كيفرض على حتى واحد يوصف شي حاجة. يعني
+    الـLake <strong>عوّض قيد ميكانيكي بانضباط بشري</strong> — ومن تمة الـswamp هو النتيجة
+    <strong>الافتراضية</strong> ماشي حادث. وآخر نتيجة: بالتخلي على التهييء وقت الكتابة، تحيّد تحيّدات
+    البلاصة اللي كان فيها <strong>التعريف واحد</strong> — دابا كل قارئ كيأوّل بطريقتو، وكيرجعو الأرقام
+    المختلفة.</p>
+</div>
+
+<h3 id="n11-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le lac traite le problème dominant de la génération 4 : <strong>la diversité des formats</strong>.
+      L'entrepôt n'accepte que du structuré ; or les données les plus riches d'une organisation —
+      logs de navigation, enregistrements d'appels, photos, documents — n'entrent dans aucun schéma.
+      Elles restaient donc dehors, c'est-à-dire inexploitées : c'est la situation exacte de notre
+      enseigne, dont les logs et les photos ne sont chargés nulle part.</p>
+    <p>Mais il traite un second problème, plus subtil et tout aussi décisif : <strong>l'incertitude sur
+      les usages futurs</strong>. L'entrepôt oblige à décider aujourd'hui quelles questions seront
+      posées demain. Pour une organisation qui commence à explorer ses données — et plus encore pour
+      préparer des usages d'IA dont personne ne connaît les besoins exacts — cette obligation est
+      intenable. Le lac répond en déplaçant la décision : <em>conserver maintenant, interpréter quand
+      on saura</em>.</p>
+  </div>
+</div>
+
+<h3 id="n11-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Accueillir ce qui n'entrait nulle part</strong> : logs, événements, documents, images,
+        sans attendre de savoir ce qu'on en fera.</li>
+      <li><strong>Ne pas détruire d'information</strong> en conservant le grain le plus fin, ce qui
+        garde ouvertes les questions futures.</li>
+      <li><strong>Maîtriser le coût du volume</strong> grâce à la séparation du stockage et du calcul :
+        on paie le stockage pour tout, le calcul pour ce qu'on traite.</li>
+      <li><strong>Alimenter les projets d'IA</strong>, qui réclament de la matière brute, de la
+        profondeur et de la représentativité plutôt que des agrégats.</li>
+      <li><strong>Explorer avant de modéliser</strong> : chercher dans les données ce qui mérite d'être
+        préparé, au lieu de préparer à l'aveugle.</li>
+      <li><strong>Savoir à quelle condition on s'engage</strong> : le lac n'est acceptable que si la
+        gouvernance et les métadonnées sont prévues dès le premier jour, et cette notion permet de le
+        dire avant de commencer.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n11-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Appliquons une fois encore le mécanisme de N8. <em>Nouveau besoin</em> : exploiter des données
+      de formats variés, et conserver ce dont on ignore encore l'usage. <em>Nouvelle contrainte</em> :
+      variété et volume, avec des questions inconnues. <em>Choix architectural</em> : renverser l'ordre
+      — stocker d'abord, interpréter ensuite — avec pour compromis le report du travail et la perte de
+      la contrainte qui garantissait la description.</p>
+
+    <p><strong>Les quatre caractéristiques se déduisent de ce renversement</strong>, et c'est ce qui
+      montre qu'elles forment un tout cohérent plutôt qu'une liste :</p>
+    <ul>
+      <li>Plus de schéma à l'écriture → <strong>grande variété de formats</strong> : tout peut entrer.</li>
+      <li>On conserve beaucoup plus qu'on ne traite → <strong>séparation du stockage et du calcul</strong>,
+        faute de quoi on paierait de la puissance pour des données au repos.</li>
+      <li>Les usages futurs sont inconnus → <strong>préservation du brut</strong>, seule forme qui serve
+        plusieurs usages, puisque toute transformation en privilégie un et en ferme d'autres.</li>
+      <li>Ce que le schéma imposait mécaniquement doit désormais être fait volontairement →
+        <strong>gouvernance et métadonnées nécessaires</strong>.</li>
+    </ul>
+
+    <p><strong>Pourquoi le marécage est-il le résultat par défaut ?</strong> Parce que les deux
+      architectures ne placent pas le coût de l'erreur au même moment. Dans un entrepôt, ne pas décrire
+      une donnée a un coût <em>immédiat</em> : le chargement échoue, et l'on corrige tout de suite.
+      Dans un lac, ne pas décrire a un coût <strong>différé</strong> : le dépôt réussit, tout semble
+      bien se passer, et le problème n'apparaît que le jour où quelqu'un cherche à utiliser ces données
+      — souvent des années plus tard, quand celui qui les connaissait a quitté l'entreprise. Or
+      <strong>tout système dont le coût d'erreur est différé se dégrade par défaut</strong>, sauf si une
+      discipline explicite compense. Le mot « nécessite » du quatrième point n'est donc pas une mise en
+      garde : c'est la conclusion d'un raisonnement.</p>
+
+    <p>Enfin, remarquez ce que ce choix a coûté sans qu'on le remarque sur le moment. L'entrepôt
+      fournissait gratuitement deux choses : une description obligatoire et une définition unique des
+      indicateurs. Le lac perd les deux d'un seul geste. La première se récupère par la gouvernance ; la
+      seconde exige de reconstruire volontairement un lieu où la donnée est préparée et publiée. Faire
+      coexister les deux mondes — le lac pour le brut, l'entrepôt pour le préparé — devient alors la
+      solution évidente, et son coût sera précisément le problème de la génération suivante (N12).</p>
+  </div>
+</div>
+
+<h3 id="n11-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Pour les données non structurées et semi-structurées.</strong> Logs, événements
+        applicatifs, enregistrements, documents, images : c'est le seul endroit qui les accepte en
+        l'état, et donc la condition pour qu'elles existent dans le système d'information.</li>
+      <li><strong>Pour les projets d'IA et de science des données.</strong> L'entraînement réclame de la
+        matière fine, profonde et représentative, pas des agrégats ; un modèle ne se nourrit pas de
+        chiffres d'affaires mensuels.</li>
+      <li><strong>Pour l'exploration préalable à une modélisation.</strong> Avant de construire un
+        entrepôt, examiner le brut permet de découvrir quels axes et quel grain méritent d'être
+        préparés — la décision de N10 devient alors fondée au lieu d'être pariée.</li>
+      <li><strong>Pour conserver le détail à coût maîtrisé.</strong> Garder la ligne de ticket pendant
+        cinq ans dans un entrepôt coûte cher ; dans un stockage objet séparé du calcul, beaucoup
+        moins.</li>
+      <li><strong>Comme zone d'atterrissage d'une architecture plus large.</strong> Même lorsqu'un
+        entrepôt existe, recevoir d'abord le brut permet de rejouer un chargement, de corriger une règle
+        a posteriori et de servir plusieurs destinations à partir d'une seule arrivée.</li>
+      <li><strong>Pour les sources qui changent de forme.</strong> Un flux dont le schéma évolue (N2)
+        casse une chaîne à schéma fixe ; le lac l'absorbe et laisse le travail d'alignement à la
+        lecture.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n11-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Ces données n'entrent pas dans notre schéma. »</strong> Signal direct : la variété
+        est la contrainte dominante, l'entrepôt ne peut rien.</li>
+      <li><strong>« On ne sait pas encore ce qu'on en fera, mais ce serait dommage de les perdre. »</strong>
+        Formulation exacte du besoin auquel répond le lac — à condition d'ajouter aussitôt la question
+        de la gouvernance.</li>
+      <li><strong>« Le data scientist demande le détail, pas les agrégats. »</strong> L'entrepôt a
+        consolidé ; il faut une source conservant le grain fin.</li>
+      <li><strong>« Nous jetons les logs au bout de sept jours. »</strong> De l'information est détruite
+        chaque semaine, sans décision explicite.</li>
+      <li><strong>« Le format du flux a encore changé. »</strong> Une zone brute absorbe le changement ;
+        une chaîne à schéma fixe casse.</li>
+      <li><strong>Signal d'alerte — « on verra la gouvernance plus tard. »</strong> Le marécage commence
+        exactement ici, et il ne se verra pas avant plusieurs années.</li>
+      <li><strong>Signal d'alerte — « personne ne sait ce que contient ce répertoire. »</strong> Le
+        marécage est déjà là.</li>
+      <li><strong>Signal inverse — « nos questions sont stables et nos données structurées. »</strong>
+        Un lac n'apporterait rien : c'est le terrain de l'entrepôt (N10).</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n11-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Vérifier que le besoin est bien celui du lac.</strong> Deux conditions, dont au
+      moins une doit être remplie : des formats qui n'entrent pas dans un schéma, ou des usages futurs
+      réellement inconnus. Si les données sont structurées et les questions stables, l'entrepôt suffit
+      et coûtera moins cher. <strong>Le lac n'est pas une étape obligatoire de la modernité.</strong></p>
+
+    <p><strong>Étape 2 — Définir les zones et la règle d'entrée.</strong> Au minimum deux zones : une
+      zone <em>brute</em>, où la donnée arrive telle quelle et n'est jamais modifiée, et une zone
+      <em>préparée</em>, où elle est nettoyée et structurée pour des usages identifiés. Puis la règle
+      d'entrée, qui est le cœur du dispositif : <strong>rien n'entre sans métadonnées minimales</strong>
+      — source, date, propriétaire, format, finalité, droits d'usage. Cette règle est automatisée dans
+      l'ingestion, jamais laissée à la bonne volonté.</p>
+
+    <p><strong>Étape 3 — Décider la rétention, zone par zone et source par source.</strong> Combien de
+      temps garde-t-on le brut ? Que devient-il ensuite — supprimé, agrégé, archivé à froid ? Sans
+      cette décision, le volume croît sans limite et personne n'osera plus rien effacer, faute de
+      savoir ce qui sert.</p>
+
+    <p><strong>Étape 4 — Installer la gouvernance dès l'ingestion, pas après.</strong> Catalogue
+      alimenté automatiquement, lignage — d'où vient ce fichier, qu'a-t-il produit — droits d'accès par
+      zone, et contrôles de qualité à l'entrée. C'est l'étape que l'on reporte et c'est celle qui décide
+      du sort du lac ; différée de deux ans, elle coûtera plusieurs fois plus cher et restera
+      incomplète.</p>
+
+    <p><strong>Étape 5 — Écrire le compromis, et prévoir le lieu de la définition unique.</strong> Le
+      travail est reporté à la lecture et sera refait par chaque consommateur ; les interprétations
+      peuvent diverger. Pour les indicateurs partagés, prévoyez donc dès le départ une zone préparée
+      avec des définitions publiées — faute de quoi vous aurez des données complètes et des chiffres
+      contradictoires, ce qui est la pire combinaison.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le lac <strong>stocke d'abord, interprète ensuite</strong> : il préserve les usages futurs au prix
+      d'un travail reporté à la lecture. Il a remplacé une <strong>contrainte mécanique</strong> — le
+      schéma, qui forçait la description — par une <strong>discipline volontaire</strong> ; sans elle,
+      le marécage est le résultat par défaut.</p>
+    <p class="ar" dir="rtl">الـLake <strong>كيخزن أولا وكيأوّل من بعد</strong>: كيحمي الاستعمالات
+      المستقبلية بثمن خدمة مؤجلة للقراءة. وعوّض <strong>قيدا ميكانيكيا</strong> — السكيما اللي كانت
+      كتفرض الوصف — بـ<strong>انضباط إرادي</strong>؛ وبلا هاد الانضباط، المستنقع هو النتيجة
+      الافتراضية.</p>
+  </div>
+</div>
+
+<h3 id="n11-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — faut-il un lac pour l'enseigne ?</div>
+  <div class="box-b">
+    <p>L'enseigne dispose maintenant de son entrepôt (N10). Restent dehors : les logs de navigation du
+      site (12 Go par jour, format JSON évolutif), les 400 000 photos du SAV, et les futures mesures des
+      capteurs des camions. Par ailleurs, le projet de prévision de la demande réclame du détail.
+      Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Le besoin est-il celui du lac ?</strong> Les deux conditions sont remplies, et
+      pas seulement une. <em>Formats</em> : JSON évolutif, images, flux de capteurs — rien de tout cela
+      n'entre dans un schéma d'entrepôt. <em>Usages futurs inconnus</em> : la prévision de demande est
+      un premier usage, mais l'analyse des parcours de navigation et la détection de défauts sur photos
+      sont encore des intentions. Réponse : oui, un lac est justifié — <strong>en complément de
+      l'entrepôt, pas à sa place</strong>, car les rapports de ventes restent mieux servis par le
+      préparé.</p>
+
+    <p><strong>Étape 2 — Zones et règle d'entrée.</strong> Zone <em>brute</em> : les logs tels qu'ils
+      sortent, les photos avec leurs fichiers d'origine, les mesures des capteurs ; jamais modifiés.
+      Zone <em>préparée</em> : sessions de navigation reconstituées, photos rattachées à leur
+      réclamation et à leur produit, mesures agrégées par camion et par heure. Règle d'entrée,
+      automatisée : chaque dépôt porte la source, la date, le propriétaire métier, le format, la
+      finalité et les droits. <strong>Pour les photos, cette règle résout à elle seule le problème
+      identifié en N1 et N2</strong> — l'absence de lien avec la réclamation, qui rendait toute analyse
+      impossible.</p>
+
+    <p><strong>Étape 3 — Rétention.</strong> Logs bruts : 13 mois, pour permettre une comparaison d'une
+      année sur l'autre, puis agrégation en sessions et suppression du détail. Photos : durée alignée
+      sur l'obligation légale de traitement des réclamations, avec vérification du cadre d'usage.
+      Capteurs : un an en détail, puis agrégats horaires. <strong>Chaque durée est une décision écrite,
+      avec son motif</strong> — sans quoi, dans trois ans, personne n'osera rien supprimer.</p>
+
+    <p><strong>Étape 4 — Gouvernance dès l'ingestion.</strong> Catalogue alimenté automatiquement par la
+      règle d'entrée ; lignage entre zone brute et zone préparée ; droits distincts — la zone brute,
+      qui contient des données personnelles non filtrées, n'est accessible qu'à l'équipe data, tandis
+      que la zone préparée est ouverte plus largement.</p>
+
+    <p><strong>Étape 5 — Compromis.</strong> Le travail d'interprétation des logs sera refait par chaque
+      usage, sauf à publier des tables de sessions dans la zone préparée — ce qui est prévu. Le volume
+      croîtra fortement : 12 Go par jour représentent environ 4 To par an pour les seuls logs, d'où
+      l'importance de l'étape 3. Enfin, <strong>deux plateformes coexistent désormais</strong> —
+      entrepôt et lac — avec deux chaînes à maintenir et un risque de duplication des ventes dans les
+      deux. Ce coût est accepté en connaissance de cause ; c'est exactement le problème que traitera
+      N12.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — un marécage constitué</div>
+  <div class="box-b">
+    <p>Un assureur a déversé pendant cinq ans dans son lac : exports quotidiens de huit applications,
+      archives de messagerie, scans de contrats, fichiers déposés manuellement par les équipes. Aucune
+      métadonnée, aucune convention de nommage. 600 To. Aujourd'hui, un projet de détection de fraude
+      doit constituer un jeu de données. Diagnostiquez et proposez un plan.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Diagnostic par les quatre conditions de N1.</strong> <em>Comprise</em> : non — on ignore
+      ce que contiennent les fichiers et ce que signifient leurs champs. <em>Contextualisée</em> : non —
+      ni source fiable, ni date de production certaine, ni périmètre. <em>Accessible</em> : techniquement
+      oui, pratiquement non — on ne peut pas trouver ce qu'on ne sait pas nommer. <em>Utilisée
+      correctement</em> : impossible à garantir — des scans de contrats et des archives de messagerie
+      contiennent des données personnelles dont la finalité d'usage n'a jamais été établie.
+      <strong>Trois conditions sur quatre sont en défaut : ces 600 To ne valent presque rien</strong>,
+      et le quatrième point constitue en outre un risque de conformité.</p>
+
+    <p><strong>Ce qui est récupérable et ce qui ne l'est pas.</strong> Récupérable : tout ce qui porte
+      une structure interne identifiable — un export applicatif reste lisible, ses colonnes se
+      reconnaissent, sa source peut souvent se déduire. Non récupérable : la signification des champs
+      ambigus, l'identité du producteur, les règles appliquées à l'époque — autant d'informations qui
+      ne vivaient que dans la mémoire de personnes aujourd'hui parties. <strong>C'est la démonstration
+      concrète du coût différé</strong> : ce qui aurait coûté quelques minutes à l'ingestion est devenu
+      définitivement perdu.</p>
+
+    <p><strong>Plan proposé, en quatre temps.</strong> (a) <em>Ne pas tenter de tout assainir</em> :
+      600 To sans métadonnées ne se reprennent pas. Partir du besoin — la détection de fraude — et
+      n'explorer que ce qui le sert : sinistres, paiements, contrats. (b) <em>Fermer le robinet</em> :
+      appliquer immédiatement la règle d'entrée à tout nouveau dépôt, et interdire les dépôts manuels
+      sans métadonnées. Sans cela, le marécage continue de croître pendant qu'on le nettoie. (c)
+      <em>Reconstituer par zones</em> : créer une zone préparée propre pour le périmètre fraude, avec
+      catalogue et lignage, et n'y faire entrer que ce qui a été identifié et validé. (d)
+      <em>Décider du sort du reste</em> : classer en « identifié et utile », « identifié et inutile »,
+      « non identifiable ». La troisième catégorie relève d'une décision de suppression, à prendre avec
+      le juridique — conserver indéfiniment des données que personne ne peut qualifier est à la fois un
+      coût et un risque.</p>
+
+    <p><strong>La leçon.</strong> Le lac n'a pas échoué parce que la technologie était mauvaise : il a
+      échoué parce que la quatrième caractéristique de l'énoncé a été lue comme une recommandation
+      alors qu'elle énonçait une condition.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — deux équipes, deux chiffres</div>
+  <div class="box-b">
+    <p>Dans une entreprise disposant d'un lac bien gouverné — métadonnées complètes, catalogue à jour —
+      deux équipes calculent le « nombre de clients actifs » à partir des mêmes fichiers bruts
+      d'événements. Le marketing annonce 128 000, le contrôle de gestion 96 000. Les deux équipes ont
+      vérifié leurs calculs et les deux ont raison. Expliquez et proposez une correction.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Pourquoi les deux ont raison.</strong> Chacune a appliqué une définition implicite
+      différente de « client actif » : le marketing compte probablement tout client ayant eu au moins
+      une interaction sur douze mois, y compris une visite ou l'ouverture d'un message ; le contrôle de
+      gestion compte ceux ayant effectué au moins un achat sur six mois. Les calculs sont justes, les
+      fichiers sont les mêmes, et les résultats diffèrent de 33 % parce que <strong>la question n'avait
+      pas la même signification</strong>.</p>
+
+    <p><strong>Ce que cela révèle sur le lac.</strong> Le problème n'est pas un défaut de gouvernance :
+      le catalogue est à jour, les métadonnées sont complètes. <strong>Les métadonnées décrivent la
+      donnée brute, pas les règles métier qui en dérivent un indicateur.</strong> En supprimant la
+      préparation à l'écriture, le lac a supprimé le lieu où cette règle était écrite une fois pour
+      toutes. Chaque lecteur la réinvente — c'est le schéma à la lecture appliqué, non plus aux
+      structures, mais aux définitions.</p>
+
+    <p><strong>Pourquoi l'entrepôt n'avait pas ce problème.</strong> Non par vertu, mais par
+      construction : il fallait bien écrire une règle pour charger la table, et cette règle devenait la
+      définition officielle. Le lac a perdu cette garantie en même temps qu'il gagnait sa souplesse —
+      c'est le compromis de la génération 4, vu sous un angle qu'on anticipe rarement.</p>
+
+    <p><strong>Correction proposée.</strong> (a) Faire trancher la définition par le métier, et non par
+      la technique : qui est propriétaire de la notion de « client actif » ? (b) L'implémenter
+      <em>une seule fois</em> dans la zone préparée, sous forme de table ou de vue publiée, versionnée
+      et documentée. (c) Interdire que des indicateurs partagés soient calculés directement depuis la
+      zone brute : l'exploration y reste libre, la publication passe par la zone préparée. (d) Si les
+      deux notions sont légitimes — et c'est souvent le cas — publier <strong>deux</strong> indicateurs
+      aux noms distincts, « clients ayant interagi 12 mois » et « clients acheteurs 6 mois », plutôt
+      qu'un seul nom pour deux réalités. <strong>La divergence n'était pas une erreur de calcul : c'était
+      une absence de décision.</strong></p>
+  </div>
+</div>
+
+<h3 id="n11-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition du Data Lake et ses quatre caractéristiques, puis expliquez pourquoi la
+        quatrième emploie le verbe « nécessite » et non « recommande ».</li>
+      <li>Comparez entrepôt et lac sur le moment de la préparation, et dites ce que chacun gagne et perd
+        de ce fait.</li>
+      <li>Qu'est-ce qu'un data swamp ? Expliquez pourquoi c'est le résultat par défaut et non un
+        accident, en vous appuyant sur le moment où le coût de l'erreur apparaît.</li>
+      <li>Que signifie « séparation du stockage et du calcul » ? Donnez un cas où cette séparation change
+        la facture, et un cas où elle ne change rien.</li>
+      <li>Rédigez la règle d'entrée d'un lac pour une université : quelles métadonnées minimales
+        exigeriez-vous à chaque dépôt, et pourquoi chacune ?</li>
+      <li>Une équipe affirme : « avec le lac, nous n'avons plus besoin d'entrepôt ». Répondez en vous
+        appuyant sur les deux notions.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n11-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez ces données selon qu'elles relèvent plutôt d'un entrepôt ou plutôt d'un lac, en
+      justifiant chaque fois en une phrase : ventes mensuelles consolidées ; enregistrements du centre
+      d'appels ; soldes comptables ; photos de sinistres ; événements de navigation ; budget
+      prévisionnel par service.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une ville veut exploiter : les capteurs de qualité de l'air (une mesure par minute, 200 points),
+      les signalements des habitants (formulaires web et photos), les données de trafic (flux continu),
+      et les délibérations du conseil municipal (documents PDF). Usages envisagés : un tableau de bord
+      public, des alertes de pollution, et « d'autres analyses plus tard ». Appliquez les cinq étapes :
+      justifiez le recours au lac, définissez les zones et la règle d'entrée, fixez une rétention par
+      source avec son motif, décrivez la gouvernance et écrivez le compromis. Précisez enfin ce qui,
+      dans ce cas, devrait malgré tout passer par un entrepôt.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le Data Lake promet de ne pas décider à l'avance des usages futurs. Pourtant, plusieurs décisions
+      irréversibles sont bel et bien prises au moment de l'ingestion. Identifiez-en au moins quatre
+      — en examinant ce qui est capté, à quelle fréquence, sous quelle forme, et pendant combien de
+      temps — et montrez pour chacune ce qu'elle interdit définitivement. Concluez en reformulant avec
+      précision ce que le lac préserve réellement et ce qu'il ne préserve pas, puis dites en quoi cette
+      conclusion nuance la phrase « conservés pour différents usages futurs ».</p>
+  </div>
+</div>

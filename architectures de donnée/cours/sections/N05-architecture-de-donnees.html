@@ -1,0 +1,569 @@
+<h2 class="notion" id="n05">N5 — L'architecture de données : définition opérationnelle</h2>
+
+<h3 id="n05-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Une <strong>architecture de données</strong> décrit
+      <strong>comment les données sont gérées</strong>, depuis leur <strong>collecte</strong> et leur
+      <strong>transformation</strong> jusqu'à leur <strong>distribution</strong> et leur
+      <strong>consommation</strong>.</p>
+
+    <p><strong>Pour l'architecte.</strong> Elle organise les <strong>composants</strong>, les
+      <strong>flux</strong>, les <strong>responsabilités</strong>, les <strong>stockages</strong>, les
+      <strong>traitements</strong>, les <strong>interfaces</strong> et les <strong>contraintes</strong>
+      nécessaires <strong>aux usages</strong>.</p>
+
+    <p>Concrètement, le chemin décrit comporte cinq étapes :</p>
+    <table>
+      <thead><tr><th>Étape</th><th>Rôle</th><th>Ce qu'on y trouve</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Collecte</strong></td>
+          <td>Sources de données</td>
+          <td>Bases de données (CRM, ERP…), fichiers (CSV, Excel, PDF…), capteurs IoT (GPS,
+            température…), APIs et services (réseaux sociaux…), autres sources (logs, emails…)</td>
+        </tr>
+        <tr>
+          <td><strong>2. Ingestion</strong></td>
+          <td>Collecte et intégration</td>
+          <td>Connecteurs et adaptateurs ; ingestion batch ou temps réel ; validation et filtrage ;
+            transformation légère ; gestion des formats et des schémas.
+            <em>Exemples : Kafka, Azure Data Factory, Flink, pipelines de données.</em></td>
+        </tr>
+        <tr>
+          <td><strong>3. Stockage</strong></td>
+          <td>Conservation des données</td>
+          <td>Données brutes et/ou transformées ; différents types de stockage ; gestion du cycle de
+            vie ; scalabilité et haute disponibilité.
+            <em>Exemples : Data Lake (S3, ADLS…), Data Warehouse (Snowflake…), Lakehouse (Databricks…).</em></td>
+        </tr>
+        <tr>
+          <td><strong>4. Traitement</strong></td>
+          <td>Transformation et analyse</td>
+          <td>Traitement batch ou temps réel ; nettoyage et enrichissement ; transformation et
+            agrégation ; analytique et ML ; orchestration des traitements.
+            <em>Exemples : Spark, Flink, Databricks, BigQuery.</em></td>
+        </tr>
+        <tr>
+          <td><strong>5. Consommation</strong></td>
+          <td>Utilisation des données</td>
+          <td>Tableaux de bord et reporting ; analyses ad hoc ; applications métiers ; modèles de
+            Machine Learning / IA ; APIs et services de données.
+            <em>Exemples : Power BI, Tableau, applications métiers, modèles IA (ML, GenAI).</em></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Ces cinq étapes sont ici l'<em>illustration</em> de la définition ; chacune sera étudiée pour
+      elle-même dans la partie VII (N30 à N35).</p>
+  </div>
+</div>
+
+<h3 id="n05-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Trois éléments de cette définition méritent d'être pesés, car ils décident de ce qui est une
+      architecture et de ce qui n'en est pas une.</p>
+
+    <p><strong>Premier élément : « décrit comment ».</strong> Une architecture n'est pas un ensemble
+      d'outils, c'est la <em>description</em> d'un fonctionnement. Deux entreprises peuvent posséder
+      exactement les mêmes produits et avoir deux architectures différentes, parce qu'elles ne les
+      font pas travailler de la même façon. Inversement, une architecture peut rester valable quand on
+      remplace un produit par un autre. C'est pourquoi la liste des outils d'une entreprise ne répond
+      jamais à la question « quelle est votre architecture ? ».</p>
+
+    <p><strong>Deuxième élément : « depuis la collecte jusqu'à la consommation ».</strong> La définition
+      fixe une <strong>portée de bout en bout</strong>, et cette portée est exigeante. Une décision qui
+      ne couvre qu'un segment — choisir un entrepôt, mettre en place un pipeline — est une décision
+      d'architecture, pas une architecture. Tant que le chemin complet n'est pas décrit, il reste
+      toujours un endroit où la donnée s'arrête : c'est exactement ce qui se produit quand on découvre,
+      en fin de projet, que personne n'avait prévu comment les analystes obtiendraient le résultat.</p>
+
+    <p><strong>Troisième élément : les sept objets de l'architecte.</strong> Ils forment son vocabulaire
+      de travail, et chacun répond à une question précise :</p>
+    <ul>
+      <li><strong>Composants</strong> — <em>de quelles briques est-ce fait ?</em> Systèmes, services,
+        moteurs.</li>
+      <li><strong>Flux</strong> — <em>qu'est-ce qui circule, d'où vers où, à quelle fréquence ?</em></li>
+      <li><strong>Responsabilités</strong> — <em>qui tient quoi ?</em> Le seul objet qui ne soit pas
+        technique, et le plus souvent absent des schémas.</li>
+      <li><strong>Stockages</strong> — <em>où la donnée se pose-t-elle, sous quelle forme, combien de
+        temps ?</em></li>
+      <li><strong>Traitements</strong> — <em>que lui fait-on, et à quel moment ?</em></li>
+      <li><strong>Interfaces</strong> — <em>par où l'obtient-on ?</em> Ce sont les contrats : ce qu'un
+        consommateur peut attendre, et ce qui lui est promis.</li>
+      <li><strong>Contraintes</strong> — <em>sous quelles limites ?</em> Latence, coût, sécurité,
+        conformité, disponibilité.</li>
+    </ul>
+
+    <p>Ces sept objets ne sont pas d'égale difficulté. Les quatre premiers se dessinent ; les
+      <strong>responsabilités</strong>, les <strong>interfaces</strong> et les
+      <strong>contraintes</strong> s'écrivent, et ce sont elles qui transforment un schéma en
+      architecture. Un dessin qui montre des boîtes et des flèches sans dire qui en répond, ce qu'elles
+      promettent et sous quelles limites, ne permet de prendre aucune décision — or c'est précisément à
+      cela qu'une définition dite <em>opérationnelle</em> doit servir.</p>
+
+    <p>Reste le dernier mot, qui commande tous les autres : <strong>« nécessaires aux usages »</strong>.
+      Les usages sont l'<em>entrée</em> du raisonnement ; l'architecture en est le <em>résultat</em>.
+      On ne choisit pas une architecture pour ensuite chercher ce qu'on pourrait en faire. Cela
+      explique pourquoi la même question — « quelle architecture ? » — n'a pas de réponse universelle,
+      et pourquoi elle doit être reposée chaque fois que la liste des usages s'allonge.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Une liste d'outils n'est pas une architecture.</strong> « Nous avons Kafka, Spark et
+        Snowflake » décrit un inventaire. L'architecture dit ce que chacun fait, pour quel flux, sous
+        quelles contraintes et sous la responsabilité de qui.</li>
+      <li><strong>Un schéma n'est pas une architecture non plus</strong>, tant qu'il ne porte ni
+        responsabilités, ni interfaces, ni contraintes. C'est le défaut le plus répandu des documents
+        d'architecture.</li>
+      <li><strong>Ne pas confondre avec l'architecture technique.</strong> Serveurs, réseau et
+        conteneurs relèvent de l'infrastructure. L'architecture de données décrit le parcours de la
+        donnée, qui peut rester identique sur deux infrastructures différentes.</li>
+      <li><strong>Une architecture décrit un « comment » : elle peut donc être contournée.</strong>
+        Si une équipe se branche directement sur une base de production, l'architecture n'est plus
+        celle du document — elle est celle qui a lieu. Une architecture que personne n'applique
+        n'existe pas.</li>
+      <li><strong>« De bout en bout » ne veut pas dire « tout d'un coup ».</strong> On peut décrire le
+        chemin complet et ne le réaliser que par étapes ; ce qui est interdit, c'est de n'avoir décrit
+        que le début.</li>
+      <li><strong>L'architecture n'est pas figée.</strong> Étant dérivée des usages, elle se révise
+        quand ils changent. Un document d'architecture sans date ni version est un document périmé qui
+        s'ignore.</li>
+      <li><strong>Attention au mot « distribution ».</strong> Dans cette définition, il signifie mettre
+        la donnée à disposition de ses consommateurs — et non la répartir sur plusieurs machines, qui
+        est le sujet des architectures distribuées (N14).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> أركيتكتير المعطيات <strong>كتوصف كيفاش كيتدبرو المعطيات</strong>،
+    من <strong>الجمع والتحويل</strong> حتى <strong>التوزيع والاستهلاك</strong>. وبالنسبة للأركيتكت، هي
+    اللي كتنظم سبع حوايج: <strong>المكونات، التدفقات، المسؤوليات، التخزينات، المعالجات، الواجهات،
+    والقيود</strong> — <strong>اللازمين للاستعمالات</strong>. تلات ملاحظات: (1) الأركيتكتير ماشي لائحة
+    ديال الأدوات، هي <em>وصف ديال كيفاش</em> — جوج شركات بنفس الأدوات يقدرو يكونو عندهم أركيتكتيرين
+    مختلفين؛ (2) المجال هو <strong>الطريق كامل</strong>، واللي كيحبس فالتخزين ماشي أركيتكتير بل قرار
+    معماري؛ (3) من السبعة، <strong>المسؤوليات والواجهات والقيود</strong> هوما اللي كيحولو التصميم من
+    رسمة لأركيتكتير — وهوما اللي كيتنساو ديما. وفالآخر: الاستعمالات هي <em>المدخل</em>، والأركيتكتير هي
+    <em>النتيجة</em>، ماشي العكس.</p>
+</div>
+
+<h3 id="n05-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui des <strong>décisions prises séparément</strong>. Sans description d'ensemble,
+      chaque décision est défendable localement : cette équipe choisit son outil d'ingestion, cette autre
+      sa base, une troisième se branche directement à la source parce que c'était le plus rapide. Personne
+      ne se trompe ; le résultat, lui, est ingouvernable. Les flux se croisent sans contrat, deux
+      pipelines font la même chose, et quand un chiffre est faux, il n'existe aucun document permettant
+      de savoir par où il est passé.</p>
+    <p>La règle traite ce problème en donnant un <strong>objet commun</strong> : un seul document qui
+      décrit le chemin complet et nomme, pour chaque partie, un responsable, un contrat et des
+      contraintes. Elle traite aussi, et c'est aussi important, le problème du <strong>jugement</strong> :
+      avec elle, on peut dire d'une proposition qu'elle est incomplète — « vous décrivez le stockage,
+      pas la consommation » — au lieu d'en débattre par préférences d'outils.</p>
+  </div>
+</div>
+
+<h3 id="n05-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Écrire un document d'architecture complet</strong> en suivant les sept objets, au lieu
+        de produire un schéma que chacun interprétera à sa façon.</li>
+      <li><strong>Juger une proposition</strong> — interne ou d'un fournisseur — en vérifiant qu'elle
+        couvre le chemin entier et qu'elle nomme responsabilités, interfaces et contraintes.</li>
+      <li><strong>Séparer ce qui dure de ce qui se remplace</strong> : le « comment » reste quand les
+        produits changent. Cela évite de refaire l'architecture à chaque migration d'outil.</li>
+      <li><strong>Situer une décision</strong> : « choisir un entrepôt » devient une décision parmi
+        d'autres, à l'étape stockage, avec ses conséquences en amont et en aval.</li>
+      <li><strong>Transmettre</strong> : un nouvel arrivant comprend un système par son architecture,
+        pas par la lecture de ses pipelines.</li>
+      <li><strong>Détecter les écarts</strong> entre l'architecture décrite et celle qui a lieu
+        réellement — écart qui est, dans les faits, la principale source d'incidents.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n05-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La définition est qualifiée d'<strong>opérationnelle</strong>, et ce mot est un engagement : elle
+      n'est pas là pour classer un concept, mais pour permettre de <em>décider</em>. Son critère de
+      réussite est simple — si, après l'avoir lue, on sait quoi décrire et quoi décider, elle est bonne.
+      C'est pourquoi elle est suivie, dans le support, de la phrase « pour l'architecte » : la seconde
+      partie est l'outillage de la première.</p>
+
+    <p><strong>Pourquoi cette portée, de la collecte à la consommation ?</strong> Coupons-la aux deux
+      extrémités et observons.</p>
+    <ul>
+      <li>Si l'on commence à l'<em>ingestion</em>, en considérant les sources comme données : on hérite
+        de formats, de fréquences et de qualités que l'on n'a pas choisis, et l'on découvre trop tard
+        que la donnée nécessaire n'est pas produite. Beaucoup de projets échouent là, en amont de tout
+        ce qui avait été soigné.</li>
+      <li>Si l'on s'arrête au <em>stockage</em>, en laissant la consommation « pour après » : on
+        construit un socle techniquement irréprochable que les métiers n'utilisent pas, faute
+        d'interfaces et de formes adaptées. C'est la panne décrite en N3 à la cinquième mission.</li>
+      <li>Si l'on garde les deux extrémités : chaque décision intermédiaire a une justification
+        vérifiable, puisqu'on peut toujours remonter à l'usage servi et redescendre à la source
+        disponible.</li>
+    </ul>
+
+    <p><strong>Pourquoi ces sept objets, et pas trois ou douze ?</strong> Parce que chacun correspond à
+      une question dont l'absence de réponse produit une panne identifiable — et observable dans
+      n'importe quelle organisation :</p>
+    <ul>
+      <li>Sans <strong>composants</strong> : on ne sait pas de quoi le système est fait.</li>
+      <li>Sans <strong>flux</strong> : on ne sait pas d'où vient un chiffre.</li>
+      <li>Sans <strong>responsabilités</strong> : une panne n'a pas de propriétaire, et chacun attend
+        l'autre.</li>
+      <li>Sans <strong>stockages</strong> : la donnée se pose n'importe où, et le coût comme la
+        conformité deviennent incontrôlables.</li>
+      <li>Sans <strong>traitements</strong> : les mêmes règles de calcul sont réécrites différemment
+        par chaque équipe — et les deux chiffres contradictoires de N1 réapparaissent.</li>
+      <li>Sans <strong>interfaces</strong> : chaque consommateur se branche là où il peut, et tout
+        changement casse quelque chose chez quelqu'un.</li>
+      <li>Sans <strong>contraintes</strong> : on ne peut pas dire si une solution convient, puisque
+        rien ne définit ce que « convenir » veut dire.</li>
+    </ul>
+
+    <p>Sept questions, sept pannes distinctes, et aucune qui soit couverte par une autre : la liste est
+      donc à la fois nécessaire et suffisante pour l'usage qu'on en fait.</p>
+  </div>
+</div>
+
+<h3 id="n05-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans la rédaction d'un dossier d'architecture.</strong> Les sept objets donnent
+        directement le plan du document, et le chemin en cinq étapes donne l'ordre des sections. Un
+        dossier écrit ainsi se relit et se compare, ce qu'un dossier organisé par produits ne permet
+        pas.</li>
+      <li><strong>En revue de projet.</strong> On parcourt le chemin de bout en bout et l'on s'arrête
+        au premier endroit où l'une des sept réponses manque. C'est une revue rapide, et son résultat
+        est factuel : il manque une interface, un responsable, une contrainte.</li>
+      <li><strong>Dans un appel d'offres.</strong> Exiger les sept objets dans la réponse permet de
+        comparer des propositions sur le même terrain, et de repérer celles qui ne couvrent qu'un
+        segment du chemin.</li>
+      <li><strong>À l'arrivée d'une nouvelle source ou d'un nouvel usage.</strong> On ne repart pas de
+        zéro : on examine lesquels des sept objets sont affectés, et l'on révise ceux-là. C'est ce qui
+        permet de faire évoluer une architecture sans la refaire.</li>
+      <li><strong>Dans un audit ou une reprise de l'existant.</strong> On reconstitue l'architecture
+        <em>réelle</em> — celle qui a lieu — puis on la compare à celle qui est documentée. L'écart
+        entre les deux est le vrai sujet de l'audit.</li>
+      <li><strong>Pour transmettre.</strong> Lors d'une arrivée dans l'équipe ou d'un changement de
+        prestataire, le document d'architecture remplace des semaines de lecture de code, à condition
+        qu'il porte bien les responsabilités et les interfaces.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n05-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Montre-moi notre architecture. — Voilà la liste de nos outils. »</strong> Confusion
+        entre inventaire et description : la règle est à appliquer immédiatement.</li>
+      <li><strong>« Ce tableau de bord est faux. — D'où vient le chiffre ? — On ne sait pas. »</strong>
+        Les flux ne sont pas décrits ; aucune enquête n'est possible.</li>
+      <li><strong>« Le pipeline est tombé. — Qui s'en occupe ? — … »</strong> Les responsabilités
+        manquent. C'est le signal le plus coûteux, car il se paie en durée d'incident.</li>
+      <li><strong>« On a changé une colonne et trois rapports ont cassé. »</strong> Pas d'interfaces :
+        les consommateurs étaient branchés directement sur la structure interne.</li>
+      <li><strong>« Deux équipes ont construit le même traitement. »</strong> Absence de description
+        partagée ; le travail a été fait deux fois et donnera deux résultats légèrement différents.</li>
+      <li><strong>« On a choisi la plateforme, on verra les usages après. »</strong> Inversion de la
+        définition : les usages sont l'entrée. Signal d'un échec prévisible, à traiter avant la
+        signature.</li>
+      <li><strong>« Le document d'architecture date d'il y a trois ans. »</strong> Les usages ont
+        changé depuis ; la description ne correspond plus à ce qui a lieu.</li>
+      <li><strong>« Chacun se branche directement sur la base de production. »</strong> L'architecture
+        décrite est contournée : ce qui existe, c'est celle qui a lieu.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n05-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Écrire la liste des usages, avant tout le reste.</strong> Pour chaque usage :
+      qui consomme, pour quelle décision, à quelle fréquence, avec quelle fraîcheur. C'est l'entrée du
+      raisonnement, et rien de ce qui suit ne peut être justifié sans elle. Un usage qu'on ne sait pas
+      écrire en une ligne n'est pas encore un usage, c'est un souhait.</p>
+
+    <p><strong>Étape 2 — Parcourir le chemin complet, de la collecte à la consommation.</strong> Étape
+      par étape — collecte, ingestion, stockage, traitement, consommation — décrivez ce qui se passe
+      pour <em>un</em> usage choisi. Suivre une seule donnée de bout en bout révèle plus de trous qu'un
+      schéma général, car chaque transition doit être expliquée.</p>
+
+    <p><strong>Étape 3 — Remplir les sept objets.</strong> Composants, flux, responsabilités, stockages,
+      traitements, interfaces, contraintes. Traitez les trois non techniques avec autant de soin que les
+      autres : écrivez un nom de responsable, un contrat d'interface, et des contraintes chiffrées.
+      « Rapide » n'est pas une contrainte ; « disponible à 8 h, au plus tard 8 h 15 » en est une.</p>
+
+    <p><strong>Étape 4 — Confronter chaque usage à ses contraintes.</strong> Reprenez la liste de
+      l'étape 1 et vérifiez, usage par usage, que le chemin décrit tient la fraîcheur, le volume, le
+      coût et les règles de sécurité annoncés. Un usage qui ne passe pas doit être signalé maintenant,
+      pas découvert en recette.</p>
+
+    <p><strong>Étape 5 — Tester la description par trois questions.</strong> Donnez le document à
+      quelqu'un qui n'a pas participé et demandez-lui : d'où vient ce chiffre ? qui est responsable de
+      cette étape ? que se passe-t-il si cette source double de volume ? S'il ne peut pas répondre,
+      la description n'est pas encore une architecture — et c'est maintenant qu'il faut le savoir.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Une architecture de données décrit le <strong>comment</strong>, de la collecte à la consommation,
+      à travers sept objets — composants, flux, <strong>responsabilités</strong>, stockages, traitements,
+      <strong>interfaces</strong>, <strong>contraintes</strong> — tous dérivés des <strong>usages</strong>.</p>
+    <p class="ar" dir="rtl">أركيتكتير المعطيات كتوصف <strong>كيفاش</strong>، من الجمع حتى الاستهلاك،
+      عبر سبع حوايج — مكونات، تدفقات، <strong>مسؤوليات</strong>، تخزينات، معالجات،
+      <strong>واجهات</strong>، <strong>قيود</strong> — وكلهم مشتقين من <strong>الاستعمالات</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n05-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — « voici notre architecture »</div>
+  <div class="box-b">
+    <p>Une équipe présente ce document comme son architecture : « Les données des caisses et du site
+      arrivent dans Kafka. Un job Spark les traite toutes les nuits. Le résultat est stocké dans
+      Snowflake. Power BI est branché dessus. » Dites ce qui manque pour que ce soit une architecture,
+      et formulez les questions à poser.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Les usages.</strong> Ils ne sont pas écrits. Première question, et elle précède
+      toutes les autres : <em>à quels usages ce chemin sert-il, pour quelles décisions, à quelle
+      fraîcheur ?</em> Sans réponse, rien dans cette proposition ne peut être jugé — ni le traitement
+      nocturne, ni le choix des produits.</p>
+
+    <p><strong>Étape 2 — Le chemin.</strong> Il est couvert de la collecte à la consommation : c'est le
+      point fort du document. Mais chaque transition est nommée par un produit, pas décrite. « Arrivent
+      dans Kafka » ne dit ni dans quel format, ni à quelle fréquence, ni ce qui se passe quand un
+      message est invalide.</p>
+
+    <p><strong>Étape 3 — Les sept objets.</strong> <em>Composants</em> : présents (Kafka, Spark,
+      Snowflake, Power BI). <em>Flux</em> : partiellement — on connaît le sens, pas le contenu, ni le
+      volume, ni la fréquence réelle. <em>Stockages</em> : un seul est nommé ; rien sur la conservation
+      du brut, ni sur le cycle de vie. <em>Traitements</em> : « les traite » ne dit rien des règles
+      appliquées — et ce sont elles qui produisent les chiffres. <strong>Responsabilités : absentes.
+      Interfaces : absentes. Contraintes : absentes.</strong> Trois objets sur sept manquent entièrement,
+      et ce sont les trois qui ne se dessinent pas.</p>
+
+    <p><strong>Étape 4 — Confrontation.</strong> Impossible, faute d'usages et de contraintes. On peut
+      toutefois relever une alerte immédiate : un traitement <em>nocturne</em> ne peut servir aucun
+      usage exigeant de la fraîcheur en journée. Si un tel usage figure dans la liste de l'étape 1, la
+      proposition est déjà en défaut.</p>
+
+    <p><strong>Étape 5 — Questions à poser.</strong> (a) Quels usages, avec quelle fraîcheur et quelle
+      criticité ? (b) Qui est responsable de chacune des quatre étapes, et qui appelle-t-on à 7 h du
+      matin si le job de nuit a échoué ? (c) Par quelle interface les consommateurs accèdent-ils — des
+      tables directement, ou des vues contractuelles stables ? (d) Quelles contraintes chiffrées :
+      heure de mise à disposition, volume maximal, durée de conservation, règles d'accès ? (e) Que
+      deviennent les données brutes : conservées ou jetées après traitement ? <strong>Conclusion</strong> :
+      ce document est un schéma de flux techniques, utile mais incomplet ; il devient une architecture
+      dès qu'on y ajoute usages, responsabilités, interfaces et contraintes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — décrire l'architecture cible de l'enseigne</div>
+  <div class="box-b">
+    <p>Pour l'enseigne du cas d'ouverture, décrivez l'architecture de données pour le seul usage
+      « chiffre d'affaires de la veille par région, disponible à 8 h ». Parcourez le chemin complet et
+      remplissez les sept objets.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — L'usage, écrit précisément.</strong> Consommateur : la direction commerciale et
+      les directeurs régionaux. Décision servie : réaction commerciale sur la journée. Fréquence :
+      quotidienne. Fraîcheur : données de la veille, clôturées à minuit, disponibles à 8 h. Criticité :
+      moyenne — un retard d'une heure est gênant, une erreur de chiffre est inacceptable. Cette dernière
+      distinction oriente toute la suite : <strong>on privilégiera la justesse sur la vitesse.</strong></p>
+
+    <p><strong>Étape 2 — Le chemin, pour cet usage seulement.</strong> <em>Collecte</em> : les ventes des
+      120 caisses et du site. <em>Ingestion</em> : extraction quotidienne après clôture, en batch — le
+      temps réel n'apporterait rien à un usage quotidien et coûterait davantage. <em>Stockage</em> :
+      dépôt des ventes brutes, puis d'une table de ventes consolidée, dans une plateforme analytique
+      séparée des systèmes de caisse. <em>Traitement</em> : normalisation des montants (HT/TTC, devise),
+      rattachement au bon jour selon l'heure d'encaissement, agrégation par région et par jour.
+      <em>Consommation</em> : un tableau de bord et une vue requêtable.</p>
+
+    <p><strong>Étape 3 — Les sept objets.</strong></p>
+    <ul>
+      <li><strong>Composants</strong> : systèmes de caisse, plateforme e-commerce, outil d'ingestion
+        planifié, plateforme analytique, outil de visualisation.</li>
+      <li><strong>Flux</strong> : caisses → ingestion (une fois par jour, après minuit, environ 400 000
+        lignes) ; site → ingestion (idem) ; ingestion → stockage brut → table consolidée → tableau de
+        bord.</li>
+      <li><strong>Responsabilités</strong> : l'exploitation tient l'ingestion et alerte en cas d'échec ;
+        l'équipe data tient les règles de calcul et la table consolidée ; le contrôle de gestion est
+        propriétaire de la définition du chiffre d'affaires. Ce dernier point évite la dispute de N1 sur
+        le HT et le TTC : la définition appartient au métier, pas à la technique.</li>
+      <li><strong>Stockages</strong> : ventes brutes conservées 3 ans — durée choisie pour permettre la
+        prévision de demande à venir — table consolidée conservée 5 ans.</li>
+      <li><strong>Traitements</strong> : règles de normalisation et d'agrégation écrites et versionnées,
+        exécutées une fois par nuit, avec contrôle du nombre de lignes et du total attendu.</li>
+      <li><strong>Interfaces</strong> : une vue <code>ventes_jour_region</code> documentée, stable, et
+        un tableau de bord. Personne ne se branche sur les tables internes : c'est ce qui permettra de
+        changer le traitement sans casser les consommateurs.</li>
+      <li><strong>Contraintes</strong> : disponible à 8 h au plus tard ; aucune requête analytique sur
+        la base des caisses pendant les heures d'ouverture ; accès réservé aux rôles direction et
+        contrôle de gestion ; coût de stockage plafonné.</li>
+    </ul>
+
+    <p><strong>Étape 4 — Confrontation.</strong> La chaîne nocturne tient la fraîcheur demandée, avec
+      une marge : si elle démarre à 1 h et dure deux heures, il reste près de cinq heures de rattrapage
+      avant 8 h. La contrainte « ne pas peser sur les caisses » est satisfaite puisque l'extraction a
+      lieu après la clôture et que l'analyse se fait ailleurs. Le volume est faible pour une plateforme
+      analytique.</p>
+
+    <p><strong>Étape 5 — Test de la description.</strong> D'où vient le chiffre ? De
+      <code>ventes_jour_region</code>, produite par la règle versionnée R-12 à partir des ventes brutes.
+      Qui est responsable si rien n'arrive à 8 h ? L'exploitation, alertée dès l'échec du job.
+      Que se passe-t-il si le volume double ? L'extraction nocturne passe de deux à quatre heures : la
+      marge absorbe, mais l'alerte doit être déclenchée à 6 h pour laisser le temps d'agir. Les trois
+      réponses existent : la description est une architecture.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — une nouvelle source arrive</div>
+  <div class="box-b">
+    <p>L'enseigne équipe ses 40 camions frigorifiques de capteurs de température qui émettent une mesure
+      toutes les 10 secondes. Deux usages apparaissent : alerter en moins de deux minutes si la
+      température sort des limites, et analyser les incidents du mois. En repartant de l'architecture
+      de l'exercice 12.2, dites lesquels des sept objets doivent être révisés, et comment.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Les deux usages, écrits.</strong> Usage A : alerte température, consommée par
+      l'exploitation logistique, fraîcheur exigée inférieure à deux minutes, criticité forte — une
+      alerte manquée détruit une cargaison. Usage B : analyse mensuelle des incidents, consommée par
+      la qualité, fraîcheur indifférente, criticité faible. <strong>Deux usages, deux exigences
+      opposées sur la même donnée</strong> : c'est le cœur de l'exercice.</p>
+
+    <p><strong>Étape 2 — Le chemin.</strong> Collecte : 40 camions × 6 mesures par minute, soit environ
+      345 000 mesures par jour. Pour l'usage A, la donnée doit être traitée <em>pendant</em> son trajet ;
+      pour l'usage B, il suffit qu'elle soit stockée et interrogeable plus tard.</p>
+
+    <p><strong>Étape 3 — Les objets révisés.</strong></p>
+    <ul>
+      <li><strong>Composants</strong> : ajout d'un canal d'ingestion continu, à côté de l'ingestion
+        planifiée existante. L'architecture devient mixte, et c'est normal.</li>
+      <li><strong>Flux</strong> : un nouveau flux continu, qui se sépare en deux — une branche qui
+        évalue les seuils en passant, une branche qui dépose les mesures pour l'analyse. La même donnée
+        emprunte deux chemins, parce qu'elle sert deux usages (ce sera le sujet de N22).</li>
+      <li><strong>Responsabilités</strong> : qui reçoit l'alerte à 3 h du matin, et selon quelle
+        procédure ? Sans réponse écrite, l'usage A n'existe pas, quelle que soit la technique.</li>
+      <li><strong>Stockages</strong> : les mesures brutes, volumineuses et peu utiles passé un mois,
+        appellent une règle de cycle de vie distincte de celle des ventes — par exemple un an en
+        détail, puis des agrégats.</li>
+      <li><strong>Traitements</strong> : une évaluation de seuil en continu, et une agrégation mensuelle
+        pour la qualité.</li>
+      <li><strong>Interfaces</strong> : une interface d'alerte vers l'exploitation, et une vue
+        d'incidents pour la qualité. Deux consommateurs, deux contrats, deux niveaux de service.</li>
+      <li><strong>Contraintes</strong> : moins de deux minutes de bout en bout pour A, et une
+        disponibilité élevée du canal d'alerte ; rien de tel pour B. Les contraintes de A ne doivent pas
+        être imposées à B, sous peine de payer un temps réel inutile sur l'analyse mensuelle.</li>
+    </ul>
+
+    <p><strong>Étape 4 et 5 — Vérification.</strong> Les deux usages sont servis par un chemin partagé
+      en amont et séparé en aval, sans que l'exigence du plus contraignant soit imposée à l'autre.
+      Ce que montre l'exercice : une architecture bien écrite <strong>se révise par parties</strong>.
+      Les sept objets ont été passés en revue ; quatre ont réellement changé, l'existant n'a pas été
+      refait. C'est la différence pratique entre faire évoluer une architecture et la reconstruire.</p>
+  </div>
+</div>
+
+<h3 id="n05-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition, puis citez les sept objets de l'architecte et donnez, pour chacun, la
+        question à laquelle il répond.</li>
+      <li>Expliquez pourquoi une liste d'outils n'est pas une architecture, en donnant un exemple de deux
+        organisations ayant les mêmes outils et des architectures différentes.</li>
+      <li>Parmi les sept objets, trois ne se dessinent pas. Lesquels, et que perd-on exactement quand ils
+        manquent ?</li>
+      <li>Pour une bibliothèque universitaire (prêts, catalogue, fréquentation, ressources numériques),
+        écrivez trois usages puis le chemin complet pour le premier d'entre eux.</li>
+      <li>Donnez trois exemples de contraintes correctement formulées et trois exemples de contraintes
+        mal formulées, et dites ce qui distingue les deux.</li>
+      <li>Qu'est-ce que « l'architecture qui a lieu », et comment la reconstituer quand elle diffère de
+        celle qui est documentée ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n05-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez ces affirmations sous l'un des sept objets : « le fichier arrive chaque nuit à 2 h » ;
+      « l'équipe data tient ce traitement » ; « les données clients sont conservées trois ans » ;
+      « la vue est accessible par API » ; « le rapport doit sortir en moins de dix minutes » ;
+      « nous utilisons Spark » ; « les montants sont convertis en dirhams ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une chaîne de pharmacies (60 officines) veut suivre ses stocks en temps quasi réel pour éviter
+      les ruptures, et analyser mensuellement les ventes par molécule. Appliquez les cinq étapes et
+      produisez un document d'architecture complet : liste des usages, chemin de bout en bout, les sept
+      objets remplis, confrontation des usages aux contraintes. Terminez par les trois questions du
+      test de l'étape 5 et par vos réponses.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Un directeur affirme : « notre architecture est bonne, la preuve, elle n'a pas changé depuis
+      cinq ans. » Un autre affirme : « la nôtre est bonne, la preuve, nous la révisons tous les
+      trimestres. » Montrez que ces deux arguments reposent sur la même erreur de raisonnement, en vous
+      appuyant précisément sur la définition. Proposez ensuite trois critères vérifiables permettant de
+      juger réellement de la qualité d'une architecture de données, et expliquez, pour chacun, comment
+      vous le mesureriez dans une organisation que vous découvrez.</p>
+  </div>
+</div>

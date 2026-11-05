@@ -1,0 +1,124 @@
+<h1 class="chapitre saut" id="ouverture"><span class="num">Ouverture</span>Objectifs, problème et préambule</h1>
+
+<h2 id="f-s1">1. Objectifs du cours</h2>
+
+<div class="box b-quoi long">
+  <div class="box-t">1. OBJECTIFS — ce que vous saurez faire à la fin</div>
+  <div class="box-b">
+    <p>Ce cours ne vise pas à vous faire retenir des noms de technologies, mais à vous rendre capable de
+      <strong>décider</strong> : devant une situation réelle, savoir quelle architecture de données construire
+      et <strong>justifier chaque choix par une contrainte</strong>. À la fin, vous serez capable de :</p>
+    <ol>
+      <li><strong>Définir une donnée</strong> et expliquer à quelle condition elle a de la valeur pour une
+        organisation.</li>
+      <li><strong>Distinguer</strong> données structurées, semi-structurées et non structurées, et en tirer
+        une conséquence concrète sur le stockage et le traitement.</li>
+      <li><strong>Expliquer ce qu'est la gestion des données</strong> (collecte, stockage, gouvernance, cycle
+        de vie, mise à disposition) et pourquoi elle devient complexe quand les sources se multiplient.</li>
+      <li><strong>Définir une architecture de données</strong> et énoncer les décisions qu'un architecte doit
+        prendre : sources, stockage, mode de déplacement, traitement, consommation, fraîcheur, sécurité,
+        qualité.</li>
+      <li><strong>Situer les grandes familles d'architectures</strong> — traditionnelle, Data Warehouse,
+        Data Lake, Lakehouse — non par leur date, mais par le problème que chacune résout.</li>
+      <li><strong>Comparer</strong> architecture centralisée et architecture distribuée, scale-up et
+        scale-out, et dire ce que chaque choix apporte <em>et</em> ce qu'il coûte.</li>
+      <li><strong>Séparer les workloads OLTP et OLAP</strong>, expliquer leur complémentarité par l'ETL et
+        justifier pourquoi on les sépare logiquement ou physiquement.</li>
+      <li><strong>Choisir entre batch et stream</strong> à partir du seul critère qui compte : la latence
+        acceptable pour le cas d'usage.</li>
+      <li><strong>Expliquer pourquoi « beaucoup de données » ne signifie pas « beaucoup de valeur »</strong>,
+        et pourquoi la qualité exigée dépend du workload (BI ou IA).</li>
+      <li><strong>Distinguer</strong> une organisation <em>data-driven</em> d'une organisation
+        <em>AI-driven</em>, et dire ce que l'IA exige en plus de la donnée.</li>
+      <li><strong>Décrire une architecture moderne</strong> en cinq couches — sources, ingestion, storage,
+        processing, analytics/AI — traversées par la gouvernance, la sécurité, les métadonnées, la qualité
+        et l'observabilité.</li>
+      <li><strong>Concevoir une architecture de bout en bout sur un cas réel</strong> (e-commerce, IoT/Edge)
+        et défendre chaque décision devant les contraintes de volume, de latence, de coût et de conformité.</li>
+    </ol>
+  </div>
+</div>
+
+<h2 id="f-s2">2. Un problème du réel</h2>
+
+<div class="box b-domaine long">
+  <div class="box-t">DOMAINE : DISTRIBUTION / E-COMMERCE — le lundi matin d'une enseigne</div>
+  <div class="box-b">
+    <p>Une enseigne de distribution possède <strong>120 magasins</strong>, un site marchand, une application
+      mobile, un programme de fidélité et un service après-vente. Tout fonctionne : les caisses encaissent,
+      le site vend, l'ERP suit les commandes. L'informatique tient en une ligne :
+      <em>applications → base de données → reporting</em>.</p>
+
+    <p>Un lundi matin, la direction formule trois demandes qui semblent raisonnables :</p>
+    <ol>
+      <li>« Je veux le <strong>chiffre d'affaires de la veille</strong>, par région et par catégorie,
+        disponible à 8 h — pas la consolidation du mois dernier. »</li>
+      <li>« Un client qui achète en magasin n'est <strong>pas reconnu</strong> quand il ouvre l'application.
+        Je veux une vue unique du client. »</li>
+      <li>« Je veux <strong>prévoir la demande</strong> par produit et par magasin pour arrêter les ruptures
+        du vendredi soir. »</li>
+    </ol>
+
+    <p>La réponse de l'équipe informatique est, elle aussi, raisonnable — et c'est bien le problème :</p>
+    <ul>
+      <li>Le rapport du soir interroge <strong>directement la base des caisses</strong> ; quand il tourne,
+        les encaissements ralentissent.</li>
+      <li>Les <strong>logs du site</strong> et les événements de l'application sont en JSON : ils n'entrent
+        pas dans le schéma de l'ERP, donc personne ne les charge.</li>
+      <li>Les <strong>photos</strong> jointes aux réclamations dorment sur un serveur de fichiers ; aucune
+        analyse ne les voit.</li>
+      <li>Le <strong>même client</strong> porte trois identifiants différents — caisse, site, fidélité — avec
+        trois adresses, mises à jour à des moments différents.</li>
+      <li>Pour la prévision, le data scientist demande <strong>trois ans d'historique</strong> : la base
+        opérationnelle n'en garde que six mois, car elle a été conçue pour aller vite, pas pour se souvenir.</li>
+    </ul>
+
+    <p><strong>La question centrale de ce cours est exactement celle-là :</strong> pourquoi une organisation
+      qui possède plusieurs <strong>sources</strong>, plusieurs <strong>formats</strong>, de gros
+      <strong>volumes</strong> et des <strong>usages</strong> différents ne peut-elle plus se limiter à
+      « application → base de données → reporting » ? Et par quoi faut-il la remplacer, sans multiplier les
+      copies ni perdre le contexte, la qualité et la traçabilité ?</p>
+  </div>
+</div>
+
+<h2 id="f-s3">3. Préambule</h2>
+
+<p>Le lundi matin de cette enseigne n'est pas une panne : rien n'est tombé. C'est une
+<strong>limite d'architecture</strong>. Chacune des trois demandes ajoute une contrainte que la chaîne
+initiale n'avait jamais eu à porter — de la <em>fraîcheur</em> pour le chiffre d'affaires de la veille, de
+la <em>variété</em> et de l'<em>intégration</em> pour la vue unique du client, du <em>volume</em>, de
+l'<em>historique</em> et de la <em>qualité</em> pour la prévision. Une architecture ne vieillit donc pas
+parce qu'une technologie plus récente est apparue, mais parce que <strong>de nouveaux besoins imposent de
+nouveaux compromis</strong>.</p>
+
+<p>C'est le fil de ce cours. Nous partirons de la matière elle-même — qu'est-ce qu'une donnée, pourquoi sa
+gestion devient complexe, ce qu'on appelle exactement une architecture de données et quelles décisions
+elle engage. Nous suivrons ensuite l'<strong>évolution</strong> des architectures en lisant chaque
+génération par le problème qu'elle résolvait : la chaîne traditionnelle, puis le <strong>Data
+Warehouse</strong>, le <strong>Data Lake</strong> et le <strong>Lakehouse</strong>. Nous examinerons les
+deux grands axes de choix — <strong>centralisé ou distribué</strong>, <strong>OLTP ou OLAP</strong>,
+<strong>batch ou stream</strong> — en pesant à chaque fois ce que l'option apporte et ce qu'elle coûte.
+Nous verrons pourquoi la donnée devient un <strong>actif stratégique</strong> seulement lorsqu'elle est
+gouvernée, documentée et disponible, et ce qui sépare une organisation <em>data-driven</em> d'une
+organisation <em>AI-driven</em>. Nous assemblerons enfin une <strong>architecture moderne en cinq
+couches</strong> — sources, ingestion, storage, processing, analytics/AI — traversée de bout en bout par la
+gouvernance, la sécurité, les métadonnées, la qualité et l'observabilité.</p>
+
+<p>Chacune des <strong>35 notions</strong> du cours est traitée de la même façon, et c'est volontaire :
+son énoncé exact, son explication, le problème qu'elle traite, son utilité, son origine, <em>où</em> et
+<em>quand</em> l'employer, <em>comment</em> l'employer pas à pas, puis des exercices d'application corrigés
+avec exactement la même démarche, des exercices d'entraînement et des exercices de difficulté croissante.
+La répétition de ce schéma est ce qui fait passer une notion du statut de définition apprise à celui
+d'outil de décision. Le cours se termine par les <strong>problèmes du réel résolus</strong> — le cas
+e-commerce ci-dessus et un cas IoT/Edge — puis par une banque de <strong>30 exercices</strong> dont les
+corrigés sont regroupés en fin de document, pour que vous puissiez chercher avant de voir.</p>
+
+<div class="ar" dir="rtl">
+  <p><strong>بالعربية:</strong> هاد الدرس كيجاوب على سؤال واحد: علاش مقاولة عندها عدة مصادر وأشكال وأحجام
+    واستعمالات ما بقاتش تقدر تكتفي بـ«تطبيق ← قاعدة بيانات ← تقارير»؟ غادي نبداو من المادة نفسها (شنو هي
+    المعطيات وشنو هي أركيتكتير المعطيات)، من بعد نتبعو تطور الأركيتكتيرات حسب المشكل اللي حلات كل وحدة
+    (التقليدية، Data Warehouse، Data Lake، Lakehouse)، ونوازنو بين الاختيارات الكبار (مركزي/موزع،
+    OLTP/OLAP، batch/stream)، وفالآخر نركبو أركيتكتير عصرية ب5 طبقات مع طبقة عرضانية ديال الحكامة والجودة
+    والتتبع. كل notion من 35 كتاخد نفس المعالجة: القاعدة، الشرح، المشكل، الفائدة، الأصل، فين، وقتاش،
+    كيفاش، وتمارين محلولة.</p>
+</div>

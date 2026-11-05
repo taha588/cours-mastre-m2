@@ -1,0 +1,202 @@
+/* ============================================================================
+   THEME « Quoi ? Où ? Comment ? »
+   Couleurs relevées AU PIXEL dans le PDF de référence
+   (Cours_Complet_Optimisation.pdf — LaTeX / tcolorbox).
+   Ne pas inventer de teinte : tout ce qui est utilisé est ci-dessous.
+   Usage : HTML + MathJax SVG -> Edge headless --print-to-pdf.
+   ========================================================================= */
+
+:root {
+  /* --- 1. BLEU — « C'EST QUOI ? » : énoncé, définition, principe --------- */
+  --bleu:        #286EBE;   /* barre de titre                               */
+  --bleu-fond:   #E8F2FE;   /* fond du corps                                */
+  --marine:      #22497A;   /* titres, filets, barres des boîtes neutres    */
+  --marine-2:    #1D3E68;   /* amorces « ▶ » variante                       */
+
+  /* --- 2. OR — « OÙ / QUAND l'utiliser ? » ------------------------------- */
+  --or:          #C88C14;
+  --or-fond:     #FFF7E6;
+
+  /* --- 3. VERT — « COMMENT l'utiliser ? » : mode d'emploi ---------------- */
+  --vert:        #288C3C;
+  --vert-fond:   #EBF8EB;
+  --vert-fonce:  #1C622A;   /* « À retenir »                                */
+  --vert-app:    #50963C;   /* barre des énoncés d'exercices                */
+
+  /* --- ROUGE — pièges, erreurs, cas particuliers ------------------------- */
+  --rouge:       #BE3232;
+  --rouge-fond:  #FDEBEB;
+
+  /* --- PRUNE — problèmes du réel / « Domaine … » ------------------------- */
+  --prune:       #460046;
+  --prune-fond:  #F7F0F7;
+
+  /* --- OLIVE — cadre des boîtes de travail (corrigés, exercices) --------- */
+  --olive:       #789010;
+  --olive-2:     #697E0E;   /* filet de la page de titre                    */
+
+  /* --- NEUTRES ----------------------------------------------------------- */
+  --lien:        #800080;   /* sommaire / renvois                           */
+  --trait:       #BFBFBF;   /* filets de tableaux                           */
+  --gris-fond:   #F5F5F5;   /* fond du code                                 */
+  --gris-2:      #D9D9D9;
+  --encre:       #000000;
+
+  /* --- CODE -------------------------------------------------------------- */
+  --code-kw:     #0000B3;
+  --code-str:    #990000;
+  --code-com:    #007300;
+  --code-num:    #7F807F;
+}
+
+/* ---------------------------------------------------------------- PAGE --- */
+@page { size: A4; margin: 21mm 21mm 20mm 21mm; }
+
+body {
+  font-family: "Latin Modern Roman", "Amiri", Cambria, Georgia, "Times New Roman", serif;
+  font-size: 11.5pt;
+  line-height: 1.75;
+  color: var(--encre);
+  margin: 0;
+  text-align: justify;
+}
+[dir="rtl"], .ar { font-family: "Amiri", "Traditional Arabic", "Segoe UI", serif; line-height: 2.05; }
+
+p { margin: .55em 0; }
+strong { font-weight: 700; }
+
+/* ATTENTION : pas de position:fixed pour un en-tête/pied courant —
+   Edge --print-to-pdf les inverse haut/bas et les superpose au texte. */
+
+/* ------------------------------------------------------- PAGE DE TITRE --- */
+.cover { text-align: center; padding-top: 34mm; page-break-after: always; }
+.cover .rule-top,
+.cover .rule-bot { height: 2.2pt; background: var(--marine); margin: 0 0 10mm; }
+.cover .rule-bot { background: var(--olive-2); margin: 8mm 0 12mm; }
+.cover h1 {
+  font-size: 27pt; color: var(--marine); font-weight: 400;
+  margin: 0 0 4mm; line-height: 1.25;
+}
+.cover .sub   { font-size: 16pt; color: var(--marine); margin: 0 0 5mm; }
+.cover .claim { font-size: 12pt; font-style: italic; color: var(--marine); }
+.cover .foot  { margin-top: 26mm; font-size: 11pt; }
+
+/* Boîte « la méthode en 3 temps » de la page de titre */
+.cover-method {
+  border: 1.6pt solid var(--marine); background: var(--bleu-fond);
+  border-radius: 3px; padding: 4mm 5mm; margin: 0 6mm 8mm; text-align: left;
+}
+.cover-method .mt { text-align: center; font-weight: 700; margin-bottom: 3mm; }
+.cover-cols { display: flex; gap: 5mm; font-size: 10.5pt; }
+.cover-cols > div { flex: 1; }
+.cover-cols .k { display: inline-block; padding: 1px 5px; border-radius: 2px; font-weight: 700; }
+.cover-cols .k1 { color: var(--bleu);  background: var(--bleu-fond); }
+.cover-cols .k2 { color: var(--or);    background: var(--or-fond); }
+.cover-cols .k3 { color: var(--vert);  background: var(--vert-fond); }
+
+.cover-contenu {
+  border: 1.4pt solid var(--olive); background: #fff;
+  border-radius: 3px; padding: 4mm 5mm; margin: 0 6mm; font-size: 10.5pt;
+}
+
+/* ------------------------------------------------------------- TITRES --- */
+h1.chapitre { font-size: 22pt; color: var(--marine); font-weight: 400; margin: 0 0 6mm; line-height: 1.3; }
+h1.chapitre .num { display: block; font-size: 14pt; margin-bottom: 3mm; }
+h2 { font-size: 15.5pt; color: var(--marine); font-weight: 400; margin: 9mm 0 3mm; }
+h3 { font-size: 12.5pt; color: var(--prune);   font-weight: 400; margin: 7mm 0 2mm; }
+h3.var { color: var(--marine-2); }
+h3::before { content: "\25B6\00A0"; }        /* ▶ */
+h4 { font-size: 11.5pt; font-weight: 700; margin: 4mm 0 1mm; }
+
+/* ----------------------------------------------------------- SOMMAIRE --- */
+.toc { font-size: 11pt; }
+.toc a, .toc .e { color: var(--lien); text-decoration: none; }
+.toc .l1 { font-weight: 700; margin-top: 3mm; }
+.toc .l2 { padding-left: 8mm; }
+.toc .l3 { padding-left: 16mm; font-size: 10.5pt; }
+.toc .row { display: flex; align-items: baseline; }
+.toc .dots { flex: 1; border-bottom: 1px dotted var(--trait); margin: 0 2mm 4px; }
+[dir="rtl"] .toc .l2 { padding-left: 0; padding-right: 8mm; }
+[dir="rtl"] .toc .l3 { padding-left: 0; padding-right: 16mm; }
+
+/* -------------------------------------------------------------- BOÎTES ---
+   Structure HTML :
+     <div class="box b-quoi">
+       <div class="box-t">1. C'EST QUOI ? — l'énoncé</div>
+       <div class="box-b"> … </div>
+     </div>
+   --acc  = barre de titre (+ cadre par défaut)
+   --cadre = cadre, quand il diffère de la barre (boîtes de travail)
+   -------------------------------------------------------------------- */
+.box {
+  --cadre: var(--acc);
+  border: 1.4pt solid var(--cadre);
+  border-radius: 3px;
+  margin: 3.5mm 0;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.box-t {
+  background: var(--acc); color: #fff;
+  font-weight: 700; font-size: 10.9pt; letter-spacing: .2px;
+  padding: 1.2mm 3mm;
+}
+.box-b { background: var(--fond, #fff); padding: 2.5mm 3.5mm; }
+.box-b > :first-child { margin-top: 0; }
+.box-b > :last-child  { margin-bottom: 0; }
+
+/* 1 · le QUOI — énoncé de la règle, principe, intuition */
+.b-quoi     { --acc: var(--bleu);       --fond: var(--bleu-fond); }
+/* 2 · le OÙ / QUAND — domaines, signaux dans l'énoncé */
+.b-ou       { --acc: var(--or);         --fond: var(--or-fond); }
+/* 3 · le COMMENT — recette pas à pas */
+.b-comment  { --acc: var(--vert);       --fond: var(--vert-fond); }
+/* synthèse d'une phrase, à mémoriser */
+.b-retenir  { --acc: var(--vert-fonce); --fond: var(--vert-fond); }
+/* pièges, erreurs classiques, cas particuliers */
+.b-piege    { --acc: var(--rouge);      --fond: var(--rouge-fond); }
+/* problème du réel / énoncé « Domaine … » */
+.b-domaine  { --acc: var(--prune);      --fond: var(--prune-fond); }
+/* boîtes de travail : cadre olive, barre marine ou verte, fond blanc */
+.b-note     { --acc: var(--marine);     --cadre: var(--olive); --fond: #fff; }
+.b-solution { --acc: var(--marine);     --cadre: var(--olive); --fond: #fff; }
+.b-app      { --acc: var(--vert-app);   --cadre: var(--olive); --fond: #fff; }
+/* suite d'une boîte coupée par un saut de page : même fond, sans barre */
+.box.suite > .box-t { display: none; }
+
+/* --------------------------------------------------------- PASTILLES ---- */
+.chip {
+  display: inline-block; padding: 0 6px; border-radius: 9px;
+  font-size: 9.5pt; font-weight: 700; color: #fff; vertical-align: 1px;
+}
+.chip-facile   { background: var(--vert); }
+.chip-moyen    { background: var(--or); }
+.chip-difficile{ background: var(--rouge); }
+
+/* ------------------------------------------------------------ TABLEAU --- */
+/* mettre la ligne d'en-tête dans <thead> pour que le zébrage tombe juste */
+table { width: 100%; border-collapse: collapse; font-size: 10.5pt; margin: 3.5mm 0; page-break-inside: avoid; }
+th { background: var(--marine); color: #fff; font-weight: 700; text-align: left; }
+th, td { border: .8pt solid var(--trait); padding: 1.4mm 2.5mm; vertical-align: top; }
+tbody tr:nth-child(odd)  td { background: #fff; }              /* jamais le fond de la boîte */
+tbody tr:nth-child(even) td { background: var(--gris-fond); }
+[dir="rtl"] th { text-align: right; }
+
+/* --------------------------------------------------------------- CODE --- */
+pre, code { font-family: "Consolas", "DejaVu Sans Mono", monospace; font-size: 9.5pt; }
+pre {
+  background: var(--gris-fond); border: .8pt solid var(--trait);
+  border-radius: 3px; padding: 2.5mm 3mm; line-height: 1.45;
+  text-align: left; direction: ltr; page-break-inside: avoid;
+}
+.c-kw { color: var(--code-kw); } .c-str { color: var(--code-str); }
+.c-com{ color: var(--code-com); } .c-num { color: var(--code-num); }
+
+/* ---------------------------------------------------- MATHS & DIVERS ---- */
+.mjx-container[display="true"], .eq { margin: 2.5mm 0; text-align: center; }
+.boxed { border: .9pt solid var(--encre); padding: .4mm 2mm; border-radius: 2px; }
+hr.filet { border: 0; height: 1.2pt; background: var(--marine); margin: 6mm 0; }
+ul, ol { margin: .5em 0; padding-left: 6mm; }
+[dir="rtl"] ul, [dir="rtl"] ol { padding-left: 0; padding-right: 6mm; }
+li { margin: .25em 0; }
+.saut { page-break-before: always; }

@@ -1,0 +1,521 @@
+<h1 class="chapitre saut" id="partie2"><span class="num">Partie II</span>Architectures centralisées et distribuées</h1>
+
+<p>Le choix porte sur l'<strong>emplacement des données et du calcul</strong>, mais aussi sur la
+<strong>coordination</strong> et la <strong>gouvernance</strong>.</p>
+
+<h2 class="notion" id="n13">N13 — L'architecture centralisée</h2>
+
+<h3 id="n13-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Les <strong>données et/ou le traitement</strong> sont
+      <strong>principalement regroupés</strong> dans une <strong>plateforme centrale</strong>.</p>
+
+    <p><strong>Exemple.</strong> Une entreprise concentre ses données analytiques dans un
+      <strong>entrepôt unique alimenté par plusieurs applications</strong>.</p>
+
+    <table>
+      <thead><tr><th>Atouts</th><th>Limites</th><th>Question</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Contrôle • cohérence • administration centralisée</td>
+          <td>Concentration • scalabilité potentiellement limitée</td>
+          <td><strong>Le centre devient-il un goulot d'étranglement ?</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 id="n13-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Trois mots de cette définition en disent plus qu'il n'y paraît, et ils doivent être lus avant les
+      atouts et les limites.</p>
+
+    <p><strong>« Et/ou ».</strong> La centralisation a <strong>deux axes indépendants</strong> : où
+      vivent les <em>données</em>, et où s'exécute le <em>calcul</em>. On peut centraliser les deux,
+      ou seulement l'un. Rassembler toutes les données dans un stockage commun tout en laissant chaque
+      équipe y exécuter ses propres traitements est une architecture centralisée sur un axe et
+      distribuée sur l'autre — c'est d'ailleurs la combinaison que la séparation du stockage et du
+      calcul (N11) a rendue courante. Poser la question en bloc — « sommes-nous centralisés ? » — fait
+      perdre cette distinction, qui est précisément celle sur laquelle on peut agir.</p>
+
+    <p><strong>« Principalement ».</strong> La centralisation est une <strong>affaire de degré, jamais
+      un état binaire</strong>. Aucune organisation réelle n'est entièrement centralisée : les bases
+      opérationnelles restent chez elles, des fichiers circulent, une filiale garde son système. La
+      question utile n'est donc pas « centralisé ou distribué ? » mais « <em>quelle part</em>, et
+      laquelle ? ».</p>
+
+    <p><strong>« Plateforme centrale ».</strong> Central veut dire <em>logiquement unique</em>, pas
+      <em>physiquement unique</em>. Un entrepôt infonuagique réparti sur des centaines de machines est
+      une architecture centralisée, parce qu'il n'y a qu'un endroit où l'on dépose, qu'une politique
+      d'accès et qu'une administration.</p>
+
+    <p>Vient alors ce qui fait la force pédagogique de cette notion. Regardez les atouts —
+      <strong>contrôle, cohérence, administration centralisée</strong> — et les limites —
+      <strong>concentration, scalabilité potentiellement limitée</strong>. On les présente souvent comme
+      deux listes à peser l'une contre l'autre. En réalité, <strong>ce sont les deux faces d'un seul et
+      même fait : il n'y a qu'un endroit.</strong></p>
+    <ul>
+      <li>Un seul endroit → une seule copie → <strong>cohérence</strong> : un chiffre, une définition
+        (c'est exactement ce que N10 obtenait par la préparation unique).</li>
+      <li>Un seul endroit → un seul chemin d'accès → <strong>contrôle</strong> : une politique de
+        droits, un journal, un audit.</li>
+      <li>Un seul endroit → un seul système à tenir → <strong>administration centralisée</strong> : une
+        sauvegarde, une mise à jour, une équipe.</li>
+      <li>Un seul endroit → tous les workloads partagent les mêmes ressources →
+        <strong>concentration</strong> et contention.</li>
+      <li>Un seul endroit → toute demande passe par la même autorité → <strong>file d'attente</strong>.</li>
+      <li>Un seul endroit → un seul point de panne, et un seul périmètre d'incident de sécurité.</li>
+    </ul>
+    <p>On ne peut donc pas « garder les atouts en supprimant les limites » : ce serait demander qu'il y
+      ait un seul endroit et plusieurs à la fois. Ce qu'on peut faire, en revanche, c'est
+      <strong>choisir ce que l'on met au centre</strong>.</p>
+
+    <p>Reste la question du support, qui est le véritable outil de cette notion : <strong>le centre
+      devient-il un goulot d'étranglement ?</strong> Elle est au présent et au futur, parce qu'un centre
+      n'est pas un goulot par nature : il le devient quand la demande dépasse ce qu'il peut absorber. Et
+      elle se tranche par la <em>mesure</em>, non par l'opinion — temps d'attente, contention, délai
+      moyen d'une demande. Surtout, le goulot peut être de deux natures, et c'est le couplage de N7 qui
+      revient : <strong>technique</strong>, quand les ressources sont saturées, ou
+      <strong>organisationnel</strong>, quand une seule équipe autorise, prépare et publie pour tout le
+      monde. Le second est le plus fréquent, et il est invisible sur un schéma d'architecture.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Centralisé ne veut pas dire « un seul serveur ».</strong> La concentration se juge
+        logiquement : un seul lieu de dépôt, une seule politique, une seule administration — même si
+        l'infrastructure sous-jacente compte mille machines.</li>
+      <li><strong>Ne pas traiter les deux axes en bloc.</strong> Données centralisées et calcul distribué
+        est une configuration parfaitement cohérente, et souvent la meilleure.</li>
+      <li><strong>La centralisation n'est pas un défaut à corriger.</strong> C'est la bonne réponse
+        quand la cohérence et le contrôle priment — comptabilité, dossier patient, reporting
+        réglementaire.</li>
+      <li><strong>Le goulot est plus souvent humain que technique.</strong> Ajouter de la puissance à une
+        plateforme dont le goulot est l'équipe ne change rien, sinon la facture.</li>
+      <li><strong>« Scalabilité potentiellement limitée » : le mot <em>potentiellement</em> compte.</strong>
+        Les plateformes centrales modernes montent très haut ; ce qui plafonne en premier est
+        généralement le coût ou la coordination, pas la capacité brute.</li>
+      <li><strong>Un centre unique est un périmètre d'incident unique.</strong> Panne, erreur humaine ou
+        compromission y touchent tous les usages à la fois — ce qui se traite par la disponibilité et la
+        séparation des droits, non par la distribution.</li>
+      <li><strong>Centraliser « pour mettre de l'ordre » sans toucher aux responsabilités déplace la
+        file d'attente</strong> au lieu de la supprimer (N7, exercice 12.3).</li>
+      <li><strong>La cohérence n'est pas automatique.</strong> Un entrepôt central où chaque équipe crée
+        ses propres tables reproduit la divergence des chiffres à l'intérieur même du centre.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الأركيتكتير <strong>المركزية</strong> = المعطيات <strong>و/ولا</strong>
+    المعالجة مجمّعين <strong>أساسا</strong> فمنصة مركزية (مثال: entrepôt وحيد مغذّى من عدة تطبيقات).
+    المزايا: <strong>تحكم · اتساق · إدارة مركزية</strong>. الحدود: <strong>تركيز · قابلية توسع محدودة
+    احتمالا</strong>. والسؤال: <strong>واش المركز كيولي عنق زجاجة؟</strong> تلات ملاحظات: (1)
+    <strong>«و/ولا»</strong> — كاينين محورين مستقلين: فين كيعيشو المعطيات، وفين كيتنفذ الحساب؛ يمكن
+    تمركز وحد وتوزع الآخر. (2) <strong>«أساسا»</strong> — المركزية درجة ماشي حالة ثنائية؛ السؤال المفيد
+    هو «شحال، وأشنو بالضبط؟». (3) المزايا والحدود <strong>ماشي جوج لوائح كنوازنو بيناتهم — هوما وجهين
+    ديال حقيقة وحدة: كاينة غير بلاصة وحدة</strong>. بلاصة وحدة ← نسخة وحدة (اتساق) ← طريق ولوج واحد
+    (تحكم) ← نظام واحد (إدارة)، وفنفس الوقت ← كل الـworkloads كيتقاسمو نفس الموارد (تركيز) ← وكل طلب
+    كيدوز من نفس الجهة (طابور). وعلاش ما يمكنش «نحتافظو بالمزايا ونحيدو الحدود». وآخر نقطة: عنق
+    الزجاجة يقدر يكون <strong>تقني</strong> (موارد) ولا <strong>تنظيمي</strong> (فريق واحد كيأذن
+    ويهيّئ وينشر للجميع) — والثاني هو الأكثر، وما كيبانش فالتصميم.</p>
+</div>
+
+<h3 id="n13-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'architecture centralisée traite le problème de la <strong>dispersion</strong>. Quand chaque
+      application détient sa vérité, aucune question transverse n'a de réponse : le même client porte
+      trois identifiants, trois services calculent trois chiffres, et nul ne sait lequel fait autorité.
+      Rassembler en un lieu unique résout cela d'un coup, et c'est pourquoi la centralisation est la
+      première réponse de presque toutes les organisations — l'entrepôt de N10 en est l'exemple
+      canonique.</p>
+    <p>Mais la règle, telle qu'elle est énoncée ici, traite un second problème, et c'est lui qui nous
+      intéresse à ce stade du cours : <strong>savoir ce que la concentration coûte</strong>. En plaçant
+      côte à côte les atouts, les limites et la question du goulot, elle interdit de présenter la
+      centralisation comme un progrès sans contrepartie. Elle transforme un réflexe — « rassemblons
+      tout » — en décision mesurable : que met-on au centre, et jusqu'où ?</p>
+  </div>
+</div>
+
+<h3 id="n13-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Mesurer le degré de centralisation</strong> sur les deux axes au lieu de ranger
+        l'architecture dans un camp.</li>
+      <li><strong>Nommer ce que la concentration rapporte</strong> — une définition, une politique
+        d'accès, un audit — pour ne pas la défaire par mégarde.</li>
+      <li><strong>Diagnostiquer un goulot d'étranglement</strong> avec des chiffres : file d'attente,
+        délai moyen, contention aux heures de pointe.</li>
+      <li><strong>Distinguer goulot technique et goulot organisationnel</strong>, qui n'appellent pas le
+        même remède.</li>
+      <li><strong>Décider ce qui reste au centre</strong> : ce qui exige cohérence et contrôle y reste,
+        le reste peut être rendu autonome.</li>
+      <li><strong>Préparer la comparaison avec l'architecture distribuée</strong> (N14) sur des critères
+        plutôt que sur des préférences.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n13-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La centralisation n'a pas été inventée : elle est la <strong>forme par défaut</strong> de toute
+      architecture naissante. Quand il n'y a qu'une application, il n'y a qu'une base ; quand on veut
+      analyser, on crée un entrepôt et l'on y met tout. Le mouvement est si naturel qu'on ne le décide
+      pas — ce qui explique que ses limites soient découvertes plutôt que prévues.</p>
+
+    <p><strong>Pourquoi les trois atouts arrivent-ils ensemble ?</strong> Parce qu'ils ont une cause
+      commune, l'unicité du lieu, et l'on peut le vérifier terme à terme. <em>Cohérence</em> : avec une
+      seule copie, deux chiffres contradictoires sont impossibles — il n'y a rien à réconcilier.
+      <em>Contrôle</em> : avec un seul chemin d'accès, autoriser et journaliser se font en un point.
+      <em>Administration</em> : avec un seul système, une sauvegarde et une montée de version suffisent.
+      Trois bénéfices, une seule cause.</p>
+
+    <p><strong>Pourquoi les limites ont-elles la même cause ?</strong> Suivons l'entrepôt de notre
+      enseigne, qui est exactement l'exemple du support — un entrepôt unique alimenté par plusieurs
+      applications.</p>
+    <ul>
+      <li>Avec <strong>4 workloads</strong> — un tableau de bord, deux analyses, un export — la
+        plateforme absorbe sans peine. Les atouts jouent, les limites dorment.</li>
+      <li>Avec <strong>20 workloads</strong>, dont trois lourds qui tournent à la même heure, les
+        requêtes se concurrencent : les mêmes ressources sont partagées par tout le monde. C'est la
+        <em>concentration</em>, et elle n'est que l'autre nom de l'unicité.</li>
+      <li>Avec <strong>12 demandeurs</strong> et une seule équipe pour préparer les données, les délais
+        s'allongent sans qu'aucune ressource technique ne soit saturée. C'est le goulot
+        <em>organisationnel</em>, et aucun tableau de bord d'infrastructure ne le montrera.</li>
+    </ul>
+    <p>Dans les deux cas, <strong>rien n'est tombé en panne</strong> : le système fait exactement ce
+      pour quoi il a été conçu, et c'est la demande qui a changé de taille. Voilà pourquoi la question
+      du support est posée au présent — « le centre <em>devient</em>-il un goulot ? » — et pourquoi elle
+      doit être reposée périodiquement.</p>
+
+    <p>Enfin, pourquoi le support précise-t-il « <em>potentiellement</em> limitée » ? Par honnêteté.
+      Une plateforme centrale moderne monte très haut en capacité, et la limite rencontrée en pratique
+      est rarement le plafond technique : c'est le <strong>coût</strong> de la montée, ou la
+      <strong>coordination</strong> qu'elle impose. Ce que confirme le sous-titre de cette partie — le
+      choix porte sur l'emplacement, <em>mais aussi sur la coordination et la gouvernance</em>.</p>
+  </div>
+</div>
+
+<h3 id="n13-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Partout où la cohérence prime sur l'autonomie.</strong> Comptabilité, paie, reporting
+        réglementaire, dossier patient : une seule vérité, auditable, vaut mieux que la souplesse. La
+        centralisation n'y est pas un choix d'époque, c'est une exigence.</li>
+      <li><strong>Dans une organisation de taille modeste.</strong> Tant qu'il y a peu de workloads et
+        peu de demandeurs, les limites ne se manifestent pas et les atouts sont gratuits.</li>
+      <li><strong>Pour sortir d'une dispersion.</strong> Quand chaque service a sa copie, rassembler est
+        la première chose à faire — c'est le mouvement même de l'entrepôt (N10).</li>
+      <li><strong>Pour établir une gouvernance.</strong> Un lieu unique rend possibles un catalogue, un
+        lignage et une politique d'accès uniques ; les obtenir sur dix systèmes dispersés est beaucoup
+        plus coûteux.</li>
+      <li><strong>Sur l'axe des données seulement</strong>, quand on veut une source unique tout en
+        laissant les équipes calculer de leur côté — configuration très fréquente aujourd'hui.</li>
+      <li><strong>Dans un arbitrage de coût.</strong> Une plateforme mutualisée est souvent moins chère
+        que cinq plateformes autonomes, tant que la coordination ne mange pas l'économie.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n13-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Chaque service a sa propre copie et ses propres chiffres. »</strong> Dispersion :
+        la centralisation est la réponse directe.</li>
+      <li><strong>« Nous devons prouver qui a accès à quoi. »</strong> Un seul chemin d'accès rend la
+        preuve possible ; dix systèmes la rendent très coûteuse.</li>
+      <li><strong>« Quelle est la définition officielle de cet indicateur ? »</strong> Un centre fournit
+        le lieu où la trancher une fois.</li>
+      <li><strong>Signal d'alerte — « il faut six semaines pour obtenir un nouvel indicateur. »</strong>
+        Le centre est devenu un goulot, et il est organisationnel.</li>
+      <li><strong>Signal d'alerte — « tout ralentit en fin de mois. »</strong> Goulot technique :
+        contention entre workloads au moment du pic.</li>
+      <li><strong>Signal d'alerte — « les équipes contournent la plateforme. »</strong> Le meilleur
+        indicateur d'un goulot : quand l'attente dépasse le bénéfice, les gens repartent avec leurs
+        propres copies, et la dispersion revient par la fenêtre.</li>
+      <li><strong>Signal d'alerte — « la facture de la plateforme double chaque année. »</strong> La
+        limite rencontrée n'est pas la capacité mais le coût.</li>
+      <li><strong>Signal inverse — « chaque filiale a des besoins et un rythme différents. »</strong>
+        L'uniformité imposée par le centre devient un coût plutôt qu'un bénéfice : voir N14.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n13-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesurer le degré sur les deux axes, séparément.</strong> <em>Données</em> :
+      quelle part des données utiles se trouve dans la plateforme centrale, et que reste-t-il dehors ?
+      <em>Calcul</em> : qui exécute les traitements — le centre pour tout le monde, ou chaque équipe
+      chez elle ? Écrivez deux pourcentages plutôt qu'une étiquette.</p>
+
+    <p><strong>Étape 2 — Nommer ce que la concentration vous apporte réellement.</strong> Avez-vous
+      <em>effectivement</em> une définition unique des indicateurs, une politique d'accès unique, un
+      audit en un point ? Si la réponse est non, vous payez les limites de la centralisation sans en
+      toucher les atouts — situation fréquente et qui se corrige sans rien déplacer.</p>
+
+    <p><strong>Étape 3 — Répondre à la question du support, avec des mesures.</strong> Le centre est-il
+      un goulot ? Trois indicateurs suffisent : le <em>délai moyen</em> entre une demande et sa
+      livraison, la <em>contention</em> aux heures de pointe, et le nombre de <em>contournements</em>
+      observés — exports sauvages, copies locales. Le troisième est le plus parlant, car il mesure ce
+      que les utilisateurs pensent vraiment du centre.</p>
+
+    <p><strong>Étape 4 — Si goulot, déterminer sa nature avant tout remède.</strong> Test simple : si
+      l'on doublait la puissance de la plateforme demain, les délais baisseraient-ils ? Si oui, le
+      goulot est <strong>technique</strong> — capacité, isolation des workloads, fenêtres d'exécution.
+      Si non, il est <strong>organisationnel</strong> — et le remède est de rendre des équipes
+      autonomes sur ce qui les concerne, en gardant au centre les définitions et les règles.</p>
+
+    <p><strong>Étape 5 — Décider le degré, pas le camp.</strong> Classez vos données en deux
+      catégories : celles qui <em>exigent</em> cohérence et contrôle — elles restent au centre, sans
+      discussion — et celles dont l'autonomie coûte moins cher que l'attente. Écrivez le compromis :
+      ce que vous perdez en sortant du centre, c'est exactement la garantie que le centre procurait.
+      <strong>Toute sortie du centre doit être compensée par une règle explicite</strong>, faute de quoi
+      la dispersion revient — et c'est le sujet de N14.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Les atouts de la centralisation — <strong>contrôle, cohérence, administration</strong> — et ses
+      limites — <strong>concentration, file d'attente</strong> — sont <strong>le même fait vu des deux
+      côtés</strong> : il n'y a qu'un endroit. On ne choisit donc pas un camp, on choisit
+      <strong>ce que l'on met au centre</strong> — et l'on vérifie par la mesure si ce centre est
+      devenu un goulot, technique ou organisationnel.</p>
+    <p class="ar" dir="rtl">مزايا المركزية — <strong>تحكم، اتساق، إدارة</strong> — وحدودها —
+      <strong>تركيز، طابور</strong> — هوما <strong>نفس الحقيقة من الجهتين</strong>: كاينة بلاصة وحدة.
+      ما كنختاروش معسكر، كنختارو <strong>أشنو نحطو فالمركز</strong> — وكنقيسو واش هاد المركز ولا عنق
+      زجاجة، تقني ولا تنظيمي.</p>
+  </div>
+</div>
+
+<h3 id="n13-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — le socle de l'enseigne est-il un goulot ?</div>
+  <div class="box-b">
+    <p>L'enseigne dispose maintenant d'un socle commun (N12) : toutes les données analytiques y sont,
+      les traitements y sont exécutés, et l'équipe data de six personnes prépare et publie pour tous les
+      métiers. Constats : 22 workloads contre 4 il y a deux ans ; les rapports de fin de mois se
+      chevauchent et le tableau de bord du matin est parfois livré à 9 h au lieu de 8 h ; un nouvel
+      indicateur demande cinq semaines ; le marketing a recommencé à exporter dans des classeurs.
+      Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Le degré, sur les deux axes.</strong> <em>Données</em> : centralisation forte,
+      la quasi-totalité des données analytiques est sur le socle. <em>Calcul</em> : centralisation
+      forte également, tous les traitements y sont exécutés et écrits par l'équipe data.
+      <strong>Les deux axes sont au maximum</strong> — ce qui, à lui seul, explique que les deux types
+      de goulot puissent apparaître.</p>
+
+    <p><strong>Étape 2 — Ce que la concentration apporte réellement.</strong> Oui, et il faut le
+      reconnaître avant de critiquer : une définition unique du chiffre d'affaires, une politique
+      d'accès unique, un catalogue et un lignage uniques. Ces acquis ont supprimé la divergence des
+      chiffres de N1 et doivent être préservés par toute évolution.</p>
+
+    <p><strong>Étape 3 — Le centre est-il un goulot ?</strong> Les trois mesures répondent oui, et
+      doublement. <em>Délai moyen</em> : cinq semaines pour un nouvel indicateur. <em>Contention</em> :
+      le tableau de bord du matin glisse de 8 h à 9 h en fin de mois, quand les traitements lourds se
+      chevauchent. <em>Contournements</em> : le marketing exporte de nouveau — signal le plus grave, car
+      il annonce le retour de la dispersion que le socle avait supprimée.</p>
+
+    <p><strong>Étape 4 — De quelle nature ?</strong> Appliquons le test. Si l'on doublait la puissance
+      demain : le chevauchement de fin de mois disparaîtrait — donc <strong>une part du goulot est
+      technique</strong> ; mais les cinq semaines ne bougeraient pas d'un jour, puisque le délai vient
+      de la file de demandes devant six personnes — donc <strong>l'essentiel du goulot est
+      organisationnel</strong>. Les deux coexistent, et c'est la situation la plus courante.</p>
+
+    <p><strong>Étape 5 — Décider le degré.</strong> <em>Reste au centre</em> : les définitions
+      d'indicateurs, les règles d'accès, le catalogue, le lignage, et les données financières servant
+      aux déclarations — tout ce qui exige cohérence et contrôle. <em>Devient autonome</em> : la
+      construction d'indicateurs propres à un métier, à partir de données préparées et documentées,
+      par les équipes métier elles-mêmes. <em>Remède technique en parallèle</em> : isoler les
+      traitements lourds de fin de mois dans une fenêtre ou des ressources séparées, pour protéger la
+      livraison de 8 h. <em>Compromis écrit</em> : l'autonomie fera réapparaître un risque de
+      divergence ; il est compensé par l'obligation de bâtir sur les données préparées du centre et de
+      publier toute définition nouvelle au catalogue. <strong>Et l'on vérifie par le troisième
+      indicateur : si les exports du marketing cessent, le remède a fonctionné.</strong></p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le groupe international</div>
+  <div class="box-b">
+    <p>Un groupe industriel possède une plateforme centrale à Casablanca, qui sert sept filiales dans
+      cinq pays. Techniquement, elle est loin d'être saturée : 30 % d'utilisation moyenne. Pourtant,
+      chaque filiale attend six semaines pour toute évolution, deux d'entre elles ont monté leur propre
+      base « en attendant », et la filiale allemande signale que ses données de production ne peuvent
+      pas quitter le pays. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Le degré.</strong> <em>Données</em> : centralisation forte mais déjà entamée —
+      deux filiales ont leurs bases parallèles, et une troisième ne peut légalement pas participer.
+      <em>Calcul</em> : entièrement centralisé. La centralisation « principale » du support est en train
+      de se défaire par les bords, sans décision.</p>
+
+    <p><strong>Étape 2 — Ce que le centre apporte.</strong> Un référentiel produit commun et une
+      consolidation financière unique : deux acquis réels, qui justifient qu'une plateforme centrale
+      existe. Il ne s'agit donc pas de la démonter.</p>
+
+    <p><strong>Étape 3 et 4 — Goulot et nature.</strong> 30 % d'utilisation : le goulot n'est pas
+      technique, le test de l'étape 4 le confirme — doubler la puissance ne changerait rien aux six
+      semaines. Le goulot est <strong>organisationnel</strong>, et les deux bases parallèles sont la
+      preuve que l'attente a dépassé le bénéfice perçu.</p>
+
+    <p><strong>Un troisième facteur, qui n'est ni l'un ni l'autre.</strong> La filiale allemande
+      n'attend pas : elle est <em>empêchée</em>. Une contrainte de localisation des données n'est ni un
+      problème de capacité ni un problème de file d'attente — c'est une limite externe qui rend la
+      centralisation complète <strong>impossible</strong>, quelles que soient les ressources. C'est
+      exactement ce que rappelle le sous-titre de la partie : le choix porte aussi sur la coordination
+      et la gouvernance, et parfois il ne nous appartient pas.</p>
+
+    <p><strong>Étape 5 — Décider le degré.</strong> <em>Reste au centre</em> : les référentiels communs
+      — produits, fournisseurs, plan comptable — et la consolidation financière, parce qu'ils exigent
+      une définition unique à l'échelle du groupe. <em>Devient autonome</em> : les analyses propres à
+      chaque filiale, construites localement sur les référentiels du centre. <em>Cas allemand</em> : les
+      données restent dans le pays, et seuls des agrégats conformes remontent — une architecture
+      délibérément distribuée sur ce périmètre (N14). <em>Compromis</em> : le groupe perd la capacité
+      d'interroger le détail allemand depuis Casablanca, et l'accepte parce que la contrainte est
+      juridique. <strong>Enseignement</strong> : la bonne question n'était pas « centralisé ou
+      distribué ? » mais « quelle part, et pourquoi » — et dans ce cas, trois réponses différentes
+      cohabitent dans la même entreprise.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — quand il faut défendre le centre</div>
+  <div class="box-b">
+    <p>Dans un groupe hospitalier de trois établissements, les médecins se plaignent de la lenteur du
+      dossier patient central et demandent que chaque établissement gère le sien, « comme avant ». La
+      direction informatique est tentée de céder. Que répondez-vous ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 et 2 — Le degré et ce qu'il apporte.</strong> Centralisation forte sur les deux
+      axes. Et ce qu'elle apporte ici n'est pas du confort administratif : c'est qu'un patient admis
+      en urgence dans l'établissement B est <strong>reconnu immédiatement</strong>, avec ses
+      allergies, ses traitements et ses antécédents saisis à A. La cohérence n'est pas un objectif de
+      gestion, c'est une condition de sécurité du soin.</p>
+
+    <p><strong>Étape 3 et 4 — Le goulot.</strong> La plainte est réelle et doit être prise au sérieux :
+      il y a bien un goulot, et il est probablement <em>technique</em> — temps de réponse aux heures de
+      consultation. Le test de l'étape 4 s'applique : si doubler les ressources, isoler les workloads
+      lourds ou rapprocher le service de consultation des utilisateurs réduit les délais, alors le
+      remède est là.</p>
+
+    <p><strong>Ce qu'il faut répondre.</strong> La demande des médecins identifie correctement le
+      symptôme et se trompe de remède. Répartir le dossier patient par établissement supprimerait
+      exactement la propriété pour laquelle il a été centralisé — et le coût ne serait pas un retard de
+      reporting, mais un risque clinique. <strong>Ici, l'étape 5 conclut sans hésitation : ces données
+      restent au centre.</strong></p>
+
+    <p><strong>Le remède proposé.</strong> Traiter le goulot sans défaire la centralisation : isoler les
+      traitements lourds — statistiques, recherche, facturation — des consultations cliniques ; donner
+      la priorité aux lectures du dossier en journée ; mesurer le temps de réponse perçu et s'engager
+      sur un seuil. <strong>Ce qui peut être rendu autonome</strong>, en revanche, ce sont les analyses
+      propres à chaque établissement, sur des données extraites du centre.</p>
+
+    <p><strong>La leçon.</strong> Toutes les notions de ce cours servent à décider — et parfois à
+      décider de <em>ne pas</em> bouger. Une plainte légitime sur les performances n'implique pas que
+      l'architecture soit mauvaise : elle implique qu'un goulot doit être traité, à l'endroit où il se
+      trouve.</p>
+  </div>
+</div>
+
+<h3 id="n13-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition, les trois atouts, les deux limites et la question du support, puis
+        expliquez pourquoi atouts et limites ont la même cause.</li>
+      <li>Que signifie « et/ou » dans la définition ? Donnez un exemple d'architecture centralisée sur
+        un axe et distribuée sur l'autre.</li>
+      <li>Pourquoi « centralisé » ne veut-il pas dire « un seul serveur » ? Illustrez.</li>
+      <li>Proposez trois mesures permettant de répondre à « le centre est-il un goulot ? », et dites ce
+        que chacune révèle.</li>
+      <li>Décrivez le test qui distingue un goulot technique d'un goulot organisationnel, et donnez le
+        remède correspondant à chacun.</li>
+      <li>Citez trois types de données qui doivent rester au centre quelle que soit la pression, et
+        justifiez chacun par une exigence précise.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n13-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez ces situations en « atout de la centralisation » ou « limite de la centralisation » :
+      une seule politique d'accès ; tous les rapports ralentissent en fin de mois ; une définition
+      unique du chiffre d'affaires ; six semaines d'attente pour un indicateur ; une seule sauvegarde
+      à administrer ; une panne qui arrête tous les usages.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une chaîne de 40 cliniques vétérinaires centralise dossiers animaux, facturation et stocks de
+      médicaments. Constats : la facturation mensuelle sature la plateforme trois jours par mois ; les
+      vétérinaires attendent huit semaines pour toute modification de formulaire ; deux cliniques
+      tiennent un fichier local « plus pratique » ; le registre des médicaments contrôlés doit être
+      inaltérable et auditable. Appliquez les cinq étapes : mesurez les deux axes, nommez les acquis,
+      répondez à la question du goulot avec trois mesures, qualifiez sa nature, puis décidez ce qui
+      reste au centre et ce qui devient autonome, avec le compromis écrit.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>On affirme : « les atouts et les limites de la centralisation sont deux listes indépendantes ;
+      une bonne architecture garde les premiers et supprime les seconds. » Réfutez cette affirmation en
+      montrant, pour chaque atout, la limite qui en est la conséquence directe et inséparable.
+      Construisez ensuite un contre-exemple apparent — une organisation qui semble avoir les atouts sans
+      les limites — et expliquez pourquoi ce n'est qu'une apparence : soit les limites existent mais ne
+      se sont pas encore manifestées, soit un atout annoncé n'est pas réellement obtenu. Concluez en
+      formulant la seule marge de manœuvre réelle de l'architecte.</p>
+  </div>
+</div>

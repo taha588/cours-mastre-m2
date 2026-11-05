@@ -1,0 +1,512 @@
+<h2 class="notion" id="n17">N17 — OLAP : le traitement analytique</h2>
+
+<h3 id="n17-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> <strong>OLAP</strong> (<em>Online Analytical Processing</em>) désigne
+      les traitements destinés à <strong>explorer, agréger et analyser de grands volumes de
+      données</strong>.</p>
+
+    <p><strong>Caractéristiques :</strong></p>
+    <ul>
+      <li><strong>Requêtes complexes.</strong></li>
+      <li><strong>Agrégations et scans de grands volumes.</strong></li>
+      <li><strong>Historique important.</strong></li>
+      <li><strong>Décision et pilotage.</strong></li>
+    </ul>
+
+    <p><strong>Exemple e-commerce :</strong> calculer le chiffre d'affaires par <strong>mois, région,
+      catégorie et canal</strong> sur <strong>cinq années</strong>.</p>
+
+    <p><strong>Exemples :</strong> BI • prévisions • rapports de performance.</p>
+  </div>
+</div>
+
+<h3 id="n17-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Procédons comme en N16 : les quatre caractéristiques ne se mémorisent pas, elles se déduisent
+      d'une fonction unique — <strong>analyser le métier</strong>.</p>
+    <ul>
+      <li>Analyser, c'est poser une question qui <strong>traverse de nombreux événements</strong> : non
+        pas « cette commande », mais « toutes les commandes » : d'où les <strong>scans de grands
+        volumes</strong>.</li>
+      <li>La question croise plusieurs axes, applique des filtres et calcule : d'où les
+        <strong>requêtes complexes</strong>.</li>
+      <li>Comparer, mesurer une évolution, détecter une saisonnalité suppose un passé : d'où
+        l'<strong>historique important</strong>.</li>
+      <li>Le destinataire n'est pas un processus mais une personne qui décide : d'où
+        <strong>décision et pilotage</strong>.</li>
+    </ul>
+
+    <p>L'exemple du support mérite d'être disséqué, car il contient toute la notion : « chiffre
+      d'affaires par <em>mois, région, catégorie et canal</em> sur <em>cinq années</em> ». Quatre
+      <strong>axes</strong> et une <strong>profondeur</strong> — c'est exactement le vocabulaire de N10,
+      qui apparaît ici sous la forme d'un workload. Une telle requête parcourt potentiellement des
+      centaines de millions de lignes pour n'en retourner que quelques centaines.</p>
+
+    <p>De là, l'inversion complète par rapport à N16, et il faut la formuler précisément :
+      <strong>l'OLTP lit peu et écrit peu, mais très souvent ; l'OLAP lit énormément, n'écrit rien, et
+      beaucoup plus rarement.</strong> Les deux workloads sont donc opposés sur chacune de leurs
+      dimensions — et cette opposition ne porte pas seulement sur les ressources consommées.</p>
+
+    <p>Elle porte aussi sur le <strong>temps acceptable</strong>, et c'est ce qui autorise des exigences
+      contraires. En OLTP, personne ne doit attendre plus d'une seconde, parce qu'un client est au
+      comptoir et qu'une opération du métier est bloquée. En OLAP, <strong>aucune opération du métier
+      n'est bloquée</strong> : un analyste peut attendre dix secondes, un rapport peut mettre deux
+      minutes. Le workload analytique est lourd mais patient ; le workload transactionnel est léger mais
+      pressé.</p>
+
+    <p>Elle porte enfin sur le <strong>modèle de données</strong>, et c'est le point que N16 annonçait.
+      Pour que l'écriture soit sûre, l'OLTP <em>évite</em> la redondance : chaque fait est écrit une
+      fois. Pour que la lecture soit rapide, l'OLAP <strong>accepte la redondance</strong> : on
+      pré-joint, on pré-agrège, on dénormalise. Écrire coûte plus cher — mais on n'écrit qu'une fois, au
+      chargement — et lire devient immédiat, ce qu'on fait des centaines de fois. <strong>Ce ne sont pas
+      deux réglages du même modèle : ce sont deux modèles opposés, chacun optimal pour sa fonction.</strong></p>
+
+    <p>Un dernier mot sur l'ordre des verbes de la définition : <em>explorer</em>, <em>agréger</em>,
+      <em>analyser</em>. Le premier est le plus exigeant, car explorer signifie que
+      <strong>l'on ne connaît pas encore la question</strong>. Or préparer les données suppose justement
+      de connaître les questions à l'avance (N10). L'OLAP recouvre donc deux régimes distincts : les
+      questions <em>stables</em>, qu'on prépare une fois pour toutes, et l'<em>exploration</em>, qui
+      réclame le détail conservé (N11). Savoir dans quel régime l'on se trouve est la décision
+      principale que cette notion impose.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>OLAP désigne un workload, pas une technologie.</strong> Ce n'est pas synonyme de
+        « cube » : la catégorie décrit ce que l'on demande au système, non le produit employé.</li>
+      <li><strong>« Online » ne veut pas dire rapide</strong>, mais <em>interactif</em> : on pose une
+        question, on voit, on en pose une autre — par opposition au rapport produit en lot.</li>
+      <li><strong>« Requêtes complexes » ne veut pas dire longues à écrire.</strong> La complexité tient
+        à ce qu'elles croisent : plusieurs axes, plusieurs tables, des calculs sur des fenêtres de
+        temps.</li>
+      <li><strong>Gros volume lu, petit volume retourné.</strong> Un tableau de bord qui affiche douze
+        nombres peut en avoir parcouru des centaines de millions : ne jugez jamais le coût d'une requête
+        à la taille de son résultat.</li>
+      <li><strong>L'historique n'existe que si quelqu'un l'a conservé.</strong> L'OLTP purge (N16) :
+        sans entrepôt ni lac, la quatrième caractéristique est un vœu.</li>
+      <li><strong>L'OLAP tolère une donnée un peu ancienne, jamais une donnée fausse.</strong> Une erreur
+        dans un indicateur ne bloque personne — elle se propage silencieusement dans des décisions, ce
+        qui est bien pire qu'une erreur visible.</li>
+      <li><strong>Les deux erreurs symétriques coûtent autant.</strong> Faire de l'OLAP sur un système
+        OLTP dégrade la production (N9) ; faire de l'OLTP sur un entrepôt donne un service lent et cher
+        (N10, exercice 12.2).</li>
+      <li><strong>Une requête analytique instantanée cache souvent une pré-agrégation.</strong> C'est
+        très bien — à condition de savoir laquelle, et de quand elle date.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> <strong>OLAP</strong> (<em>Online Analytical Processing</em>) هي
+    المعالجات اللي غرضها <strong>الاستكشاف والتجميع والتحليل ديال أحجام كبيرة</strong> من المعطيات.
+    خصائصها الأربعة: <strong>استعلامات معقدة</strong> · <strong>تجميعات ومسح أحجام كبيرة</strong> ·
+    <strong>تاريخ مهم</strong> · <strong>قرار وقيادة</strong>. ومثال السلايد فيه الـnotion كاملة:
+    «رقم المعاملات حسب <em>الشهر والجهة والفئة والقناة</em> على <em>خمس سنين</em>» = أربع
+    <strong>محاور</strong> + <strong>عمق</strong> (نفس مفردات N10). والانقلاب التام مقابل N16:
+    <strong>الـOLTP كيقرا شوية وكيكتب شوية ولكن بزاف ديال المرات؛ الـOLAP كيقرا بزاف، ما كيكتب والو،
+    وقليل ديال المرات</strong>. والفرق كيمس حتى <strong>الوقت المقبول</strong>: فالـOLTP حتى واحد ما
+    خاصو يتسنى أكثر من ثانية حيت كاين زبون محبوس؛ فالـOLAP <strong>حتى عملية ديال المهنة ما هي
+    محبوسة</strong> — تقيل ولكن صبور. وكيمس <strong>النموذج</strong>: الـOLTP كيتجنب التكرار باش
+    الكتابة تكون آمنة، والـOLAP <strong>كيقبل التكرار</strong> (dénormalisation، تجميع مسبق) باش
+    القراءة تكون سريعة. <strong>ماشي جوج إعدادات لنفس النموذج — هوما جوج نماذج متعاكسين.</strong>
+    وآخر نقطة: ترتيب الأفعال «explorer, agréger, analyser» — الأول هو الأصعب، حيت
+    <strong>الاستكشاف معناه أن السؤال مازال ما معروفش</strong>، والتهييء كيفترض معرفة الأسئلة مسبقا.
+    يعني OLAP فيه نظامين: أسئلة <strong>مستقرة</strong> كنهيّئوها (N10)، و<strong>استكشاف</strong>
+    كيطلب التفصيل محفوظ (N11).</p>
+</div>
+
+<h3 id="n17-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'OLAP traite le problème de la <strong>connaissance</strong> : non pas faire fonctionner
+      l'entreprise, mais savoir ce qu'elle fait, comment cela évolue et pourquoi. Combien avons-nous
+      vendu, où, à qui, et la tendance est-elle meilleure que l'an dernier ? Ce sont des questions
+      qu'aucun système opérationnel ne peut traiter, parce qu'il n'en a ni la forme, ni la mémoire, ni
+      le temps disponible. C'est le problème dominant de la génération 2 du tableau de N8.</p>
+    <p>Mais nommer ce workload traite surtout, à ce stade, un problème d'<strong>attribution</strong> :
+      savoir à quelle famille appartient une demande avant de décider où l'exécuter. Tant que « sortir
+      un chiffre » reste indistinct, il atterrit sur le premier système venu — en général celui de
+      production, avec les conséquences décrites en N9. En posant OLTP et OLAP comme deux familles
+      opposées, on obtient un critère de tri qui précède toute décision technique.</p>
+  </div>
+</div>
+
+<h3 id="n17-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Reconnaître une demande analytique</strong> et refuser de l'exécuter sur un système
+        transactionnel.</li>
+      <li><strong>Fixer un SLA réaliste</strong> : des secondes ou des minutes, et non des
+        millisecondes — exigence qui serait absurde ici.</li>
+      <li><strong>Caractériser la question</strong> en axes, maille et profondeur, ce qui conduit
+        directement à la conception de N10.</li>
+      <li><strong>Choisir le régime</strong> : questions stables à préparer, ou exploration à servir sur
+        le détail.</li>
+      <li><strong>Estimer le coût réel d'une requête</strong> par le volume lu, et non par la taille du
+        résultat affiché.</li>
+      <li><strong>Exiger la fraîcheur avec le chiffre</strong> : un indicateur sans date de mise à jour
+        est une information incomplète.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n17-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Le sigle se déplie comme celui de N16, et la symétrie est voulue. <em>Online</em> : interactif,
+      on explore et l'on enchaîne les questions, par opposition au rapport imprimé de la veille.
+      <em>Analytical</em> : l'objet est de comprendre, non d'enregistrer. <em>Processing</em> : il
+      s'agit encore d'un type de traitement, pas d'un produit.</p>
+
+    <p><strong>Pourquoi ces quatre caractéristiques ?</strong> Retirons-les tour à tour de l'exemple du
+      support — le chiffre d'affaires par mois, région, catégorie et canal sur cinq ans.</p>
+    <ul>
+      <li>Sans <strong>scans de grands volumes</strong> : on ne peut répondre que sur un échantillon, et
+        un chiffre d'affaires partiel n'est pas un chiffre d'affaires.</li>
+      <li>Sans <strong>requêtes complexes</strong> : on obtient un total global, mais aucun croisement —
+        or ce sont les croisements qui font la décision, puisqu'ils désignent <em>où</em> agir.</li>
+      <li>Sans <strong>historique</strong> : plus de comparaison, donc plus de tendance ni de
+        saisonnalité. Le mot « cinq années » est dans l'exemple, et il n'y est pas par hasard.</li>
+      <li>Sans <strong>décision et pilotage</strong> : le calcul est exact et ne sert à rien — c'est la
+        finalité de N3 qui manque, et le travail devient un coût.</li>
+    </ul>
+
+    <p><strong>Le calcul qui justifie tout le reste.</strong> Évaluons l'exemple sur les deux modèles
+      possibles, avec les ordres de grandeur de notre enseigne : cinq ans de ventes au grain ligne de
+      ticket représentent environ 400 millions de lignes.</p>
+    <ul>
+      <li>Sur un <strong>modèle normalisé</strong> (OLTP) : il faut joindre les lignes de vente aux
+        tickets, aux magasins, aux régions, aux produits et aux catégories, puis agréger — soit
+        plusieurs centaines de millions de lignes parcourues et cinq jointures,
+        <strong>à chaque exécution</strong>.</li>
+      <li>Sur un <strong>modèle préparé</strong> (OLAP) : une table pré-agrégée par mois × région ×
+        catégorie × canal contient 60 mois × 12 régions × 20 catégories × 2 canaux, soit environ
+        <strong>29 000 lignes</strong>. La réponse est immédiate.</li>
+    </ul>
+    <p>Le rapport est de l'ordre de 10 000. <strong>Aucune machine plus puissante ne comble un tel
+      écart</strong> : c'est la démonstration que l'opposition OLTP/OLAP est une affaire de modèle avant
+      d'être une affaire de ressources — et c'est pourquoi la séparation des deux workloads (N19) ne se
+      règle pas en achetant du matériel.</p>
+
+    <p>Reste la tension interne de la définition, qui explique la partie I du cours. <em>Agréger</em>
+      suppose de savoir selon quels axes : on prépare. <em>Explorer</em> suppose de ne pas le savoir :
+      on conserve le détail. Les deux verbes figurent dans la même phrase parce que le workload
+      analytique contient réellement ces deux régimes — et c'est exactement l'écart entre l'entrepôt
+      (N10) et le lac (N11), puis la tentative de les réunir (N12).</p>
+  </div>
+</div>
+
+<h3 id="n17-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans tout pilotage par indicateurs.</strong> Tableaux de bord, suivi d'activité,
+        rapports de performance : c'est le terrain premier, et celui où les questions sont les plus
+        stables.</li>
+      <li><strong>Dans la préparation d'une prévision.</strong> Un modèle réclame de l'historique
+        profond et des agrégats : le besoin est analytique avant d'être un sujet d'intelligence
+        artificielle.</li>
+      <li><strong>Dans l'exploration d'un problème métier.</strong> Comprendre pourquoi les ruptures
+        surviennent le vendredi soir suppose d'enchaîner des questions dont aucune n'était prévue : le
+        régime d'exploration.</li>
+      <li><strong>Dans le tri des demandes qui arrivent à l'équipe data.</strong> Avant de décider où
+        l'exécuter, on classe : effet ou connaissance.</li>
+      <li><strong>Dans la définition des SLA.</strong> C'est ici qu'on écrit qu'un rapport peut mettre
+        deux minutes et doit être disponible à 8 h — deux exigences très différentes qu'on confond
+        souvent.</li>
+      <li><strong>Dans le dimensionnement d'une plateforme analytique.</strong> Volume lu par requête,
+        nombre de requêtes simultanées, heures de pointe : des chiffres très différents de ceux d'un
+        système OLTP.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n17-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Par mois, par région, par catégorie… »</strong> Les « par » sont des axes : la
+        question est analytique, et sa forme annonce déjà le modèle à construire.</li>
+      <li><strong>« …sur les cinq dernières années. »</strong> Besoin d'historique : le système
+        opérationnel ne pourra pas répondre, quelle que soit sa puissance.</li>
+      <li><strong>« Je veux comprendre pourquoi… »</strong> Régime d'exploration : les questions
+        suivantes ne sont pas connues, il faut du détail et un accès libre.</li>
+      <li><strong>« Ce rapport met quarante minutes. »</strong> Scan de grand volume sur un modèle non
+        préparé : c'est le signal d'une préparation à faire (N10), pas d'une machine à changer.</li>
+      <li><strong>« Le tableau de bord affiche douze nombres. »</strong> Ne pas en déduire que la requête
+        est légère : mesurez le volume lu.</li>
+      <li><strong>Signal d'alerte — « il nous faut ces analyses en temps réel ».</strong> Demandez quelle
+        décision serait prise différemment à la seconde près : la réponse est presque toujours qu'il
+        n'y en a pas.</li>
+      <li><strong>Signal d'alerte — « le chiffre est faux depuis trois semaines ».</strong> L'OLAP ne
+        bloque personne, donc rien ne signale l'erreur : il faut des contrôles (N6, huitième ligne).</li>
+      <li><strong>Signal inverse — « quel est le stock disponible maintenant ? »</strong> État courant :
+        c'est l'OLTP qui répond (N16).</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n17-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Appliquer le test de la fonction.</strong> Ce traitement produit-il un
+      <em>effet</em> dans le métier, ou une <em>connaissance</em> sur le métier ? Le second cas est un
+      workload OLAP. C'est le même test qu'en N16, posé dans l'autre sens, et il tranche presque
+      toujours en une phrase.</p>
+
+    <p><strong>Étape 2 — Caractériser la question : axes, maille, profondeur, fréquence.</strong> Quels
+      « par quoi » ? À quelle maille la réponse est-elle attendue — le mois, le jour, l'heure ? Sur
+      quelle profondeur d'historique ? Combien de fois par jour, et par combien de personnes ? Ces
+      quatre réponses sont déjà la moitié de la conception de N10.</p>
+
+    <p><strong>Étape 3 — Mesurer le rapport lu/retourné et fixer un SLA réaliste.</strong> Combien de
+      lignes faut-il parcourir pour produire ce résultat ? Un rapport de 1 000 ou de 10 000 entre le lu
+      et le retourné indique qu'une préparation est rentable. Puis écrivez un temps de réponse
+      acceptable <em>en secondes ou en minutes</em> : exiger des millisecondes sur un scan de cinq ans
+      serait confondre les deux workloads.</p>
+
+    <p><strong>Étape 4 — Choisir le régime, et c'est la décision principale.</strong> Les questions
+      sont-elles <strong>stables</strong> — les mêmes chaque mois ? Alors préparez : axes, grain,
+      agrégats (N10). Sont-elles <strong>exploratoires</strong> — inconnues à l'avance ? Alors donnez
+      accès au détail conservé (N11) et n'essayez pas de tout pré-calculer. Beaucoup d'organisations
+      échouent en traitant l'exploration comme du reporting, ou l'inverse.</p>
+
+    <p><strong>Étape 5 — Placer le workload, et publier la fraîcheur avec le chiffre.</strong> Ce
+      traitement ne s'exécute pas sur le système transactionnel : décidez où, et avec quelle fréquence
+      d'alimentation. Puis affichez systématiquement <strong>la date des données à côté du
+      résultat</strong>. Un indicateur sans fraîcheur déclarée laisse chacun supposer qu'il est à jour —
+      et c'est ainsi que des décisions se prennent sur des chiffres du mois dernier.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>L'OLAP <strong>analyse le métier</strong> : il lit énormément, n'écrit rien, et peut attendre —
+      car aucune opération n'est bloquée. Son modèle <strong>accepte la redondance</strong> là où
+      l'OLTP l'évite : <em>deux modèles opposés, pas deux réglages</em>. Et il recouvre deux régimes :
+      <strong>questions stables</strong> que l'on prépare, <strong>exploration</strong> qui réclame le
+      détail.</p>
+    <p class="ar" dir="rtl">الـOLAP <strong>كيحلل المهنة</strong>: كيقرا بزاف، ما كيكتب والو، وقادر
+      يتسنى — حيت حتى عملية ما هي محبوسة. ونموذجو <strong>كيقبل التكرار</strong> فين الـOLTP كيتجنبو:
+      <em>جوج نماذج متعاكسين، ماشي جوج إعدادات</em>. وفيه نظامين: <strong>أسئلة مستقرة</strong>
+      كنهيّئوها، و<strong>استكشاف</strong> كيطلب التفصيل.</p>
+  </div>
+</div>
+
+<h3 id="n17-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — caractériser la question du support</div>
+  <div class="box-b">
+    <p>Chez l'enseigne, la direction demande le chiffre d'affaires par mois, région, catégorie et canal
+      sur cinq ans, consulté chaque matin par une douzaine de personnes. Les ventes au grain ligne de
+      ticket représentent environ 400 millions de lignes sur la période. Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Test de la fonction.</strong> Cette demande ne modifie rien dans le métier :
+      elle produit une <em>connaissance</em>. <strong>Workload OLAP</strong>, sans ambiguïté — et il ne
+      doit donc pas s'exécuter sur la base des caisses.</p>
+
+    <p><strong>Étape 2 — Axes, maille, profondeur, fréquence.</strong> <em>Axes</em> : temps, région,
+      catégorie, canal — quatre. <em>Maille</em> : le mois pour l'affichage, mais attention, la maille
+      de <em>stockage</em> doit rester plus fine, car la direction demandera tôt ou tard le détail par
+      magasin ou par semaine (leçon de N10, exercice 12.3). <em>Profondeur</em> : cinq ans, soit
+      60 mois, ce qui impose une rétention correspondante. <em>Fréquence</em> : quotidienne, par une
+      douzaine de personnes, le matin — donc une pointe de consultations concentrée.</p>
+
+    <p><strong>Étape 3 — Rapport lu/retourné et SLA.</strong> Sans préparation, la requête parcourt
+      400 millions de lignes pour retourner 60 × 12 × 20 × 2 ≈ <strong>29 000 lignes</strong>, et le
+      tableau affiché n'en montre que quelques dizaines. Le rapport dépasse 10 000 :
+      <strong>la préparation est très largement rentable</strong>, et elle le serait même si la requête
+      n'était exécutée qu'une fois par semaine. SLA raisonnable : réponse en moins de 5 secondes à
+      l'affichage, données de la veille disponibles à 8 h.</p>
+
+    <p><strong>Étape 4 — Le régime.</strong> Ces quatre axes et cette maille ne changeront pas d'un mois
+      sur l'autre : <strong>questions stables</strong>. On prépare donc une table agrégée, conformément
+      à N10. Mais l'on garde le grain fin en dessous, pour que les questions non prévues restent
+      possibles : c'est la cohabitation des deux régimes sur le même socle (N12).</p>
+
+    <p><strong>Étape 5 — Placement et fraîcheur.</strong> Exécution sur la plateforme analytique,
+      alimentée par le chargement nocturne. Et surtout : le tableau de bord affiche
+      <strong>« données au 23/10 à 23 h 59 »</strong> à côté du chiffre. Sans cette mention, un
+      directeur régional consultant le lundi matin croira voir le week-end complet alors qu'il manquera
+      peut-être le dimanche — et personne ne s'en apercevra.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — l'exploration traitée comme du reporting</div>
+  <div class="box-b">
+    <p>Dans une compagnie d'assurance, l'équipe actuarielle se plaint : chaque nouvelle question
+      — « les sinistres de grêle augmentent-ils dans le Nord ? », « les contrats souscrits en ligne
+      résilient-ils plus vite ? » — donne lieu à une demande à l'équipe data, traitée en trois semaines
+      par la création d'un nouveau rapport. En trois ans, 180 rapports ont été créés, dont 150 ne sont
+      plus jamais consultés. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 et 2 — La nature des demandes.</strong> Ce sont bien des workloads OLAP. Mais
+      caractérisons-les : chaque question a ses propres axes, sa propre maille, et surtout
+      <strong>elle n'est posée qu'une ou deux fois</strong>. Ce ne sont pas des indicateurs de pilotage,
+      ce sont des interrogations ponctuelles.</p>
+
+    <p><strong>Étape 4 — Le diagnostic est une erreur de régime.</strong> L'organisation traite de
+      l'<em>exploration</em> avec les moyens du <em>reporting stable</em>. Or préparer coûte cher et ne
+      se rentabilise que par la répétition : ici, 150 rapports sur 180 n'ont servi qu'une fois. On a
+      donc payé 180 préparations pour obtenir 180 réponses — <strong>le rapport coût/bénéfice de la
+      préparation s'est inversé</strong>, et les trois semaines de délai ont en outre découragé la
+      moitié des questions qui auraient pu être posées.</p>
+
+    <p><strong>Ce que les 150 rapports morts révèlent.</strong> Ils ne sont pas un gaspillage de
+      l'équipe data : ils sont la <em>preuve</em> que les questions n'étaient pas stables. Un rapport
+      consulté une fois est une question explorée, pas un indicateur. Le symptôme a donc valeur de
+      mesure : <strong>150/180 = 83 % des demandes relèvent de l'exploration.</strong></p>
+
+    <p><strong>La correction.</strong> <em>(a)</em> Donner aux actuaires un <strong>accès direct au
+      détail</strong> — sinistres, contrats, résiliations au grain fin, documentés — avec des outils
+      leur permettant de poser leurs questions eux-mêmes. <em>(b)</em> Garder au centre ce qui doit
+      l'être : les définitions des notions partagées — « sinistre », « contrat actif », « résiliation » —
+      publiées et uniques, faute de quoi l'autonomie reproduira la divergence de N11, exercice 12.3.
+      <em>(c)</em> Réserver la préparation aux questions devenues stables : lorsqu'une exploration est
+      reposée chaque mois, elle mérite alors un indicateur préparé. <em>(d)</em> Supprimer les
+      150 rapports morts, qui coûtent en maintenance et brouillent le catalogue.</p>
+
+    <p><strong>La leçon.</strong> « Explorer » et « agréger » figurent dans la même définition, mais ils
+      n'appellent pas la même architecture. <strong>Le délai de trois semaines n'était pas un problème
+      de capacité : c'était un problème de régime.</strong></p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le chiffre juste et périmé</div>
+  <div class="box-b">
+    <p>Dans une chaîne hôtelière, le tableau de bord du taux d'occupation s'affiche instantanément et
+      tout le monde l'apprécie. Un jour, un directeur constate que le chiffre de son établissement n'a
+      pas bougé depuis cinq semaines. Enquête : le tableau lit une table pré-agrégée dont le traitement
+      d'alimentation échoue silencieusement depuis le 14 septembre. Les chiffres affichés sont exacts —
+      ils sont simplement ceux de septembre. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Pourquoi personne n'a rien vu pendant cinq semaines.</strong> C'est la conséquence
+      directe de la caractéristique « décision et pilotage » : <strong>un workload OLAP ne bloque aucune
+      opération</strong>. Si une caisse tombe, on le sait en trente secondes, parce qu'un client attend.
+      Si un indicateur se fige, rien ne s'arrête — et le chiffre reste plausible, puisqu'un taux
+      d'occupation de 72 % ne choque personne. <strong>L'absence de blocage, qui est un avantage du
+      workload analytique, est aussi ce qui rend ses pannes invisibles.</strong></p>
+
+    <p><strong>Le rôle joué par la rapidité.</strong> Le tableau s'affichait instantanément parce qu'il
+      lisait une pré-agrégation — ce qui est une bonne conception. Mais la vitesse a ici joué contre la
+      vigilance : un rapport lent aurait au moins signalé qu'il travaillait. C'est le piège signalé plus
+      haut : une réponse instantanée cache souvent une pré-agrégation, <strong>et il faut savoir de
+      quand elle date</strong>.</p>
+
+    <p><strong>Étape 5 appliquée — ce qui aurait dû exister.</strong> <em>(a)</em> La <strong>fraîcheur
+      affichée à côté du chiffre</strong> : « données au 14/09 » aurait rendu l'anomalie visible le
+      premier jour, par n'importe quel utilisateur. C'est la mesure la moins coûteuse et la plus
+      efficace. <em>(b)</em> Une <strong>alerte sur l'échec du traitement</strong>, qui relève de la
+      huitième ligne de la grille de N6 — comment vérifier leur état — restée vide ici.
+      <em>(c)</em> Un <strong>contrôle de vraisemblance</strong> : si la date maximale des données
+      n'avance pas de 24 heures, le tableau affiche un avertissement plutôt qu'un chiffre.</p>
+
+    <p><strong>La distinction à retenir.</strong> L'OLAP tolère parfaitement une donnée de la veille —
+      c'est même son régime normal. Ce qu'il ne tolère pas, c'est une donnée dont <strong>l'âge est
+      inconnu de celui qui s'en sert</strong>. Un chiffre périmé mais daté est une information ; un
+      chiffre périmé et présenté comme courant est une erreur qui se propage dans des décisions, sans
+      jamais déclencher la moindre alarme.</p>
+  </div>
+</div>
+
+<h3 id="n17-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition de l'OLAP et ses quatre caractéristiques, puis déduisez chacune de la
+        fonction « analyser le métier ».</li>
+      <li>Comparez OLTP et OLAP sur cinq dimensions : taille de l'opération, fréquence, latence
+        acceptable, profondeur d'historique, modèle de données.</li>
+      <li>Pourquoi dit-on que les deux workloads demandent des modèles opposés et non deux réglages du
+        même modèle ? Appuyez-vous sur la normalisation.</li>
+      <li>Qu'est-ce que le rapport lu/retourné ? Calculez-le pour « nombre d'inscrits par filière et par
+        année sur dix ans » dans une université, avec vos propres hypothèses.</li>
+      <li>Distinguez les deux régimes — questions stables et exploration — et donnez deux exemples de
+        chacun dans une banque.</li>
+      <li>Pourquoi un indicateur doit-il toujours être affiché avec sa fraîcheur ? Donnez un cas où
+        l'absence de cette mention conduirait à une mauvaise décision.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n17-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque demande, dites si elle relève d'OLTP ou d'OLAP et justifiez en une phrase : enregistrer
+      une réservation ; calculer le taux d'annulation par mois et par agence sur trois ans ; afficher le
+      solde d'un compte ; mesurer l'évolution du panier moyen par canal ; valider un paiement ; comparer
+      la marge par famille de produits depuis 2022.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un réseau de 300 pharmacies veut suivre : les ventes par molécule, par officine et par mois sur
+      quatre ans ; le taux de rupture par fournisseur ; et permettre aux pharmaciens d'explorer librement
+      les ventes pour comprendre des variations locales. Appliquez les cinq étapes à chacun des trois
+      besoins : test de la fonction, caractérisation en axes/maille/profondeur/fréquence, rapport
+      lu/retourné et SLA, choix du régime, placement et fraîcheur. Dites lesquels seront préparés et
+      lequel exige le détail, en justifiant par le coût de la préparation.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>La définition réunit trois verbes — explorer, agréger, analyser — qui n'ont pas les mêmes
+      exigences architecturales. Montrez que « explorer » et « agréger » sont en tension directe, en
+      vous appuyant sur N10 et N11. Construisez ensuite un <strong>critère de bascule</strong> permettant
+      de décider, pour une question donnée, si elle doit être préparée ou servie sur le détail — votre
+      critère devra combiner la fréquence de la question, sa stabilité dans le temps, le rapport
+      lu/retourné et le coût de la préparation. Appliquez-le aux 180 rapports de l'exercice 12.2 et
+      dites combien auraient dû être préparés. Terminez en expliquant pourquoi une organisation qui
+      choisit un seul des deux régimes se trompe nécessairement sur une partie de ses besoins.</p>
+  </div>
+</div>

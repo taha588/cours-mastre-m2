@@ -1,0 +1,533 @@
+<h2 class="notion" id="n06">N6 — La grille des décisions de l'architecte</h2>
+
+<h3 id="n06-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>Concevoir une architecture de données revient à répondre à <strong>huit questions</strong>, dont
+      chacune engage une <strong>décision</strong> :</p>
+
+    <table>
+      <thead><tr><th>Question</th><th>Décision</th></tr></thead>
+      <tbody>
+        <tr><td>Où arrivent les données ?</td><td>Sources / ingestion</td></tr>
+        <tr><td>Où les conserver ?</td><td>Storage</td></tr>
+        <tr><td>Comment les déplacer ?</td><td>Batch / Stream / CDC</td></tr>
+        <tr><td>Où les transformer ?</td><td>Processing</td></tr>
+        <tr><td>Qui va les consommer ?</td><td>BI / ML / AI / applications</td></tr>
+        <tr><td>Quel niveau de fraîcheur ?</td><td>Latence / SLA</td></tr>
+        <tr><td>Qui peut y accéder ?</td><td>Sécurité / gouvernance</td></tr>
+        <tr><td>Comment vérifier leur état ?</td><td>Quality / observability</td></tr>
+      </tbody>
+    </table>
+
+    <p><em>CDC (Change Data Capture)</em> : capter au fil de l'eau les <em>modifications</em> d'une source
+      — insertions, mises à jour, suppressions — au lieu de relire la source entière.</p>
+  </div>
+</div>
+
+<h3 id="n06-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette grille fait un travail que l'on remarque rarement : elle <strong>traduit</strong>. À gauche,
+      des questions qu'un responsable métier comprend sans vocabulaire technique ; à droite, le domaine
+      technique où la réponse se décide. C'est ce qui permet de tenir une réunion où tout le monde parle
+      de la même chose : le métier répond aux questions, l'architecte en tire les décisions. Une grille
+      remplie est donc à la fois un compte rendu de réunion et un document de conception.</p>
+
+    <p>Deuxième propriété, et c'est la plus utile : <strong>ces huit questions ne sont pas
+      indépendantes</strong>. Certaines réponses en commandent d'autres, et toujours dans le même sens.
+      <em>Qui va les consommer ?</em> et <em>quel niveau de fraîcheur ?</em> commandent presque tout le
+      reste : dès que l'on exige deux minutes de latence, la question « comment les déplacer ? » n'a plus
+      qu'une famille de réponses possibles, et le choix du stockage s'en trouve restreint. À l'inverse,
+      décider du stockage en premier ne contraint presque rien — mais engage de l'argent. D'où la
+      conséquence pratique, qui est le cœur de cette notion :</p>
+
+    <p><strong>l'ordre du tableau n'est pas l'ordre des réponses.</strong> Le tableau se lit de haut en
+      bas, parce qu'il suit le trajet de la donnée. Il se <em>remplit</em> en commençant par les usages —
+      « qui va les consommer ? », « quel niveau de fraîcheur ? » — puis en remontant vers les sources.
+      C'est l'application directe de la définition de N5 : les décisions sont celles qui sont
+      <em>nécessaires aux usages</em>, donc les usages viennent d'abord. Répondre dans l'ordre d'affichage
+      est l'erreur la plus répandue, et elle produit toujours le même résultat : une chaîne techniquement
+      correcte qui ne sert pas l'usage pour lequel elle a été payée.</p>
+
+    <p>Troisième propriété : <strong>les huit lignes ne sont pas de même nature</strong>. Les cinq
+      premières désignent un <em>endroit</em> du trajet — arrivée, conservation, déplacement,
+      transformation, consommation. Les trois dernières — fraîcheur, accès, état — ne se situent nulle
+      part en particulier : elles s'appliquent <strong>partout à la fois</strong>. Une latence se tient
+      de bout en bout, un droit d'accès vaut à chaque étape, et la qualité se vérifie tout au long. Ces
+      trois-là sont déjà la couche transverse de l'architecture moderne (N30), et c'est pourquoi on ne
+      peut pas les traiter « à la fin ».</p>
+
+    <p>Enfin, chaque ligne appelle un <strong>compromis</strong>, jamais une vérité. « Batch ou stream »
+      n'a pas de bonne réponse en soi ; il y en a une pour une fraîcheur donnée, à un coût donné. Une
+      grille bien remplie ne contient donc pas huit réponses, mais huit réponses <em>et</em> ce que chacune
+      coûte.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Répondre dans l'ordre du tableau.</strong> Le piège principal. On choisit les sources
+        et le stockage, puis on découvre à la cinquième ligne que le consommateur avait besoin d'autre
+        chose — alors que l'essentiel de la dépense est déjà engagé.</li>
+      <li><strong>Laisser une ligne vide ne supprime pas la décision.</strong> Elle sera prise par
+        défaut, en silence, par celui qui construit — et découverte plus tard, quand elle coûtera cher à
+        changer.</li>
+      <li><strong>Oublier le CDC.</strong> « Comment les déplacer ? » offre trois options, pas deux. Le
+        CDC répond au cas fréquent d'une base qui change peu mais qu'il serait absurde de relire
+        entièrement chaque nuit.</li>
+      <li><strong>Confondre fréquence et latence.</strong> Un chargement « toutes les heures » ne garantit
+        pas une donnée vieille d'une heure au plus : il faut y ajouter la durée du traitement et celle de
+        la mise à disposition. La fraîcheur se mesure <em>de bout en bout</em>, du fait réel jusqu'à
+        l'écran.</li>
+      <li><strong>Un SLA est un chiffre.</strong> « Temps réel », « rapide », « au plus tôt » ne sont pas
+        des réponses à la sixième ligne : elles ne permettent ni de concevoir, ni de vérifier.</li>
+      <li><strong>Une même donnée peut exiger deux grilles.</strong> Deux usages aux contraintes opposées
+        donnent deux jeux de réponses sur les mêmes sources — c'est normal, et c'est préférable à un
+        compromis qui ne satisfait personne.</li>
+      <li><strong>« Qui peut y accéder ? » n'est pas une question d'outil.</strong> C'est une question de
+        règles : qui, pour quelle finalité, pendant combien de temps. L'outil vient après.</li>
+      <li><strong>La grille ne dit pas quoi répondre.</strong> Elle garantit seulement qu'aucune décision
+        n'est oubliée. Deux architectes compétents peuvent la remplir différemment pour le même cas, et
+        tous deux avoir raison — ce qui les départage, ce sont les contraintes, pas les préférences.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> تصميم أركيتكتير المعطيات = الجواب على <strong>8 أسئلة</strong>،
+    وكل سؤال كيجر قرار: فين كتوصل المعطيات (مصادر/ingestion) · فين نحتافظو بيها (storage) · كيفاش
+    نحركوها (batch / stream / CDC) · فين نحولوها (processing) · شكون غادي يستهلكها (BI/ML/IA/تطبيقات) ·
+    أشمن مستوى ديال الطراوة (latence/SLA) · شكون يقدر يوصل ليها (أمن/حكامة) · كيفاش نتحققو من حالتها
+    (جودة/مراقبة). تلات ملاحظات: (1) الجدول كيتقرا من فوق لتحت حيت كيتبع طريق المعطى، ولكن
+    <strong>كيتعمر بالعكس</strong>: كنبداو من «شكون غادي يستهلك» و«أشمن طراوة»، ومن بعد كنطلعو للمصادر —
+    حيت القرارات هي «اللازمة للاستعمالات» (N5)؛ (2) الخمسة الأوائل كيحددو <strong>بلاصة</strong>
+    فالطريق، والتلاتة الأخيرين كيطبقو <strong>فكل بلاصة</strong> (هادي هي الطبقة العرضانية ديال N30)؛
+    (3) كل سطر هو <strong>تنازل</strong> ماشي حقيقة: «batch ولا stream» ما عندوش جواب صحيح فحد ذاتو،
+    عندو جواب لطراوة معينة بتكلفة معينة.</p>
+</div>
+
+<h3 id="n06-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui de la <strong>décision oubliée</strong>. Une architecture ne se rate presque
+      jamais sur une décision mal prise — elle se rate sur une décision que personne n'a vue passer.
+      Les sources ont été branchées, le stockage choisi, les traitements écrits ; mais nul n'a demandé
+      quelle fraîcheur était attendue, ni qui aurait le droit de voir quoi, ni comment on saurait qu'un
+      chargement a échoué. Ces questions ne se posent pas d'elles-mêmes : elles ne gênent personne tant
+      que le système n'est pas en service.</p>
+    <p>La grille traite ce problème en rendant les décisions <strong>limitativement énumérables</strong>.
+      Avec elle, « avons-nous tout décidé ? » devient une question à laquelle on peut répondre par oui
+      ou par non, en comptant. Elle traite aussi un second problème, plus discret : celui de la
+      <strong>langue commune</strong>. Un responsable métier ne sait pas répondre à « quelle stratégie
+      d'ingestion ? », mais il sait parfaitement répondre à « où arrivent les données ? » et « quel
+      niveau de fraîcheur vous faut-il ? ».</p>
+  </div>
+</div>
+
+<h3 id="n06-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Mener un atelier de cadrage en une séance</strong> : huit questions, posées dans le bon
+        ordre, suffisent à produire la trame d'une architecture.</li>
+      <li><strong>Vérifier qu'une conception est complète</strong>, en comptant les lignes remplies. Une
+        ligne vide est un risque identifié, pas une omission découverte six mois plus tard.</li>
+      <li><strong>Comparer deux propositions</strong> ligne à ligne, sur le même terrain, au lieu de
+        comparer des listes de produits.</li>
+      <li><strong>Repérer une incohérence</strong> : une latence de cinq minutes annoncée avec un
+        déplacement en batch nocturne se voit immédiatement sur la grille.</li>
+      <li><strong>Dialoguer avec le métier</strong> dans sa langue, et en tirer sans discussion
+        supplémentaire les décisions techniques correspondantes.</li>
+      <li><strong>Documenter une décision et son coût</strong> : chaque ligne reçoit une réponse et le
+        compromis accepté, ce qui évite de rouvrir le débat à chaque nouvel arrivant.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n06-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La grille n'est pas une liste de bonnes pratiques : c'est la <strong>définition de N5 mise à
+      l'interrogatif</strong>. On s'en convainc en superposant les deux.</p>
+
+    <p>L'architecture décrit le trajet de la donnée, de la collecte à la consommation. Posez une question
+      à chaque point du trajet et vous obtenez les cinq premières lignes :</p>
+    <ul>
+      <li>au point d'entrée → <em>où arrivent les données ?</em></li>
+      <li>au point de repos → <em>où les conserver ?</em></li>
+      <li>entre deux points → <em>comment les déplacer ?</em></li>
+      <li>au point de travail → <em>où les transformer ?</em></li>
+      <li>au point de sortie → <em>qui va les consommer ?</em></li>
+    </ul>
+
+    <p>Restent trois questions qui ne correspondent à aucun point parce qu'elles valent sur tout le
+      trajet : la fraîcheur, qui se mesure d'un bout à l'autre ; l'accès, qui doit être contrôlé partout
+      où la donnée passe ; l'état, qu'il faut pouvoir vérifier à chaque étape. <strong>Cinq questions de
+      lieu, trois questions transverses</strong> : la grille est complète parce que le trajet l'est.</p>
+
+    <p>On peut aussi justifier chaque ligne par la panne qu'elle évite, comme en N5 :</p>
+    <ul>
+      <li>Sans la 1 : on conçoit pour des données qui n'arriveront pas sous la forme prévue.</li>
+      <li>Sans la 2 : la donnée se pose là où c'était le plus simple, et le coût suit.</li>
+      <li>Sans la 3 : on relit chaque nuit l'intégralité d'une source qui changeait de 1 % — ou l'on
+        construit du temps réel pour un besoin hebdomadaire.</li>
+      <li>Sans la 4 : chaque consommateur refait ses propres calculs, et les chiffres divergent (N1).</li>
+      <li>Sans la 5 : le socle est construit avant de savoir qui s'en servira, panne décrite en N3.</li>
+      <li>Sans la 6 : aucune vérification possible, puisque rien n'a été promis.</li>
+      <li>Sans la 7 : on découvre les règles d'accès le jour d'un incident ou d'un contrôle.</li>
+      <li>Sans la 8 : les erreurs se propagent silencieusement jusqu'à un tableau de bord.</li>
+    </ul>
+
+    <p>Enfin, pourquoi parler des décisions de <em>l'architecte</em> plutôt que de l'ingénieur ? Parce
+      que ces huit-là partagent une propriété : <strong>elles survivent au projet</strong>. Le code se
+      réécrit, l'outil se remplace, mais le choix d'une latence, d'un mode de déplacement ou d'un
+      régime d'accès engage l'organisation pour des années et se paie très cher à changer.</p>
+  </div>
+</div>
+
+<h3 id="n06-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans l'atelier de cadrage d'un projet.</strong> On projette la grille et on la remplit
+        avec le métier et la technique réunis, dans l'ordre des usages. La séance produit un document
+        qui tient en une page et que les deux parties reconnaissent, ce qu'aucun compte rendu rédigé
+        après coup n'obtient.</li>
+      <li><strong>Dans la comparaison de solutions candidates.</strong> Deux architectures proposées pour
+        le même besoin se comparent ligne à ligne : ce qui diffère réellement apparaît, et ce qui n'est
+        qu'une différence de produit se révèle sans importance.</li>
+      <li><strong>Dans la revue d'une architecture existante.</strong> On remplit la grille d'après ce
+        qui a lieu, pas d'après la documentation. Les lignes qu'on ne sait pas remplir sont exactement
+        les décisions qui ont été prises par défaut.</li>
+      <li><strong>Dans un cahier des charges.</strong> Les huit questions deviennent les huit rubriques
+        auxquelles tout candidat doit répondre, ce qui rend les offres comparables.</li>
+      <li><strong>Dans un arbitrage.</strong> Quand deux équipes s'opposent, la grille déplace la
+        discussion : au lieu de défendre un produit, chacun doit dire quelle ligne il privilégie et ce
+        qu'il accepte de payer ailleurs.</li>
+      <li><strong>Dans un examen ou une étude de cas.</strong> Un énoncé d'architecture se traite en
+        remplissant la grille : c'est aussi la trame d'une réponse complète et ordonnée.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n06-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« On commence par choisir la plateforme. »</strong> Le signal le plus clair : on
+        s'apprête à répondre à la deuxième ligne sans avoir lu la cinquième. Sortez la grille avant la
+        signature.</li>
+      <li><strong>« Il nous faut du temps réel. »</strong> Affirmation à convertir immédiatement en
+        chiffre : quelle latence, mesurée d'où à où, pour quelle décision ? Souvent, « temps réel »
+        signifie « plus rapide que le lendemain matin ».</li>
+      <li><strong>« Chaque nuit, on recharge toute la base. »</strong> La troisième ligne n'a pas été
+        posée : le CDC n'a pas été envisagé.</li>
+      <li><strong>« On ne sait pas qui utilise cette table. »</strong> Cinquième ligne absente : la
+        consommation n'a jamais été décrite, et plus personne n'ose modifier quoi que ce soit.</li>
+      <li><strong>« Le rapport était faux depuis trois semaines. »</strong> Huitième ligne absente :
+        rien ne vérifiait l'état des données.</li>
+      <li><strong>« Qui a validé cet accès ? »</strong> Septième ligne absente, découverte au pire
+        moment.</li>
+      <li><strong>« Le projet est fini mais le métier ne l'utilise pas. »</strong> La grille a été
+        remplie dans l'ordre d'affichage : les usages sont arrivés en dernier.</li>
+      <li><strong>« Les deux équipes ne sont pas d'accord sur l'outil. »</strong> Le désaccord porte
+        rarement sur l'outil ; il porte sur une ligne de la grille que personne n'a explicitée.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n06-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Commencer par la cinquième ligne : qui va consommer ?</strong> Nommez les
+      consommateurs un par un — un tableau de bord, un modèle, une application — avec la décision que
+      chacun sert. Tant que cette ligne est vague, les sept autres n'ont pas de critère.</p>
+
+    <p><strong>Étape 2 — Enchaîner sur la sixième : quelle fraîcheur, en chiffres ?</strong> Pour chaque
+      consommateur : quel délai maximal entre le fait réel et sa disponibilité ? Exigez un nombre et une
+      unité, et notez ce qui se passe si le délai est dépassé. C'est cette réponse qui, plus que toute
+      autre, va restreindre les suivantes — autant la connaître tôt.</p>
+
+    <p><strong>Étape 3 — Remonter aux sources : où arrivent les données, et comment les déplacer ?</strong>
+      Identifiez les sources nécessaires aux consommateurs retenus — et elles seules. Choisissez ensuite
+      le mode de déplacement en confrontant la fraîcheur de l'étape 2 au volume et au taux de changement
+      de chaque source : relecture complète en batch, flux continu, ou capture des changements (CDC).</p>
+
+    <p><strong>Étape 4 — Placer le stockage et les traitements.</strong> Où la donnée se pose-t-elle, sous
+      quelle forme, combien de temps ? Où est-elle transformée, et par quelles règles ? Ces deux lignes
+      sont désormais largement contraintes par les trois réponses précédentes, ce qui est le signe que
+      l'ordre était le bon : il reste peu de liberté, donc peu d'arbitraire.</p>
+
+    <p><strong>Étape 5 — Traiter les trois transverses, et vérifier la cohérence.</strong> Accès : qui,
+      pour quelle finalité, pendant combien de temps. État : quels contrôles, quelles alertes, vers qui.
+      Puis relisez la grille entière à la recherche de contradictions — la plus fréquente étant une
+      latence promise qu'un mode de déplacement rend impossible. Terminez en écrivant, sur chaque ligne,
+      <strong>le compromis accepté</strong> : ce que cette réponse coûte, et ce à quoi elle fait
+      renoncer. Une grille sans cette colonne sera relue dans deux ans comme une suite d'évidences, et
+      ses raisons seront perdues.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La grille se <strong>lit</strong> dans l'ordre du trajet de la donnée, mais se <strong>remplit</strong>
+      en commençant par les usages : <em>qui consomme</em>, <em>quelle fraîcheur</em>, puis on remonte.
+      Cinq questions de lieu, trois questions transverses, huit compromis à écrire.</p>
+    <p class="ar" dir="rtl">الشبكة <strong>كتتقرا</strong> على ترتيب طريق المعطى، ولكن
+      <strong>كتتعمر</strong> بالبدء من الاستعمالات: <em>شكون كيستهلك</em>، <em>أشمن طراوة</em>، ومن بعد
+      كنطلعو. خمسة ديال المكان، تلاتة عرضانيين، وتمن تنازلات خاصهم يتكتبو.</p>
+  </div>
+</div>
+
+<h3 id="n06-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — la prévision de demande de l'enseigne</div>
+  <div class="box-b">
+    <p>Troisième demande de la direction (cas d'ouverture) : prévoir la demande par produit et par
+      magasin pour éviter les ruptures du vendredi soir. Les commandes aux fournisseurs sont passées le
+      lundi matin. Remplissez les huit lignes dans le bon ordre.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Qui va consommer ?</strong> Deux consommateurs, et il faut les distinguer : un
+      <em>modèle</em> de prévision, qui consomme de l'historique pour s'entraîner, et les
+      <em>responsables d'approvisionnement</em>, qui consomment le résultat de la prévision pour passer
+      commande le lundi matin. Confondre les deux conduirait à appliquer au modèle les contraintes de
+      l'application, et inversement.</p>
+
+    <p><strong>Étape 2 — Quelle fraîcheur ?</strong> Pour le modèle : de l'historique, donc la fraîcheur
+      importe peu, mais la <em>profondeur</em> est critique — au moins deux à trois ans pour capter la
+      saisonnalité. Pour les approvisionneurs : la prévision doit être disponible le lundi à 7 h,
+      calculée sur des ventes arrêtées au dimanche soir. <strong>SLA : prévision disponible le lundi
+      avant 7 h ; données de ventes intégrées au plus tard le dimanche à 23 h.</strong> Aucune exigence
+      de temps réel n'apparaît — constat qui, à lui seul, écarte une famille entière de solutions
+      coûteuses.</p>
+
+    <p><strong>Étape 3 — Où arrivent les données, comment les déplacer ?</strong> Sources nécessaires :
+      ventes par magasin et par produit (caisses et site), référentiel produits, stocks, et au moins un
+      facteur externe comme le calendrier des jours fériés et des promotions — car une prévision qui
+      ignore une promotion se trompera systématiquement. Déplacement : <strong>batch quotidien</strong>,
+      suffisant au regard de l'étape 2. Pour le référentiel produits, qui change peu mais dont les
+      modifications comptent, le <strong>CDC</strong> est préférable à une relecture complète.</p>
+
+    <p><strong>Étape 4 — Stockage et traitements.</strong> Stockage : les ventes historiques sur
+      <strong>3 ans minimum</strong> dans la plateforme analytique — contrainte imposée par l'étape 2,
+      et que la base opérationnelle, avec ses six mois, ne pouvait pas satisfaire. Traitements :
+      consolidation quotidienne, construction des variables (saisonnalité, promotions, météo si
+      retenue), entraînement périodique — mensuel suffit — et calcul de la prévision chaque dimanche
+      soir.</p>
+
+    <p><strong>Étape 5 — Transverses et cohérence.</strong> Accès : les approvisionneurs voient les
+      prévisions de leur périmètre ; l'équipe data accède à l'historique complet ; aucune donnée
+      personnelle n'est nécessaire ici, ce qui simplifie la septième ligne et mérite d'être écrit.
+      État : contrôle du nombre de lignes intégrées chaque nuit, alerte si une source manque le dimanche,
+      et surtout <strong>suivi de l'erreur de prévision dans le temps</strong> — un modèle se dégrade
+      silencieusement, et c'est la huitième ligne qui le détecte. Cohérence : la chaîne batch quotidienne
+      tient le SLA du lundi 7 h avec une marge de plusieurs heures.
+      <strong>Compromis acceptés</strong> : pas de temps réel (inutile ici, économie importante) ;
+      3 ans de stockage supplémentaire (coût assumé, imposé par la profondeur d'historique) ; prévision
+      hebdomadaire et non quotidienne (aligné sur le rythme réel des commandes, pas sur ce qui serait
+      techniquement possible).</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — quand la fraîcheur change tout</div>
+  <div class="box-b">
+    <p>Une banque traite 2 000 transactions par minute. Son dispositif actuel : extraction nocturne des
+      transactions, analyse le lendemain matin, blocage manuel des cartes suspectes. La direction veut
+      désormais <strong>bloquer une transaction frauduleuse avant qu'elle n'aboutisse</strong>. Remplissez
+      la grille et montrez ce que ce seul changement entraîne.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Qui consomme ?</strong> Changement radical par rapport à l'existant : le
+      consommateur n'est plus un analyste devant un écran, c'est le <strong>système d'autorisation de
+      paiement lui-même</strong>. La donnée n'est plus lue par un humain, elle est consommée par une
+      application qui prend une décision automatique. Cette seule ligne suffit déjà à rendre l'ancienne
+      architecture inutilisable.</p>
+
+    <p><strong>Étape 2 — Quelle fraîcheur ?</strong> Le score doit être rendu <em>pendant</em> la
+      transaction : quelques centaines de millisecondes, délai au-delà duquel le paiement est refusé ou
+      accepté sans contrôle. On passe de « le lendemain matin » à « moins d'une seconde », soit un
+      rapport de l'ordre de 50 000.</p>
+
+    <p><strong>Étape 3 — Sources et déplacement.</strong> La réponse de la troisième ligne est
+      maintenant <em>contrainte</em>, et non choisie : ni batch, ni extraction périodique.
+      <strong>Stream</strong> pour les transactions en cours, et <strong>CDC</strong> pour les
+      référentiels — listes de cartes bloquées, plafonds — qui changent peu mais dont la mise à jour
+      doit être immédiate. Remarquez qu'on n'a <em>rien décidé</em> ici : l'étape 2 a décidé pour nous.
+      C'est exactement ce que signifie « la fraîcheur commande le déplacement ».</p>
+
+    <p><strong>Étape 4 — Stockage et traitements.</strong> Deux chemins pour la même donnée. À chaud :
+      un état courant léger — les dernières opérations de la carte, les compteurs — consultable en
+      quelques millisecondes pour alimenter le score. À froid : l'historique complet, conservé pour
+      l'entraînement du modèle et les enquêtes. Traitements : calcul du score en continu, et
+      réentraînement périodique hors ligne.</p>
+
+    <p><strong>Étape 5 — Transverses et cohérence.</strong> Accès : données de paiement, donc
+      habilitations strictes, traçabilité de chaque consultation et conservation encadrée. État : c'est
+      ici que le cas devient délicat. Il faut surveiller non seulement les pannes, mais aussi le
+      <strong>taux de faux positifs</strong> : un dispositif qui bloque des transactions légitimes coûte
+      plus cher que la fraude qu'il évite. Cohérence : la chaîne de bout en bout doit tenir le budget de
+      temps — réception, enrichissement, score, décision — ce qui impose de le répartir explicitement
+      entre les étapes.
+      <strong>Compromis acceptés</strong> : coût d'exploitation bien supérieur à celui du batch ;
+      modèle plus simple que celui qui serait possible hors ligne, parce qu'il doit répondre en
+      millisecondes ; et un seuil de décision qui arbitre, en connaissance de cause, entre fraudes
+      manquées et clients bloqués à tort. <strong>Conclusion</strong> : une seule ligne modifiée — la
+      fraîcheur — et sept réponses changent. C'est la démonstration la plus nette de la hiérarchie entre
+      les lignes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — corriger une grille incohérente</div>
+  <div class="box-b">
+    <p>Une équipe présente cette grille pour une application mobile affichant aux clients le solde de
+      leur compte fidélité :</p>
+    <table>
+      <thead><tr><th>Question</th><th>Réponse proposée</th></tr></thead>
+      <tbody>
+        <tr><td>Où arrivent les données ?</td><td>Caisses, site, application</td></tr>
+        <tr><td>Où les conserver ?</td><td>Entrepôt analytique</td></tr>
+        <tr><td>Comment les déplacer ?</td><td>Batch, une fois par nuit</td></tr>
+        <tr><td>Où les transformer ?</td><td>Dans l'entrepôt, chaque matin à 6 h</td></tr>
+        <tr><td>Qui va les consommer ?</td><td>L'application mobile des clients</td></tr>
+        <tr><td>Quel niveau de fraîcheur ?</td><td>« Temps réel »</td></tr>
+        <tr><td>Qui peut y accéder ?</td><td>Tous les clients</td></tr>
+        <tr><td>Comment vérifier leur état ?</td><td>À définir</td></tr>
+      </tbody>
+    </table>
+    <p>Relevez toutes les incohérences et proposez une grille corrigée.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Incohérence 1 — fraîcheur contre déplacement.</strong> « Temps réel » est annoncé alors
+      que les données ne bougent qu'une fois par nuit et ne sont transformées qu'à 6 h. Un client qui
+      achète à 10 h verra son solde le lendemain matin. Les lignes 3, 4 et 6 se contredisent, et c'est
+      la contradiction la plus coûteuse : elle ne se découvrira qu'à la mise en service.</p>
+
+    <p><strong>Incohérence 2 — « temps réel » n'est pas une réponse.</strong> La sixième ligne exige un
+      chiffre. Ici, le besoin réel se formule : <em>le solde affiché doit refléter un achat au plus tard
+      une minute après l'encaissement.</em></p>
+
+    <p><strong>Incohérence 3 — le stockage ne correspond pas au consommateur.</strong> Un entrepôt
+      analytique est conçu pour des requêtes d'agrégation sur de gros volumes, pas pour des millions de
+      consultations unitaires « donne-moi le solde du client C001 » avec un temps de réponse de quelques
+      millisecondes. C'est un cas d'école de workload mal placé, que la partie III du cours (OLTP /
+      OLAP) traitera pour lui-même.</p>
+
+    <p><strong>Incohérence 4 — « tous les clients ».</strong> La septième ligne est mal formulée au point
+      d'être dangereuse : chaque client doit voir <em>son</em> solde, et seulement le sien. Ce qui est
+      décrit là autoriserait chacun à consulter les données de tous.</p>
+
+    <p><strong>Incohérence 5 — « à définir ».</strong> Une ligne vide est une décision prise par défaut.
+      Pour une donnée affichée directement à des clients, l'absence de contrôle signifie qu'une erreur
+      sera signalée par les clients eux-mêmes.</p>
+
+    <p><strong>Grille corrigée.</strong> <em>Consommateur</em> : l'application mobile, pour un affichage
+      unitaire par client — et, séparément, le marketing pour des analyses agrégées. <em>Fraîcheur</em> :
+      moins d'une minute après l'encaissement pour l'affichage client ; quotidienne pour le marketing.
+      <em>Sources</em> : inchangées. <em>Déplacement</em> : flux continu ou CDC depuis les caisses pour
+      l'affichage ; le batch nocturne existant reste parfaitement adapté au besoin marketing.
+      <em>Stockage</em> : un magasin de soldes à accès unitaire rapide pour l'application, l'entrepôt
+      restant pour l'analyse. <em>Traitements</em> : mise à jour du solde à chaque transaction ;
+      agrégations quotidiennes côté entrepôt. <em>Accès</em> : chaque client authentifié accède à son
+      seul compte ; le marketing accède à des agrégats, sans identification individuelle.
+      <em>État</em> : contrôle de cohérence quotidien entre la somme des transactions et le solde
+      affiché, alerte en cas d'écart.
+      <strong>Enseignement de l'exercice</strong> : deux usages aux contraintes opposées cohabitaient
+      sur une seule grille. Les séparer ne complique pas l'architecture — cela évite de payer du temps
+      réel pour le marketing et d'imposer un délai d'un jour aux clients.</p>
+  </div>
+</div>
+
+<h3 id="n06-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez les huit questions et la décision associée à chacune, puis indiquez les trois qui sont
+        transverses et expliquez pourquoi.</li>
+      <li>Expliquez en quelques lignes pourquoi la grille ne se remplit pas dans l'ordre où elle se lit,
+        et donnez un exemple d'erreur que cet ordre inversé évite.</li>
+      <li>Qu'est-ce que le CDC, et dans quel cas précis est-il préférable à une relecture complète en
+        batch ? Donnez un contre-exemple où il ne l'est pas.</li>
+      <li>Transformez ces trois besoins en SLA chiffrés : « il nous faut du temps réel » ; « le rapport
+        doit être prêt le matin » ; « les données doivent être à jour ».</li>
+      <li>Une bibliothèque veut afficher en direct les places disponibles en salle de lecture et analyser
+        la fréquentation mensuelle. Remplissez la grille pour chacun des deux usages et comparez les
+        réponses ligne à ligne.</li>
+      <li>Reprenez la grille de l'exercice 12.3 et dites, pour chaque ligne corrigée, quel compromis vous
+        avez accepté et ce qu'il coûte.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n06-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque réponse à sa question : « Power BI et une API » ; « Data Lake, 5 ans » ;
+      « CDC depuis l'ERP » ; « moins de 15 minutes » ; « rôles lecture seule pour le service client » ;
+      « capteurs et ERP » ; « Spark, chaque heure » ; « contrôle du nombre de lignes et alerte ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une plateforme de covoiturage veut : <em>(a)</em> afficher aux passagers la position du véhicule
+      en direct, <em>(b)</em> facturer les trajets en fin de course, <em>(c)</em> analyser chaque mois la
+      rentabilité par ville. Remplissez une grille complète pour chacun des trois usages en suivant les
+      cinq étapes, puis dressez le tableau des différences ligne à ligne. Indiquez ce que les trois
+      usages peuvent partager et ce qui doit impérativement rester séparé, en justifiant par les
+      contraintes et non par les outils.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Un consultant affirme : « cette grille est dépassée ; aujourd'hui, les plateformes répondent
+      elles-mêmes à six des huit questions, il ne reste qu'à choisir le bon produit. » Discutez cette
+      affirmation ligne par ligne : pour chacune des huit, dites ce qu'un produit peut effectivement
+      décider à votre place, et ce qu'il ne peut pas décider, en expliquant pourquoi. Concluez en
+      précisant ce que devient le rôle de l'architecte si l'affirmation était vraie — et montrez, à
+      l'aide d'un cas de votre choix, pourquoi deux organisations utilisant exactement le même produit
+      aboutissent malgré tout à deux grilles différentes.</p>
+  </div>
+</div>

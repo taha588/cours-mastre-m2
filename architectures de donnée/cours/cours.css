@@ -1,0 +1,45 @@
+/* Réglages de mise en page propres à ce cours.
+   Aucune couleur ici : theme.css fait foi (SPEC §4).
+   Chargé APRÈS theme.css par build/build.py. */
+
+/* Une boîte plus longue qu'une demi-page doit pouvoir se couper : sinon elle saute
+   à la page suivante et laisse un grand blanc. On la marque class="box long ...". */
+.box.long { page-break-inside: auto; }
+.box.long > .box-t { page-break-after: avoid; }
+
+/* Dans une cellule étroite, la justification du corps de texte creuse des trous :
+   on aligne à gauche (à droite en RTL). */
+td { text-align: left; }
+[dir="rtl"] td { text-align: right; }
+
+/* Un tableau plus long qu'une demi-page doit pouvoir se couper : on le marque
+   class="long" et sa ligne d'en-tête se répète en haut de chaque page. */
+table.long { page-break-inside: auto; }
+table.long thead { display: table-header-group; }
+table.long tr { page-break-inside: avoid; }
+
+/* Ne jamais laisser un titre seul en bas de page. */
+h1, h2, h3, h4 { page-break-after: avoid; }
+
+/* Les listes longues se coupent, mais jamais au milieu d'un item. */
+ul, ol { page-break-inside: auto; }
+li { page-break-inside: avoid; }
+
+/* Résumé en arabe (SPEC §4) : lisible, aligné à droite, jamais justifié.
+   Les couleurs proviennent des variables de theme.css, aucune teinte nouvelle. */
+.ar[dir="rtl"] { font-size: 12.5pt; text-align: right; }
+div.ar[dir="rtl"] {
+  background: var(--bleu-fond);
+  border-right: 2.4pt solid var(--bleu);
+  border-radius: 3px;
+  padding: 2.5mm 3.5mm;
+  margin: 3.5mm 0;
+  page-break-inside: avoid;
+}
+/* à l'intérieur d'une boîte (le « À retenir » bilingue), pas de second fond */
+.box-b .ar[dir="rtl"] { background: none; border-right: 0; padding: 0; margin: 2mm 0 0; }
+
+/* Chaque notion commence en haut d'une page... */
+h2.notion { page-break-before: always; }
+/* ...sauf la première d'une partie, qui suit son titre de partie. */
+h1.chapitre + h2.notion { page-break-before: avoid; }

@@ -1,0 +1,539 @@
+<h2 class="notion" id="n14">N14 — L'architecture distribuée</h2>
+
+<h3 id="n14-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Le <strong>stockage et/ou le calcul</strong> est <strong>réparti sur
+      plusieurs nœuds, sites, systèmes ou domaines</strong>.</p>
+
+    <p><strong>Exemple.</strong> Un <strong>cluster</strong> répartit un traitement massif sur plusieurs
+      machines au lieu d'exécuter toute la charge sur un seul serveur.</p>
+
+    <table>
+      <thead><tr><th>Atouts</th><th>Coûts</th><th>Question</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Scale-out • parallélisme • résilience potentielle</td>
+          <td>Réseau • coordination • partitionnement • cohérence</td>
+          <td><strong>Comment répartir sans perdre contrôle et qualité ?</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Centralisé et distribué ne sont pas deux architectures totalement exclusives. Une
+      architecture moderne peut combiner les deux.</strong></p>
+  </div>
+</div>
+
+<h3 id="n14-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Cette notion se lit en miroir de la précédente, et la symétrie est volontaire. En N13, tout
+      découlait d'un fait unique : <em>il n'y a qu'un endroit</em>. Ici, tout découle du fait inverse :
+      <strong>il y a plusieurs endroits</strong>. Les atouts et les coûts en sont, une fois encore, les
+      deux faces.</p>
+    <ul>
+      <li>Plusieurs endroits → on peut en ajouter un de plus → <strong>scale-out</strong> ;</li>
+      <li>plusieurs endroits → ils peuvent travailler en même temps → <strong>parallélisme</strong> ;</li>
+      <li>plusieurs endroits → la perte de l'un n'arrête pas tout → <strong>résilience</strong> ;</li>
+      <li>plusieurs endroits → les données doivent circuler → <strong>réseau</strong> ;</li>
+      <li>plusieurs endroits → ils doivent se mettre d'accord → <strong>coordination</strong> ;</li>
+      <li>plusieurs endroits → il faut décider ce qui va où → <strong>partitionnement</strong> ;</li>
+      <li>plusieurs endroits → ils peuvent ne pas dire la même chose → <strong>cohérence</strong>.</li>
+    </ul>
+
+    <p>Un détail de vocabulaire mérite qu'on s'y arrête, car il n'est pas accidentel. En N13, la colonne
+      s'intitulait « <em>limites</em> » ; ici, elle s'intitule « <strong>coûts</strong> ». Une limite est
+      un plafond : elle ne se manifeste qu'<em>au-delà</em> d'un certain seuil, et en dessous la
+      centralisation est gratuite. Un coût, lui, <strong>se paie dès le premier jour</strong>, quelle
+      que soit la taille. Réseau, coordination, partitionnement et cohérence sont facturés immédiatement,
+      tandis que les atouts — scale-out, parallélisme — ne rapportent qu'à partir d'une certaine
+      échelle. D'où la conséquence pratique la plus importante de cette notion :
+      <strong>en dessous d'un seuil, distribuer est une perte sèche</strong>.</p>
+
+    <p>Le deuxième point à ne pas manquer est l'énumération « nœuds, sites, systèmes ou
+      <strong>domaines</strong> ». Ces quatre mots décrivent <strong>quatre niveaux de distribution très
+      différents</strong>, que l'on confond souvent sous le même terme :</p>
+    <ul>
+      <li><strong>Nœuds</strong> — plusieurs machines d'un même cluster. Distribution purement technique,
+        invisible pour l'utilisateur : c'est l'exemple du support.</li>
+      <li><strong>Sites</strong> — plusieurs lieux géographiques. Souvent subie plutôt que choisie :
+        implantations, réglementation, latence.</li>
+      <li><strong>Systèmes</strong> — plusieurs plateformes distinctes. Souvent le résultat d'une
+        histoire — fusion, rachat — plus que d'une décision.</li>
+      <li><strong>Domaines</strong> — plusieurs équipes métier responsables de leurs données. Ce n'est
+        plus une distribution technique mais <strong>organisationnelle</strong>, et c'est la direction
+        que désignait la génération 7 de N8 sous le nom de Data Mesh.</li>
+    </ul>
+    <p>Dire « nous distribuons » sans préciser lequel de ces quatre niveaux est en jeu, c'est ne rien
+      dire : répartir un calcul sur dix machines et confier les données à huit équipes métier n'ont en
+      commun que le mot.</p>
+
+    <p>Troisième point : <strong>« résilience potentielle »</strong>. Le mot <em>potentielle</em> est un
+      avertissement. Distribuer ne rend pas résilient — cela rend la résilience <em>possible</em>, et
+      seulement si elle est conçue : réplication, bascule, reprise, et surtout essais réels. Sans cela,
+      multiplier les composants ne fait que multiplier les occasions de panne, et un système distribué
+      mal conçu est <strong>moins</strong> fiable qu'un système centralisé.</p>
+
+    <p>Reste la question du support, qui achève le miroir. N13 demandait : <em>le centre devient-il un
+      goulot ?</em> — une question de <strong>diagnostic</strong>, qui se mesure. N14 demande :
+      <em>comment répartir sans perdre contrôle et qualité ?</em> — une question de
+      <strong>conception</strong>. Et ce que l'on risque de perdre, contrôle et qualité, est exactement
+      ce que la centralisation apportait. <strong>Les deux questions ne sont pas deux sujets : ce sont
+      les deux bouts d'un seul arbitrage.</strong> C'est pourquoi le support conclut que les deux
+      architectures ne sont pas exclusives : la bonne réponse n'est pas un camp, mais un
+      <em>dosage</em> — ce qui reste central parce qu'il exige cohérence et contrôle, ce qui est réparti
+      parce qu'une contrainte l'impose ou qu'un bénéfice le justifie.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Distribuer ne rend pas résilient.</strong> Sans réplication ni bascule testée, plus de
+        composants signifie simplement plus de pannes possibles.</li>
+      <li><strong>Un mauvais partitionnement recrée un goulot.</strong> Si toutes les requêtes tombent
+        sur la même partition — la date du jour, le plus gros magasin — on a payé les quatre coûts pour
+        retrouver un point de contention. Le partitionnement est la décision la plus technique et la
+        plus déterminante de cette notion.</li>
+      <li><strong>Le coût réseau est invisible jusqu'au jour où il apparaît.</strong> Tant que chaque
+        nœud travaille sur ses propres données, tout va vite ; dès qu'une opération oblige les données à
+        traverser, la facture et la durée changent d'ordre de grandeur.</li>
+      <li><strong>Distribuer le calcul est simple ; distribuer les données l'est beaucoup moins.</strong>
+        Les problèmes de cohérence commencent avec la seconde copie, pas avec le second processeur.</li>
+      <li><strong>Distribuer par domaines est un projet d'organisation, pas de technologie.</strong>
+        Confier les données aux équipes métier sans leur transférer la responsabilité ni les moyens
+        reproduit la file d'attente ailleurs (N7, exercice 12.3).</li>
+      <li><strong>« Distribué » n'est pas synonyme de « scalable ».</strong> Au-delà d'un certain nombre
+        de nœuds, la coordination croît plus vite que la capacité ajoutée.</li>
+      <li><strong>Les coûts se paient avant que les atouts ne rapportent.</strong> Sur un petit volume,
+        une seule machine bien dimensionnée bat presque toujours un cluster.</li>
+      <li><strong>Répartir ne dispense pas de gouverner.</strong> Contrôle et qualité ne survivent à la
+        répartition que s'ils sont explicitement maintenus : définitions communes, contrats, catalogue.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الأركيتكتير <strong>الموزعة</strong> = التخزين <strong>و/ولا</strong>
+    الحساب موزّع على <strong>عدة عقد، مواقع، أنظمة ولا مجالات</strong> (مثال: cluster كيوزّع معالجة
+    ضخمة على عدة ماكينات بدل ما يديرها سيرفر واحد). المزايا: <strong>scale-out · توازي · مرونة
+    محتملة</strong>. التكاليف: <strong>الشبكة · التنسيق · التقسيم · الاتساق</strong>. والسؤال:
+    <strong>كيفاش نوزعو بلا ما نضيعو التحكم والجودة؟</strong> أربع نقط: (1) كل شي كيخرج من حقيقة وحدة
+    <strong>كاينين بزاف ديال البلايص</strong> — بالضبط عكس N13، والمزايا والتكاليف هوما وجهين ديالها.
+    (2) السلايد كتقول <strong>«تكاليف» ماشي «حدود»</strong>، وهادا مقصود: الحد كيبان غير فوق عتبة
+    معينة، أما التكلفة <strong>كتتخلص من النهار الأول</strong> — ومن تمة: <strong>تحت عتبة معينة،
+    التوزيع خسارة صافية</strong>. (3) «عقد، مواقع، أنظمة، مجالات» هوما <strong>أربع مستويات مختلفين
+    تماما</strong>: العقد توزيع تقني خفي، والمجالات توزيع <strong>تنظيمي</strong> (Data Mesh).
+    (4) <strong>«مرونة محتملة»</strong> — التوزيع ما كيديرش المرونة، كيخليها ممكنة، وبلا تصميم ديال
+    النسخ والتبديل، كثرة المكونات = كثرة الأعطاب.</p>
+</div>
+
+<h3 id="n14-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'architecture distribuée traite <strong>ce qui ne tient pas dans un seul endroit</strong>, et ce
+      « ne tient pas » prend quatre formes bien distinctes. Un traitement <em>trop lourd</em> pour une
+      machine, quelle que soit sa taille — c'est l'exemple du cluster, et le problème dominant de la
+      génération 3 (Big Data, N8). Des données qui <em>ne peuvent pas</em> être rassemblées, pour des
+      raisons juridiques ou de souveraineté. Des systèmes <em>hérités</em> d'une histoire que personne
+      ne réécrira. Et des équipes qui <em>attendent</em> derrière un centre devenu goulot — le cas
+      diagnostiqué en N13.</p>
+    <p>Mais la règle traite aussi, et peut-être surtout, le problème symétrique de celui de N13 :
+      <strong>savoir ce que la répartition coûte</strong>. En nommant quatre coûts précis au lieu de
+      vanter la scalabilité, et en demandant comment préserver contrôle et qualité, elle empêche de
+      présenter la distribution comme un progrès gratuit — de la même manière que N13 empêchait de
+      présenter la centralisation comme un ordre sans contrepartie.</p>
+  </div>
+</div>
+
+<h3 id="n14-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Nommer précisément ce que l'on distribue</strong> : quel axe — stockage ou calcul — et
+        à quel niveau — nœuds, sites, systèmes ou domaines.</li>
+      <li><strong>Chiffrer les quatre coûts avant de décider</strong>, au lieu de les découvrir en
+        exploitation.</li>
+      <li><strong>Reconnaître le seuil</strong> en dessous duquel distribuer coûte plus que cela ne
+        rapporte.</li>
+      <li><strong>Concevoir la résilience</strong> au lieu de l'espérer : le mot « potentielle » oblige
+        à dire comment.</li>
+      <li><strong>Décider du partitionnement</strong> en connaissance de cause, puisque c'est lui qui
+        fera la performance ou le goulot.</li>
+      <li><strong>Préserver contrôle et qualité</strong> en nommant ce qui reste commun : définitions,
+        contrats, catalogue — c'est la réponse à la question du support.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n14-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>La distribution naît d'un constat matériel simple : il existe des charges qu'<strong>aucune
+      machine ne peut porter</strong>, et à partir de là on n'a plus le choix. C'est le problème
+      dominant de la génération 3 — l'explosion du volume et le besoin de traitement distribué (N8) —
+      et c'est pourquoi l'exemple du support est un cluster : la forme la plus ancienne et la plus
+      inoffensive de la distribution.</p>
+
+    <p><strong>Pourquoi ces quatre coûts, et pas d'autres ?</strong> Parce qu'ils sont les quatre
+      conséquences nécessaires du passage de « un » à « plusieurs ». Il suffit de se demander ce qui
+      devient obligatoire dès qu'il y a deux endroits au lieu d'un :</p>
+    <ul>
+      <li>Les données doivent <strong>aller</strong> de l'un à l'autre → coût de <strong>réseau</strong>.
+        Il est nul tant que chaque nœud travaille chez lui, et il explose dès qu'une opération oblige
+        tout le monde à échanger.</li>
+      <li>Les endroits doivent <strong>s'accorder</strong> sur qui fait quoi et dans quel ordre → coût de
+        <strong>coordination</strong>, qui croît avec le nombre de participants.</li>
+      <li>Il faut <strong>décider ce qui va où</strong> → coût de <strong>partitionnement</strong>. Ce
+        n'est pas un détail technique : une clé mal choisie concentre la charge sur un nœud, et l'on
+        retrouve le goulot de N13 au cœur d'un système distribué.</li>
+      <li>Deux endroits peuvent détenir <strong>deux versions</strong> de la même information → coût de
+        <strong>cohérence</strong>. C'est le plus profond des quatre, parce qu'il ne se résout pas :
+        il se <em>choisit</em>. Faut-il que tout le monde voie la même valeur au même instant — au prix
+        de l'attente — ou tolérer un décalage temporaire au profit de la disponibilité ?</li>
+    </ul>
+
+    <p><strong>Et les atouts ?</strong> Ils sortent de la même cause. Plusieurs endroits permettent
+      d'en ajouter un onzième — <em>scale-out</em>, par opposition au fait d'agrandir le seul existant,
+      distinction qui fera l'objet de N15. Ils permettent de travailler simultanément —
+      <em>parallélisme</em>. Ils permettent de survivre à la perte de l'un — <em>résilience</em>, à
+      condition de l'avoir conçue. <strong>Atouts et coûts ont donc exactement la même origine</strong>,
+      comme en N13 : on ne peut pas prendre les uns sans les autres.</p>
+
+    <p>Reste à comprendre la phrase finale du support — les deux architectures ne sont pas exclusives.
+      Elle se déduit de tout ce qui précède. Puisque la centralisation produit cohérence et contrôle au
+      prix d'un goulot possible, et que la distribution produit l'échelle au prix de quatre coûts
+      immédiats, <strong>aucune organisation réelle n'a intérêt à choisir un camp pour l'ensemble de ses
+      données</strong>. Elle a intérêt à garder au centre ce qui exige la cohérence — référentiels,
+      définitions, consolidation — et à répartir ce dont l'échelle, la localisation ou l'autonomie
+      l'exigent. C'est exactement la conclusion de l'étape 5 de N13, vue de l'autre bord.</p>
+  </div>
+</div>
+
+<h3 id="n14-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Pour les traitements massifs.</strong> Entraînement de modèles, recalculs sur des
+        années d'historique, transformations de téraoctets : la charge dépasse une machine, et le
+        parallélisme est le seul moyen de tenir une durée acceptable.</li>
+      <li><strong>Quand la localisation est imposée.</strong> Réglementation, souveraineté, contraintes
+        contractuelles : la distribution par <em>sites</em> n'est alors pas un choix d'architecture mais
+        une obligation à laquelle il faut adapter le reste.</li>
+      <li><strong>Pour rapprocher le traitement de la source.</strong> Capteurs, usines, véhicules :
+        traiter localement évite de transporter des volumes énormes pour n'en garder qu'une fraction —
+        c'est la logique du TD IoT/Edge qui clôt ce cours.</li>
+      <li><strong>Pour la disponibilité.</strong> Lorsqu'une interruption est inacceptable, la
+        réplication sur plusieurs nœuds ou sites est le moyen de survivre à la perte de l'un — à
+        condition de concevoir la bascule.</li>
+      <li><strong>Pour rendre des domaines autonomes.</strong> Quand le centre est devenu un goulot
+        organisationnel (N13), confier à chaque domaine métier la responsabilité de ses données est une
+        distribution — la plus exigeante, car elle porte sur les responsabilités.</li>
+      <li><strong>Dans les systèmes hérités.</strong> Après une fusion, la distribution par
+        <em>systèmes</em> est l'état de fait : la question n'est pas de la choisir mais de la gouverner.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n14-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Le traitement ne tient plus dans la nuit, même sur la plus grosse machine. »</strong>
+        Signal franc : la charge dépasse une machine, le parallélisme est la seule issue.</li>
+      <li><strong>« Ces données ne peuvent pas sortir du pays. »</strong> Distribution par sites imposée
+        de l'extérieur ; il reste à décider ce qui remonte et sous quelle forme.</li>
+      <li><strong>« Nous transportons chaque jour des téraoctets pour n'en exploiter que 1 %. »</strong>
+        Traiter près de la source coûterait moins que transporter.</li>
+      <li><strong>« Une panne du centre arrête toute l'entreprise. »</strong> Besoin de résilience — à
+        concevoir, pas à espérer.</li>
+      <li><strong>« Chaque domaine attend six semaines. »</strong> Goulot organisationnel : la
+        distribution par domaines est une réponse possible, à condition de transférer aussi la
+        responsabilité.</li>
+      <li><strong>Signal d'alerte — « on met en place un cluster » pour 300 Go.</strong> Les quatre coûts
+        seront payés, les atouts ne rapporteront rien : on est sous le seuil.</li>
+      <li><strong>Signal d'alerte — « un nœud est à 90 % et les autres à 10 % ».</strong> Partitionnement
+        déséquilibré : le goulot a été recréé à l'intérieur du système distribué.</li>
+      <li><strong>Signal d'alerte — « les deux régions n'affichent pas le même total ».</strong> Le coût
+        de cohérence n'a pas été choisi explicitement ; il se manifeste sous forme de contradiction.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n14-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Dire exactement ce que l'on distribue.</strong> Quel axe — le stockage, le
+      calcul, ou les deux — et à quel niveau — nœuds, sites, systèmes, domaines ? Écrivez-le en une
+      phrase : « nous répartissons le <em>calcul</em> sur des <em>nœuds</em>, les données restant
+      centrales ». Sans cette phrase, la discussion portera sur un mot et non sur une décision.</p>
+
+    <p><strong>Étape 2 — Nommer la contrainte qui l'exige.</strong> Charge qui dépasse une machine,
+      obligation de localisation, volume à traiter près de la source, exigence de disponibilité, goulot
+      organisationnel. <strong>S'il n'y a pas de contrainte, il n'y a pas de raison de distribuer</strong> :
+      les coûts se paieraient sans contrepartie.</p>
+
+    <p><strong>Étape 3 — Payer les quatre coûts, explicitement et chiffrés.</strong>
+      <em>Réseau</em> : quel volume traverse, à quelle fréquence, à quel prix ? <em>Coordination</em> :
+      qui décide, selon quel mécanisme, et que se passe-t-il en cas de désaccord ?
+      <em>Partitionnement</em> : sur quelle clé, et quelle est la taille du plus gros morceau par
+      rapport au plus petit ? <em>Cohérence</em> : que fait-on si deux endroits divergent — qui fait
+      autorité, et quel décalage accepte-t-on ? Ces quatre réponses forment le cœur de la conception ;
+      les laisser implicites, c'est les découvrir en production.</p>
+
+    <p><strong>Étape 4 — Répondre à la question du support : que garde-t-on commun ?</strong> Contrôle
+      et qualité ne survivent à la répartition que si quelque chose reste partagé — définitions des
+      indicateurs, référentiels, contrats d'interface, catalogue, règles d'accès. Écrivez la liste.
+      <strong>C'est elle, et non la technique, qui détermine si la répartition dégradera la
+      qualité.</strong></p>
+
+    <p><strong>Étape 5 — Vérifier le seuil, et prévoir la résilience.</strong> En dessous de quel
+      volume ou de quelle charge cette distribution coûte-t-elle plus qu'elle ne rapporte ? Si vous êtes
+      en dessous, ne distribuez pas. Si vous distribuez pour la disponibilité, décrivez la bascule et
+      <em>essayez-la</em> : une résilience jamais testée n'est qu'une intention.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Tout vient de « <strong>il y a plusieurs endroits</strong> » : scale-out, parallélisme et
+      résilience d'un côté ; réseau, coordination, partitionnement et cohérence de l'autre. Ce sont des
+      <strong>coûts</strong>, payés dès le premier jour, quand la centralisation n'avait que des
+      <strong>limites</strong>, visibles au-delà d'un seuil. Et la réponse n'est jamais un camp :
+      <strong>une architecture moderne combine les deux</strong>.</p>
+    <p class="ar" dir="rtl">كلشي كيخرج من <strong>«كاينين بزاف ديال البلايص»</strong>: scale-out
+      وتوازي ومرونة من جيهة؛ شبكة وتنسيق وتقسيم واتساق من جيهة أخرى. وهادو <strong>تكاليف</strong>
+      كتتخلص من النهار الأول، بينما المركزية كان عندها غير <strong>حدود</strong> كتبان فوق عتبة.
+      والجواب عمرو معسكر: <strong>الأركيتكتير العصرية كتجمع بيناتهم</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n14-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — distribuer le calcul de la prévision</div>
+  <div class="box-b">
+    <p>L'enseigne veut entraîner son modèle de prévision sur trois ans de ventes au grain ligne de
+      ticket — environ 400 millions de lignes. Sur une seule machine, l'entraînement mensuel dure
+      14 heures ; il doit tenir dans une fenêtre de 3 heures. Les données sont dans le socle commun.
+      Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Ce que l'on distribue.</strong> « Nous répartissons le <strong>calcul</strong>
+      sur des <strong>nœuds</strong> d'un cluster ; les <strong>données restent centrales</strong> dans
+      le socle. » C'est le cas le plus simple des quatre niveaux, et il faut le dire, car il évite
+      d'emblée la plupart des difficultés : aucune donnée n'est déplacée durablement, aucune
+      responsabilité n'est transférée.</p>
+
+    <p><strong>Étape 2 — La contrainte.</strong> Une charge qui dépasse ce qu'une machine fait dans la
+      fenêtre disponible : 14 heures contre 3. C'est la contrainte canonique du parallélisme, et elle
+      est mesurée — pas supposée.</p>
+
+    <p><strong>Étape 3 — Les quatre coûts.</strong> <em>Réseau</em> : modéré, à condition que chaque
+      nœud lise sa propre tranche ; il deviendrait prohibitif si l'algorithme exigeait de réunir toutes
+      les données à chaque itération. <em>Coordination</em> : assurée par le moteur, faible pour un
+      traitement par lots. <em>Partitionnement</em> : la décision centrale de l'exercice. Partitionner
+      par <strong>magasin</strong> déséquilibre — les plus gros magasins concentrent une part
+      disproportionnée des ventes, et un nœud finira seul pendant que les autres attendent.
+      Partitionner par <strong>jour</strong> est régulier et fait correspondre les tranches aux
+      périodes, mais crée des pics saisonniers. En pratique, une combinaison <em>jour × magasin</em>
+      donne des morceaux de taille comparable. <em>Cohérence</em> : non problématique ici, les données
+      sont en lecture seule pendant l'entraînement.</p>
+
+    <p><strong>Étape 4 — Ce qui reste commun.</strong> Les données, les définitions et le catalogue
+      restent au centre ; seul le calcul est réparti. Contrôle et qualité ne sont donc pas menacés —
+      <strong>et c'est précisément pour cela que distribuer le calcul est la forme la moins risquée de
+      distribution</strong>.</p>
+
+    <p><strong>Étape 5 — Seuil et résilience.</strong> 400 millions de lignes et un facteur 5 à gagner
+      placent clairement au-dessus du seuil : les atouts rapportent plus que les quatre coûts.
+      Résilience : pour un traitement mensuel, la reprise sur échec d'un nœud suffit — inutile de
+      concevoir une haute disponibilité pour un travail qu'on peut relancer. <strong>Vérification
+      finale</strong> : mesurer l'équilibre des partitions au premier essai ; si un nœud travaille deux
+      fois plus que les autres, la clé est à revoir avant d'ajouter des machines.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — la filiale allemande</div>
+  <div class="box-b">
+    <p>Reprenez le groupe industriel de N13 (exercice 12.2) : les données de production allemandes ne
+      peuvent pas quitter le pays, alors que la plateforme est à Casablanca. Le groupe a besoin d'un
+      suivi consolidé de la production et de la qualité. Appliquez la démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Ce que l'on distribue.</strong> « Nous répartissons le <strong>stockage</strong>
+      et le <strong>calcul</strong> sur deux <strong>sites</strong> : l'Allemagne conserve et traite ses
+      données de production localement ; le reste du groupe reste à Casablanca. » Niveau <em>sites</em>,
+      les deux axes.</p>
+
+    <p><strong>Étape 2 — La contrainte.</strong> Juridique, donc non négociable. Point important :
+      <strong>on ne distribue pas ici pour gagner quelque chose, mais parce qu'il est interdit de
+      centraliser</strong>. Les quatre coûts seront payés sans aucun atout en échange — pas de
+      scale-out utile, pas de parallélisme recherché. C'est une distribution subie, et l'objectif
+      n'est pas de l'optimiser mais d'en limiter les dégâts.</p>
+
+    <p><strong>Étape 3 — Les quatre coûts.</strong> <em>Réseau</em> : faible en volume, puisque seuls
+      des agrégats traversent — c'est justement la conception à retenir. <em>Coordination</em> : réelle,
+      il faut que le calcul local produise les mêmes indicateurs selon les mêmes règles.
+      <em>Partitionnement</em> : imposé par la géographie, aucune liberté. <em>Cohérence</em> : le coût
+      principal. Les agrégats allemands arriveront avec un décalage ; le total groupe reflétera donc des
+      instants différents selon les pays. <strong>Il faut choisir et écrire ce décalage</strong> —
+      par exemple : consolidation à J+1 sur des données arrêtées à minuit heure locale.</p>
+
+    <p><strong>Étape 4 — Ce qui reste commun, et c'est l'essentiel.</strong> La réponse à « comment
+      répartir sans perdre contrôle et qualité » tient en quatre éléments : <em>(a)</em> les
+      référentiels du groupe — produits, sites, plan comptable — restent centraux et sont diffusés vers
+      l'Allemagne ; <em>(b)</em> les définitions des indicateurs sont écrites une fois et appliquées
+      identiquement des deux côtés ; <em>(c)</em> un <strong>contrat d'interface</strong> fixe la forme,
+      la fréquence et la qualité des agrégats remontés ; <em>(d)</em> un contrôle vérifie leur
+      cohérence — totaux, complétude — à chaque réception. Sans ces quatre points, la répartition
+      produirait deux vérités au lieu d'une.</p>
+
+    <p><strong>Étape 5 — Seuil et résilience.</strong> La question du seuil ne se pose pas : la
+      contrainte est juridique. Ce qu'il faut en revanche écrire, c'est le <strong>compromis</strong> :
+      le groupe renonce à interroger le détail allemand depuis Casablanca, et l'accepte. Toute question
+      exigeant ce détail devra être traitée localement — à prévoir dans l'organisation, pas à découvrir
+      au premier audit qualité.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — distribuer par domaines</div>
+  <div class="box-b">
+    <p>Toujours dans le même groupe : pour supprimer l'attente de six semaines, la direction propose de
+      confier à chaque domaine métier — production, commerce, ressources humaines, finance — la
+      responsabilité de ses propres données, chacun publiant ce que les autres consomment. Analysez
+      cette proposition.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Ce que l'on distribue.</strong> « Nous répartissons la <strong>responsabilité</strong>
+      des données sur quatre <strong>domaines</strong> métier ; la plateforme, elle, reste commune. »
+      Noter l'écart avec les deux exercices précédents : ce qui est réparti n'est ni le calcul ni le
+      stockage, mais <strong>la propriété et la décision</strong>. C'est le quatrième niveau de
+      l'énoncé, et le plus exigeant.</p>
+
+    <p><strong>Étape 2 — La contrainte.</strong> Un goulot organisationnel mesuré en N13 : six semaines
+      d'attente, 30 % d'utilisation technique, deux bases parallèles montées en contournement. La
+      contrainte est réelle et la réponse est du bon ordre — un goulot organisationnel se traite par une
+      distribution des responsabilités, pas par de la puissance.</p>
+
+    <p><strong>Étape 3 — Les quatre coûts, transposés.</strong> Ils existent tous, sous une forme
+      organisationnelle. <em>Réseau</em> → les <strong>interfaces</strong> : chaque domaine doit publier
+      ses données sous une forme stable et documentée, ce qui est un travail permanent et nouveau pour
+      lui. <em>Coordination</em> → les règles communes et l'instance qui tranche les désaccords entre
+      domaines. <em>Partitionnement</em> → le découpage lui-même : où s'arrête « commerce » et où
+      commence « finance » ? Le chiffre d'affaires appartient à qui ? <strong>Un découpage mal tracé
+      produit des données orphelines ou revendiquées par deux domaines</strong> — c'est l'équivalent
+      exact du déséquilibre de partitions. <em>Cohérence</em> → le risque de voir réapparaître plusieurs
+      définitions du même indicateur, c'est-à-dire la divergence de N1.</p>
+
+    <p><strong>Étape 4 — Ce qui reste commun.</strong> Condition de réussite, et elle n'est pas
+      négociable : les <strong>définitions transverses</strong> — client, produit, chiffre d'affaires —
+      restent possédées en commun ; le <strong>catalogue</strong> et le <strong>lignage</strong> restent
+      centraux ; chaque domaine s'engage sur un <strong>contrat</strong> — forme, fraîcheur, qualité —
+      pour ce qu'il publie. La plateforme reste unique : on distribue la responsabilité,
+      <em>pas</em> l'infrastructure.</p>
+
+    <p><strong>Étape 5 — La condition qui décide de tout.</strong> La proposition ne réussira que si la
+      responsabilité est transférée <strong>avec les moyens</strong> : chaque domaine doit disposer de
+      compétences data, sans quoi l'attente de six semaines devant l'équipe centrale deviendra une
+      attente de six semaines devant un domaine qui ne sait pas faire. C'est l'enseignement de N7 —
+      découpler les composants sans découpler les responsabilités ne découple rien, et
+      <strong>ici c'est l'inverse qui menace : découpler les responsabilités sans transférer les moyens
+      déplace le goulot sans le supprimer.</strong> Recommandation : commencer par un seul domaine
+      volontaire, mesurer le délai avant et après, et n'étendre qu'ensuite.</p>
+  </div>
+</div>
+
+<h3 id="n14-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition, les trois atouts, les quatre coûts et la question du support, puis
+        montrez qu'atouts et coûts ont la même cause.</li>
+      <li>Pourquoi le support parle-t-il de « coûts » pour la distribution et de « limites » pour la
+        centralisation ? Quelle conséquence pratique en tirez-vous ?</li>
+      <li>Distinguez les quatre niveaux — nœuds, sites, systèmes, domaines — et donnez pour chacun un
+        exemple et la difficulté principale.</li>
+      <li>Expliquez pourquoi la résilience est dite « potentielle », et dites ce qu'il faut concevoir
+        pour qu'elle devienne réelle.</li>
+      <li>Qu'est-ce qu'un partitionnement déséquilibré ? Donnez deux clés de partition pour des ventes
+        et dites laquelle vous retiendriez, en justifiant.</li>
+      <li>Répondez en une dizaine de lignes à la question du support — comment répartir sans perdre
+        contrôle et qualité — en listant ce qui doit rester commun.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n14-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque situation, dites quel niveau de distribution est en jeu — nœuds, sites, systèmes ou
+      domaines : un cluster de 12 machines pour un entraînement ; une filiale qui garde ses données dans
+      son pays ; une fusion laissant deux ERP en place ; chaque équipe métier publiant ses propres
+      tables ; des capteurs traitant les alertes dans l'usine.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un opérateur de bornes de recharge électrique gère 9 000 bornes dans trois pays. Besoins :
+      superviser l'état des bornes en moins de 30 secondes, facturer les sessions, et analyser
+      mensuellement l'usage par région. Les données de facturation de l'un des pays ne peuvent pas être
+      stockées à l'étranger. Appliquez les cinq étapes pour chacun des trois besoins : dites ce que vous
+      distribuez et à quel niveau, nommez la contrainte, chiffrez les quatre coûts, listez ce qui reste
+      commun, et vérifiez le seuil. Concluez par la part centrale et la part répartie de l'architecture.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le support affirme que centralisé et distribué ne sont pas exclusifs et qu'une architecture
+      moderne combine les deux. Démontrez cette affirmation au lieu de l'admettre : en partant des
+      atouts et des limites de N13 et des atouts et coûts de N14, montrez qu'aucune organisation
+      possédant à la fois des exigences de cohérence et des contraintes d'échelle ne peut rationnellement
+      choisir un camp unique. Construisez ensuite une <strong>règle de décision</strong> permettant de
+      dire, pour un type de données donné, s'il doit être central ou réparti — votre règle ne doit
+      invoquer ni technologie ni préférence, seulement des propriétés des données et des contraintes.
+      Appliquez-la enfin à quatre cas : le plan comptable, les logs de navigation, le dossier patient,
+      les mesures de capteurs industriels.</p>
+  </div>
+</div>

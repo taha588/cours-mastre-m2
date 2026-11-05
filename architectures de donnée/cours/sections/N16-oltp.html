@@ -1,0 +1,511 @@
+<h1 class="chapitre saut" id="partie3"><span class="num">Partie III</span>OLTP et OLAP</h1>
+
+<p>Deux familles de <strong>workloads</strong> : <strong>faire fonctionner le métier</strong> et
+<strong>analyser le métier</strong>.</p>
+
+<h2 class="notion" id="n16">N16 — OLTP : le traitement transactionnel</h2>
+
+<h3 id="n16-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> <strong>OLTP</strong> (<em>Online Transaction Processing</em>)
+      désigne les <strong>traitements transactionnels</strong> qui <strong>enregistrent et mettent à
+      jour les opérations courantes</strong>.</p>
+
+    <p><strong>Caractéristiques :</strong></p>
+    <ul>
+      <li><strong>Nombreuses petites opérations.</strong></li>
+      <li><strong>Faible latence attendue.</strong></li>
+      <li><strong>Transactions cohérentes.</strong></li>
+      <li><strong>Données courantes et opérationnelles.</strong></li>
+    </ul>
+
+    <p><strong>Exemples :</strong> systèmes bancaires • gestion des commandes • ERP.</p>
+
+    <p><strong>Exemple e-commerce :</strong> créer une commande → vérifier le stock → enregistrer le
+      paiement → mettre à jour le statut.<br>
+      <em>Transaction opérationnelle : plusieurs opérations doivent rester cohérentes.</em></p>
+  </div>
+</div>
+
+<h3 id="n16-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Les quatre caractéristiques ne sont pas une liste à mémoriser : elles décrivent toutes
+      <strong>une seule et même fonction — faire fonctionner le métier</strong>. Dès qu'on part de cette
+      fonction, chacune se déduit.</p>
+    <ul>
+      <li>Le métier se produit par <strong>événements discrets</strong> — une commande, un paiement, une
+        admission — et chaque événement ne concerne que quelques lignes : d'où des
+        <strong>opérations petites</strong>.</li>
+      <li>L'activité est continue et simultanée : d'où des opérations <strong>nombreuses</strong>.</li>
+      <li>Quelqu'un ou quelque chose <strong>attend la réponse</strong> — le client au comptoir, la page
+        de paiement, le guichet : d'où la <strong>faible latence</strong>, qui n'est pas un confort mais
+        une condition du service.</li>
+      <li>Le système doit répondre à « <em>qu'est-ce qui est vrai maintenant ?</em> » — quel est le
+        stock, quel est le solde : d'où des <strong>données courantes et opérationnelles</strong>.</li>
+    </ul>
+
+    <p>Reste la caractéristique décisive, et l'exemple e-commerce du support est là pour l'expliquer :
+      <strong>transactions cohérentes</strong>. Attention au mot <em>transaction</em> : il ne désigne
+      pas ici une opération commerciale, mais une <strong>unité de travail technique</strong> qui peut
+      contenir plusieurs étapes. Créer la commande, vérifier et décrémenter le stock, enregistrer le
+      paiement, mettre à jour le statut : ces quatre opérations <strong>doivent toutes réussir, ou
+      aucune</strong>. Le support le dit dans sa légende — « plusieurs opérations doivent rester
+      cohérentes ».</p>
+
+    <p>Pour mesurer ce que cela signifie, imaginons l'échec. Le stock est décrémenté, puis le paiement
+      échoue : un article est réservé pour une commande qui n'existe pas. Le paiement est enregistré,
+      puis la création de la commande échoue : le client a payé pour rien. <strong>Ce ne sont pas des
+      erreurs de calcul, ce sont des états impossibles du métier</strong> — et c'est précisément ce que
+      la cohérence transactionnelle interdit. Le <em>tout ou rien</em> n'est donc pas une finesse
+      technique : c'est ce qui fait qu'un système d'information décrit une réalité possible.</p>
+
+    <p>Une conséquence importante découle de « données <strong>courantes</strong> ». Un système OLTP
+      détient l'<em>état présent</em> du métier, pas sa mémoire. L'historique y est souvent purgé pour
+      que le système reste rapide — six mois dans la base de caisse de notre enseigne. <strong>Ce n'est
+      pas un oubli : c'est une conséquence de la fonction.</strong> Et c'est la raison structurelle pour
+      laquelle l'entrepôt de N10 a dû exister : l'analyse réclame une mémoire que l'opérationnel n'a
+      jamais eu pour mission de conserver.</p>
+
+    <p>Enfin, un point qui prépare toute la suite de cette partie. Pour que les mises à jour soient
+      sûres et peu coûteuses, un modèle OLTP évite d'écrire deux fois le même fait : le nom du client
+      est stocké à un seul endroit, de sorte qu'une correction ne touche qu'une ligne. Cette qualité —
+      la <strong>normalisation</strong> — est exactement ce qui rend les questions analytiques
+      coûteuses, puisqu'il faut alors rassembler l'information dispersée dans de nombreuses tables à
+      chaque requête. <strong>Ce qui fait la force d'un modèle OLTP fait sa faiblesse pour
+      l'analyse</strong> : les deux workloads ne demandent pas seulement des ressources différentes, ils
+      demandent des modèles opposés.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>« Transaction » n'est pas « transaction commerciale ».</strong> C'est une unité de
+        travail technique, qui peut regrouper plusieurs étapes métier — ou n'en contenir qu'une.</li>
+      <li><strong>Faible latence n'est pas temps réel au sens du streaming.</strong> Il s'agit du temps
+        de réponse à une demande, pas du traitement continu d'un flux d'événements (N21).</li>
+      <li><strong>OLTP ne veut pas dire « petites données ».</strong> La base d'une banque peut peser des
+        téraoctets ; ce qui est petit, c'est chaque <em>opération</em>, pas le volume total.</li>
+      <li><strong>Ne comptez pas sur l'historique.</strong> Un système OLTP conserve l'état courant ; sa
+        rétention est courte par conception. Bâtir une analyse pluriannuelle dessus est une impasse.</li>
+      <li><strong>Ajouter des index pour accélérer les rapports ralentit les écritures.</strong> Chaque
+        index doit être tenu à jour à chaque modification : on dégrade le workload principal pour en
+        servir un autre, qui n'a rien à faire là.</li>
+      <li><strong>Le type de base ne détermine pas le workload.</strong> Un magasin de documents peut
+        porter un workload OLTP ; une base relationnelle peut servir l'analytique. La catégorie décrit
+        l'usage, pas la technologie.</li>
+      <li><strong>« Online » signifie interactif</strong>, c'est-à-dire traité au fil de l'eau par
+        opposition au traitement par lots — et non « accessible depuis internet ».</li>
+      <li><strong>Toutes les étapes d'un processus ne tiennent pas dans une transaction.</strong> Dès
+        qu'un service externe intervient — un prestataire de paiement — le tout ou rien technique
+        devient impossible et doit être remplacé par une compensation explicite.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> <strong>OLTP</strong> (<em>Online Transaction Processing</em>) هو
+    المعالجات المعاملاتية اللي <strong>كتسجل وكتحدّث العمليات الجارية</strong>. خصائصو الأربعة:
+    <strong>عمليات صغيرة وكثيرة</strong> · <strong>زمن استجابة ضعيف مطلوب</strong> ·
+    <strong>معاملات متماسكة</strong> · <strong>معطيات جارية وتشغيلية</strong> (أمثلة: الأنظمة البنكية،
+    تدبير الطلبيات، ERP). والمهم: هاد الأربعة <strong>كيتشتقو كلهم من وظيفة وحدة — تشغيل المهنة</strong>:
+    المهنة كتوقع فأحداث منفصلة (عمليات صغيرة)، متواصلة (كثيرة)، وكاين شي حد <strong>كيتسنى
+    الجواب</strong> (زمن استجابة ضعيف)، والنظام خاصو يجاوب على «أشنو صحيح <strong>دابا</strong>؟»
+    (معطيات جارية). والخاصية الحاسمة هي <strong>«معاملات متماسكة»</strong>، والرسم ديال e-commerce
+    كيشرحها: إنشاء الطلبية ← التحقق من المخزون ← تسجيل الخلاص ← تحديث الحالة = <strong>خاصهم ينجحو
+    كلهم ولا حتى واحد</strong>. وإلا: مخزون منقّص لطلبية ما كايناش، ولا زبون خلّص بلا طلبية — هادو
+    ماشي أخطاء حساب، هادو <strong>حالات مستحيلة ديال المهنة</strong>. وآخر نقطة كتمهد للي جاي:
+    النموذج ديال OLTP كيتجنب يكتب نفس الواقعة مرتين (normalisation) باش التحديث يكون رخيص وآمن —
+    <strong>وهادي بالضبط هي اللي كتخلي الأسئلة التحليلية غالية</strong>. يعني الجوج workloads ما
+    كيطلبوش غير موارد مختلفة، كيطلبو <strong>نماذج متعاكسة</strong>.</p>
+</div>
+
+<h3 id="n16-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'OLTP traite le problème fondateur : <strong>enregistrer fidèlement ce qui se passe, au moment
+      où cela se passe</strong>. Une commande saisie doit être enregistrée ; un paiement accepté ne doit
+      jamais être perdu ; un stock décrémenté doit l'être une seule fois. C'est le problème dominant de
+      la génération 1 du tableau de N8, et c'est pourquoi les bases transactionnelles créées dans les
+      années 1980 fonctionnent encore aujourd'hui : le problème, lui, n'a pas changé.</p>
+    <p>Mais nommer ce workload traite un second problème, et c'est celui de cette partie :
+      <strong>distinguer deux fonctions que l'on confond parce qu'elles portent sur les mêmes
+      données</strong>. Faire fonctionner le métier et analyser le métier ne demandent ni les mêmes
+      opérations, ni la même latence, ni la même profondeur d'historique, ni le même modèle. Tant que
+      cette distinction n'est pas posée, on continue de brancher les rapports sur la base de production
+      — et l'on retrouve la dégradation croisée de N9.</p>
+  </div>
+</div>
+
+<h3 id="n16-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Reconnaître un workload OLTP</strong> en quelques questions, et donc savoir ce qu'il
+        faut lui garantir.</li>
+      <li><strong>Délimiter correctement une transaction</strong> : quelles opérations doivent réussir ou
+        échouer ensemble — décision fonctionnelle avant d'être technique.</li>
+      <li><strong>Dimensionner</strong> : nombre d'opérations par seconde au pic, temps de réponse
+        attendu, lignes touchées par opération.</li>
+      <li><strong>Protéger le workload principal</strong> en refusant d'y greffer des analyses, des
+        exports ou des index destinés aux rapports.</li>
+      <li><strong>Prévoir la rétention</strong> et désigner qui prend le relais pour l'historique
+        (N10).</li>
+      <li><strong>Préparer la comparaison avec OLAP</strong> en comprenant que l'opposition porte sur le
+        modèle, pas seulement sur la machine.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n16-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Le sigle est explicite et mérite d'être déplié. <em>Online</em> : au fil de l'eau, de façon
+      interactive, par opposition au traitement par lots qui attend la fin de la journée.
+      <em>Transaction</em> : par unités de travail indivisibles. <em>Processing</em> : il s'agit de
+      traitements, pas d'un type de base de données. <strong>La définition décrit donc un comportement,
+      et c'est pourquoi elle survit aux technologies</strong> — le même workload existait sur des
+      systèmes des années 1980 et existe aujourd'hui sur des bases distribuées.</p>
+
+    <p><strong>Pourquoi ces quatre caractéristiques, et pas d'autres ?</strong> Retirons-les une à une
+      et observons ce que devient l'exemple e-commerce du support.</p>
+    <ul>
+      <li>Sans <strong>opérations petites</strong> : chaque commande exigerait de balayer la table
+        entière. Avec mille commandes par minute, le système s'effondre — la taille de l'unité de
+        travail est ce qui rend le débit possible.</li>
+      <li>Sans <strong>faible latence</strong> : le client attend dix secondes devant la page de
+        paiement, et il part. Ici, la latence n'est pas une mesure de confort, c'est une perte de
+        chiffre d'affaires.</li>
+      <li>Sans <strong>transactions cohérentes</strong> : on obtient les états impossibles décrits plus
+        haut — stock réservé sans commande, paiement sans commande. Le système cesse de décrire une
+        réalité possible.</li>
+      <li>Sans <strong>données courantes</strong> : impossible de répondre « reste-t-il un article en
+        stock ? », qui est pourtant la question que le processus pose en deuxième étape.</li>
+    </ul>
+    <p>Chaque suppression casse une partie différente du même processus : les quatre sont donc
+      nécessaires, et elles le sont <em>ensemble</em>, parce qu'elles servent une fonction unique.</p>
+
+    <p><strong>Et la normalisation, d'où vient-elle ?</strong> De la même fonction, par un raisonnement
+      simple. Si l'adresse d'un client était recopiée dans chacune de ses commandes, la corriger
+      exigerait de modifier des milliers de lignes — opération lente, et risquée puisqu'un échec
+      laisserait des versions divergentes. En ne l'écrivant qu'une fois, la correction touche une seule
+      ligne. <strong>La normalisation est donc la forme que prend un modèle lorsqu'on l'optimise pour
+      l'écriture.</strong> Et elle explique, par avance, pourquoi la question « chiffre d'affaires par
+      région et par mois » coûte si cher sur un tel modèle : l'information nécessaire est délibérément
+      dispersée, et il faut la rassembler à chaque exécution — ce que N10 avait résolu en préparant une
+      fois pour toutes.</p>
+  </div>
+</div>
+
+<h3 id="n16-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Partout où le système produit un effet, et pas seulement une connaissance.</strong>
+        Encaisser, réserver, inscrire, admettre, expédier : c'est le test le plus sûr pour reconnaître
+        un workload OLTP.</li>
+      <li><strong>Dans la conception d'un processus métier.</strong> Délimiter les transactions —
+        quelles étapes forment un tout — est un travail d'analyse fonctionnelle qui engage la suite.</li>
+      <li><strong>Dans le dimensionnement d'une application.</strong> Opérations par seconde au pic,
+        temps de réponse cible, taux de concurrence : ce sont les chiffres qui déterminent
+        l'infrastructure.</li>
+      <li><strong>Dans la protection d'un système de production.</strong> Savoir qu'un système est OLTP,
+        c'est savoir ce qu'il ne doit pas porter : rapports, exports massifs, index analytiques.</li>
+      <li><strong>Dans la définition des politiques de rétention.</strong> Combien de temps l'état
+        courant doit-il rester, et à partir de quand l'historique passe-t-il à la plateforme analytique.</li>
+      <li><strong>Dans le choix des garanties.</strong> Certains processus exigent un tout ou rien
+        strict — un virement bancaire — d'autres tolèrent une compensation différée : cette décision se
+        prend ici, pas à la mise en production.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n16-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Un utilisateur attend la réponse à l'écran. »</strong> Signal premier : on est dans
+        un workload interactif, la latence est une exigence et non un objectif.</li>
+      <li><strong>« Cette opération doit réussir entièrement ou pas du tout. »</strong> Besoin de
+        transaction : il faut en délimiter les frontières explicitement.</li>
+      <li><strong>« Nous traitons 400 opérations par seconde au pic. »</strong> Beaucoup de petites
+        opérations : profil OLTP typique, à dimensionner en conséquence.</li>
+      <li><strong>« Quel est le stock disponible maintenant ? »</strong> Question sur l'état courant :
+        c'est l'OLTP qui répond, pas l'entrepôt.</li>
+      <li><strong>Signal d'alerte — « ajoutons un index pour le rapport mensuel ».</strong> On dégrade
+        le workload principal pour en servir un autre : le rapport doit sortir du système.</li>
+      <li><strong>Signal d'alerte — « on garde tout l'historique dans la base de production ».</strong>
+        Le système s'alourdit pour une fonction qui n'est pas la sienne.</li>
+      <li><strong>Signal d'alerte — « le paiement est passé mais la commande n'existe pas ».</strong>
+        Frontière de transaction mal délimitée, ou absence de compensation face à un service externe.</li>
+      <li><strong>Signal inverse — « nous voulons le chiffre d'affaires par région sur trois ans ».</strong>
+        Ce n'est pas un workload OLTP : voir N17.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n16-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Appliquer le test de la fonction.</strong> Ce traitement <em>produit-il un
+      effet</em> dans le métier — une commande créée, un stock réservé, un compte débité — ou
+      <em>produit-il une connaissance</em> sur le métier ? Le premier cas est un workload OLTP ; le
+      second relève de l'analyse. Cette question se pose avant toute considération de volume ou
+      d'outil.</p>
+
+    <p><strong>Étape 2 — Caractériser l'unité de travail, avec des chiffres.</strong> Combien de lignes
+      une opération touche-t-elle ? Combien d'opérations par seconde en moyenne et au pic ? Qui attend
+      la réponse, et combien de temps peut-il attendre ? Écrivez un temps de réponse cible chiffré —
+      « moins de 300 ms pour 95 % des encaissements » — car c'est lui qui servira de critère.</p>
+
+    <p><strong>Étape 3 — Délimiter les transactions.</strong> Listez les étapes du processus et tracez
+      les frontières : quelles opérations doivent réussir ou échouer <em>ensemble</em> ? Pour chaque
+      frontière, demandez ce qui se passerait si le système s'arrêtait juste après. <strong>Si la
+      réponse décrit un état impossible du métier, la frontière est mal placée.</strong></p>
+
+    <p><strong>Étape 4 — Traiter les étapes qui échappent à la transaction.</strong> Dès qu'un service
+      externe intervient — paiement, transporteur, partenaire — le tout ou rien technique n'est plus
+      possible. Il faut alors une <strong>compensation</strong> explicite : que fait-on si le paiement
+      est accepté et que l'enregistrement échoue ? Écrivez la réponse maintenant ; en production, elle
+      sera écrite dans l'urgence par celui qui sera de garde.</p>
+
+    <p><strong>Étape 5 — Protéger le workload et organiser la mémoire.</strong> Décidez ce qui n'a pas
+      le droit de s'exécuter sur ce système — rapports, exports massifs, index analytiques — et vers où
+      cela va (N10). Fixez la rétention de l'état courant et désignez qui conserve l'historique.
+      <strong>Un système OLTP bien tenu est un système dont on a dit « non » à tout le reste.</strong></p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>L'OLTP <strong>fait fonctionner le métier</strong> : beaucoup de petites opérations, une latence
+      faible parce que quelqu'un attend, des <strong>transactions cohérentes</strong> — tout ou rien —
+      et des données <strong>courantes</strong>, non une mémoire. Son modèle est optimisé pour
+      l'écriture, ce qui le rend <strong>structurellement inadapté à l'analyse</strong>.</p>
+    <p class="ar" dir="rtl">الـOLTP <strong>كيشغّل المهنة</strong>: عمليات صغيرة وكثيرة، زمن استجابة
+      ضعيف حيت كاين شي حد كيتسنى، <strong>معاملات متماسكة</strong> (كلشي ولا والو)، ومعطيات
+      <strong>جارية</strong> ماشي ذاكرة. ونموذجو محسّن للكتابة — ولهذا <strong>غير مناسب بنيويا
+      للتحليل</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n16-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — caractériser le workload des caisses</div>
+  <div class="box-b">
+    <p>Chez l'enseigne : 120 magasins, 3 à 6 caisses chacun, un encaissement moyen de 8 articles. Le
+      samedi entre 17 h et 19 h, on compte environ 350 encaissements par minute sur l'ensemble du parc.
+      Un encaissement écrit un ticket, ses lignes, décrémente les stocks et met à jour le cumul de
+      fidélité. Caractérisez ce workload et dites ce qu'il faut lui garantir.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Test de la fonction.</strong> L'encaissement <em>produit un effet</em> : il
+      crée un ticket, engage un paiement, modifie un stock. Ce n'est pas une connaissance sur le métier,
+      c'est le métier lui-même. <strong>Workload OLTP</strong>, sans ambiguïté.</p>
+
+    <p><strong>Étape 2 — L'unité de travail, chiffrée.</strong> Chaque encaissement touche environ
+      1 ticket + 8 lignes + 8 lignes de stock + 1 ligne de fidélité, soit <strong>une vingtaine de
+      lignes</strong> — petit, conformément à la première caractéristique. Débit :
+      350 par minute ≈ <strong>6 par seconde</strong> au pic, répartis sur 120 magasins. Qui attend ?
+      Le client et la caissière, devant une file. Temps de réponse cible : <strong>moins de 300 ms pour
+      95 % des encaissements</strong>, et jamais plus d'une seconde — au-delà, la file s'allonge, ce qui
+      a un coût commercial direct un samedi soir.</p>
+
+    <p><strong>Étape 3 — Les frontières de transaction.</strong> Que doit-il se passer ensemble ?
+      L'enregistrement du ticket, de ses lignes et du paiement forment un tout : un ticket payé mais non
+      enregistré, ou enregistré mais non payé, sont des états impossibles. Le test de l'arrêt brutal le
+      confirme. <strong>En revanche, la mise à jour du cumul de fidélité peut légitimement sortir de
+      cette transaction</strong> : si elle échoue, le client est encaissé correctement et ses points
+      seront recalculés — un décalage de quelques minutes sur un compteur de fidélité n'est pas un état
+      impossible. Les sortir allège la transaction critique, donc la latence.</p>
+
+    <p><strong>Étape 4 — Les étapes externes.</strong> Le paiement par carte passe par un prestataire :
+      le tout ou rien technique s'arrête là. Il faut une compensation écrite — si l'autorisation est
+      accordée et que l'enregistrement du ticket échoue, la procédure d'annulation doit être définie et
+      connue des caissières, pas improvisée.</p>
+
+    <p><strong>Étape 5 — Protection et mémoire.</strong> Ce système ne doit porter <em>aucun</em> rapport
+      ni export massif : c'est exactement le diagnostic de N9, et la raison d'être de l'entrepôt.
+      Rétention de l'état courant : quelques mois suffisent à l'exploitation — les échanges, les
+      réclamations — l'historique long étant conservé par la plateforme analytique. <strong>Et l'on
+      refuse explicitement tout index ajouté « pour le rapport » </strong>: chaque index supplémentaire
+      est un coût payé six fois par seconde au pic du samedi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — la commande à moitié passée</div>
+  <div class="box-b">
+    <p>Sur le site marchand, un incident est signalé : des clients ont été débités sans qu'aucune
+      commande n'apparaisse dans leur compte, et pour d'autres le stock a été décrémenté alors que la
+      commande a échoué. Le processus est celui du support : créer la commande → vérifier le stock →
+      enregistrer le paiement → mettre à jour le statut. Analysez et proposez une conception.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Le diagnostic.</strong> Les deux symptômes décrivent la même faute : les quatre étapes
+      ont été exécutées <em>séparément</em>, chacune validée pour elle-même. Il n'existe pas de
+      frontière de transaction ; il existe quatre opérations qui se suivent et peuvent s'interrompre
+      entre deux. Les états observés sont exactement ceux que la caractéristique « transactions
+      cohérentes » a pour but d'interdire.</p>
+
+    <p><strong>Étape 3 — Tracer les frontières.</strong> Appliquons le test de l'arrêt brutal à chaque
+      intervalle. <em>Après la création de la commande, avant la vérification du stock</em> : une
+      commande existe sans stock réservé — récupérable, la commande peut rester en attente.
+      <em>Après la décrémentation du stock, avant le paiement</em> : du stock est immobilisé pour rien —
+      <strong>état impossible</strong>. <em>Après le paiement, avant la mise à jour du statut</em> : le
+      client a payé et ne voit rien — <strong>état impossible, et le plus grave</strong>. Les frontières
+      sont donc mal placées aux deux derniers intervalles.</p>
+
+    <p><strong>La difficulté réelle.</strong> On ne peut pas mettre les quatre étapes dans une seule
+      transaction technique, car le paiement passe par un prestataire externe, hors de portée du tout
+      ou rien. <strong>C'est le cas typique où la cohérence ne peut pas être obtenue par la
+      transaction seule</strong> et doit être construite autrement.</p>
+
+    <p><strong>La conception proposée.</strong> <em>(a)</em> Une première transaction crée la commande
+      <em>et</em> réserve le stock, à l'état « en attente de paiement » : ces deux opérations ne se
+      séparent jamais, ce qui supprime le second état impossible. <em>(b)</em> Le paiement est ensuite
+      demandé au prestataire, avec une <strong>référence unique</strong> attachée à la commande.
+      <em>(c)</em> Une seconde transaction enregistre le résultat du paiement et met à jour le statut,
+      ensemble. <em>(d)</em> Pour les cas où la réponse du prestataire se perd, deux mécanismes de
+      compensation : un <strong>rapprochement</strong> périodique entre les paiements reçus et les
+      commandes enregistrées, qui détecte tout écart ; et une <strong>expiration</strong> des
+      réservations non payées, qui libère le stock immobilisé.</p>
+
+    <p><strong>La leçon.</strong> La cohérence n'est pas seulement une propriété de la base de données :
+      c'est une <strong>décision de conception</strong>, qui consiste à dire quelles opérations forment
+      un tout et, là où la technique ne peut pas le garantir, à prévoir comment on répare. Le test de
+      l'arrêt brutal est l'outil qui révèle les frontières manquantes — et il se pratique sur un tableau
+      blanc, bien avant la première ligne de code.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — les douze index</div>
+  <div class="box-b">
+    <p>Dans une clinique, le logiciel de gestion des admissions ralentit depuis trois mois : les agents
+      d'accueil attendent 4 à 6 secondes à chaque admission, contre moins d'une seconde auparavant. En
+      examinant la base, on découvre que douze index ont été ajoutés au fil des mois à la demande du
+      contrôle de gestion, pour accélérer des rapports mensuels. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Deux workloads sur un système.</strong> L'admission <em>produit un effet</em> :
+      workload OLTP, avec un agent et un patient qui attendent. Les rapports mensuels
+      <em>produisent une connaissance</em> : workload analytique. Deux fonctions différentes cohabitent
+      sur le même système — c'est la situation de N9, et chaque index ajouté a servi la seconde au
+      détriment de la première.</p>
+
+    <p><strong>Pourquoi les index ralentissent les écritures.</strong> Un index accélère la lecture
+      parce qu'il maintient un classement. Ce classement doit être <strong>mis à jour à chaque
+      écriture</strong> : avec douze index, une admission ne modifie plus seulement ses tables, elle
+      réorganise douze structures annexes. Le temps de réponse observé — passé de moins d'une seconde à
+      4-6 secondes — est la somme de ces mises à jour.</p>
+
+    <p><strong>Ce que la règle permet de dire.</strong> Le problème n'est pas que les index soient
+      mauvais, ni que le contrôle de gestion ait eu tort de vouloir ses rapports. Le problème est
+      qu'<strong>on a demandé à un système conçu pour l'écriture rapide de se comporter comme un système
+      de lecture analytique</strong>. Les deux besoins sont légitimes ; leur cohabitation ne l'est pas.</p>
+
+    <p><strong>Le remède, dans l'ordre.</strong> <em>(a)</em> Identifier, parmi les douze, ceux qui
+      servent réellement des requêtes opérationnelles — rechercher un patient par nom, par exemple — et
+      les conserver. <em>(b)</em> Supprimer les autres et mesurer : le temps de réponse doit revenir
+      près de sa valeur initiale. <em>(c)</em> Servir le contrôle de gestion depuis une plateforme
+      analytique alimentée chaque nuit (N10), où les index coûteux sont parfaitement à leur place
+      puisqu'il n'y a personne à faire attendre. <em>(d)</em> Écrire la règle, pour que le cycle ne
+      recommence pas : <strong>aucun index destiné à un rapport ne sera ajouté sur le système
+      d'admissions</strong> — c'est l'étape 5 de la démarche, celle qui consiste à dire non.</p>
+  </div>
+</div>
+
+<h3 id="n16-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition de l'OLTP et ses quatre caractéristiques, puis montrez que chacune se
+        déduit de la fonction « faire fonctionner le métier ».</li>
+      <li>Qu'est-ce qu'une transaction au sens technique ? Donnez un processus métier en quatre étapes et
+        tracez-y les frontières de transaction en justifiant chacune.</li>
+      <li>Expliquez le test de l'arrêt brutal et appliquez-le à une inscription universitaire :
+        créer le dossier, vérifier les places disponibles, encaisser les droits, éditer la carte.</li>
+      <li>Pourquoi la normalisation est-elle la forme naturelle d'un modèle OLTP ? Quelle conséquence
+        a-t-elle sur les requêtes analytiques ?</li>
+      <li>Donnez trois exemples de workloads OLTP et trois qui n'en sont pas, en justifiant par le test
+        de la fonction.</li>
+      <li>Une équipe veut conserver dix ans d'historique dans la base de production « pour pouvoir
+        analyser ». Répondez en vous appuyant sur la quatrième caractéristique.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n16-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque traitement, dites s'il relève d'un workload OLTP et justifiez en une phrase :
+      réserver un siège d'avion ; calculer le taux de remplissage mensuel des vols ; enregistrer un
+      virement ; établir le classement des agences par encours ; mettre à jour le statut d'un colis ;
+      analyser les retards de livraison de l'année.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une plateforme de réservation de trains doit gérer : la recherche d'horaires, la réservation d'un
+      siège, le paiement, l'émission du billet et l'envoi d'un courriel de confirmation. Au pic du
+      vendredi soir, 900 réservations par minute. Appliquez les cinq étapes : test de la fonction pour
+      chaque traitement, caractérisation chiffrée de l'unité de travail, délimitation des transactions
+      avec le test de l'arrêt brutal, traitement des étapes externes avec leur compensation, et
+      protection du workload. Précisez notamment ce qui doit impérativement tenir dans une seule
+      transaction et pourquoi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>On affirme souvent qu'« avec des machines assez puissantes, un seul système peut porter l'OLTP et
+      l'analyse ». Examinez cette affirmation sérieusement : montrez d'abord qu'elle n'est pas absurde —
+      la puissance résout effectivement une partie du problème — puis identifiez ce qu'elle ne résout
+      pas, en distinguant ce qui relève des <em>ressources</em> de ce qui relève du <em>modèle de
+      données</em>. Appuyez-vous sur la normalisation et sur les caractéristiques des deux workloads.
+      Concluez en indiquant dans quelles conditions précises la cohabitation reste acceptable, et à
+      partir de quel moment elle cesse de l'être — en donnant des critères vérifiables, non des
+      impressions.</p>
+  </div>
+</div>

@@ -1,0 +1,248 @@
+<div data-fig="fig1">
+<svg viewBox="0 0 640 178" xmlns="http://www.w3.org/2000/svg">
+  <line x1="110" y1="78" x2="178" y2="78" stroke="#BFBFBF" stroke-width="2"/>
+  <line x1="288" y1="78" x2="356" y2="78" stroke="#BFBFBF" stroke-width="2"/>
+  <line x1="466" y1="78" x2="534" y2="78" stroke="#BFBFBF" stroke-width="2"/>
+  <rect x="10" y="52" width="100" height="52" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="178" y="52" width="110" height="52" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="356" y="52" width="110" height="52" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="534" y="52" width="96" height="52" rx="3" fill="#EBF8EB" stroke="#288C3C" stroke-width="1.4"/>
+  <text class="fl" x="60" y="74" text-anchor="middle">Terminal</text>
+  <text class="fs" x="60" y="90" text-anchor="middle">12 ms</text>
+  <text class="fl" x="233" y="74" text-anchor="middle">Reseau</text>
+  <text class="fs" x="233" y="90" text-anchor="middle">48 ms aller</text>
+  <text class="fl" x="411" y="74" text-anchor="middle">Banque</text>
+  <text class="fs" x="411" y="90" text-anchor="middle">score : 35 ms</text>
+  <text class="fl" x="582" y="74" text-anchor="middle" fill="#288C3C">ACCEPTE</text>
+  <text class="fs" x="582" y="90" text-anchor="middle">retour 48 ms</text>
+  <text class="fs" x="320" y="26" text-anchor="middle">L = 12 + 48 + 35 + 48 = 143 ms</text>
+  <line x1="60" y1="128" x2="580" y2="128" stroke="#BFBFBF" stroke-width="1"/>
+  <line x1="246" y1="120" x2="246" y2="136" stroke="#286EBE" stroke-width="2"/>
+  <text class="fs" x="246" y="152" text-anchor="middle" fill="#286EBE">L = 143 ms</text>
+  <line x1="450" y1="120" x2="450" y2="136" stroke="#BE3232" stroke-width="2"/>
+  <text class="fs" x="450" y="152" text-anchor="middle" fill="#BE3232">delai utile D = 300 ms</text>
+  <text class="fs" x="60" y="152" text-anchor="middle">0</text>
+  <text class="fs" x="320" y="172" text-anchor="middle" fill="#288C3C">L &#8804; D : la reponse a encore de la valeur</text>
+</svg>
+</div>
+
+<div data-fig="fig2">
+<svg viewBox="0 0 640 228" xmlns="http://www.w3.org/2000/svg">
+  <text class="fl" x="10" y="20" fill="#C88C14">Batch &#8212; on accumule, puis on traite tout d'un coup</text>
+  <rect x="10" y="30" width="620" height="62" rx="3" fill="#FFF7E6" stroke="#C88C14" stroke-width="1.2"/>
+  <circle cx="60" cy="61" r="6" fill="#C88C14"/><circle cx="110" cy="61" r="6" fill="#C88C14"/>
+  <circle cx="160" cy="61" r="6" fill="#C88C14"/><circle cx="210" cy="61" r="6" fill="#C88C14"/>
+  <rect x="440" y="40" width="80" height="42" rx="3" fill="#fff" stroke="#C88C14" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <circle cx="458" cy="54" r="5" fill="#C88C14"/><circle cx="474" cy="54" r="5" fill="#C88C14"/>
+  <circle cx="490" cy="54" r="5" fill="#C88C14"/><circle cx="506" cy="54" r="5" fill="#C88C14"/>
+  <circle cx="466" cy="70" r="5" fill="#C88C14"/>
+  <text class="fs" x="480" y="98" text-anchor="middle">le bac attend la fin de la periode</text>
+  <path d="M524 61 L556 61" stroke="#C88C14" stroke-width="2" marker-end="url(#ar-or)"/>
+  <text class="fl" x="594" y="58" text-anchor="middle">5 msg</text>
+  <text class="fs" x="594" y="72" text-anchor="middle">latence ~ 2,5 s</text>
+  <text class="fl" x="10" y="128" fill="#288C3C">Streaming &#8212; chaque donnee est traitee des son arrivee</text>
+  <rect x="10" y="138" width="620" height="62" rx="3" fill="#EBF8EB" stroke="#288C3C" stroke-width="1.2"/>
+  <circle cx="60" cy="169" r="6" fill="#288C3C"/><circle cx="150" cy="169" r="6" fill="#288C3C"/>
+  <circle cx="240" cy="169" r="6" fill="#288C3C"/><circle cx="330" cy="169" r="6" fill="#288C3C"/>
+  <rect x="440" y="148" width="80" height="42" rx="3" fill="#fff" stroke="#288C3C" stroke-width="1.4"/>
+  <text class="fs" x="480" y="173" text-anchor="middle">calcul</text>
+  <path d="M524 169 L556 169" stroke="#288C3C" stroke-width="2" marker-end="url(#ar-vert)"/>
+  <text class="fl" x="594" y="166" text-anchor="middle">1 msg</text>
+  <text class="fs" x="594" y="180" text-anchor="middle">latence ~ 0 s</text>
+  <text class="fs" x="320" y="220" text-anchor="middle">Meme travail, meme volume : seul l'instant du resultat change.</text>
+  <defs>
+    <marker id="ar-or" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 z" fill="#C88C14"/></marker>
+    <marker id="ar-vert" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 z" fill="#288C3C"/></marker>
+  </defs>
+</svg>
+</div>
+
+<div data-fig="fig3">
+<svg viewBox="0 0 640 205" xmlns="http://www.w3.org/2000/svg">
+  <line x1="130" y1="43" x2="440" y2="88" stroke="#BFBFBF" stroke-width="2"/>
+  <line x1="130" y1="105" x2="440" y2="105" stroke="#BFBFBF" stroke-width="2"/>
+  <line x1="130" y1="167" x2="440" y2="122" stroke="#BFBFBF" stroke-width="2"/>
+  <rect x="440" y="60" width="150" height="90" rx="3" fill="#E8F2FE" stroke="#286EBE" stroke-width="1.4"/>
+  <text class="fl" x="515" y="86" text-anchor="middle">Serveur</text>
+  <text class="fs" x="515" y="102" text-anchor="middle">rend un service, attend</text>
+  <text class="fs" x="515" y="122" text-anchor="middle" fill="#BE3232">file : 2 en attente</text>
+  <text class="fs" x="515" y="138" text-anchor="middle">+ 1 en cours de traitement</text>
+  <rect x="20" y="22" width="110" height="42" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fl" x="75" y="42" text-anchor="middle">Client A</text>
+  <text class="fs" x="75" y="56" text-anchor="middle">attend la reponse</text>
+  <rect x="20" y="84" width="110" height="42" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fl" x="75" y="104" text-anchor="middle">Client B</text>
+  <text class="fs" x="75" y="118" text-anchor="middle">attend la reponse</text>
+  <rect x="20" y="146" width="110" height="42" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fl" x="75" y="166" text-anchor="middle">Client C</text>
+  <text class="fs" x="75" y="180" text-anchor="middle">au repos</text>
+  <circle cx="300" cy="67" r="7" fill="#C88C14"/>
+  <circle cx="250" cy="105" r="7" fill="#C88C14"/>
+  <text class="fs" x="300" y="22" text-anchor="middle">l'initiative part toujours du client</text>
+</svg>
+</div>
+
+<div data-fig="fig4">
+<svg viewBox="0 0 640 196" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="60" width="96" height="50" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fl" x="58" y="82" text-anchor="middle">Emetteur</text>
+  <text class="fs" x="58" y="98" text-anchor="middle">envoyes : 6</text>
+  <rect x="534" y="60" width="96" height="50" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fl" x="582" y="82" text-anchor="middle">Recepteur</text>
+  <text class="fs" x="582" y="98" text-anchor="middle">recus : 6</text>
+  <line x1="106" y1="85" x2="534" y2="85" stroke="#BFBFBF" stroke-width="2" stroke-dasharray="5 4"/>
+  <text class="fs" x="320" y="36" text-anchor="middle">reseau : retard, perte, duplication</text>
+  <g>
+    <circle cx="500" cy="64" r="10" fill="#286EBE"/><text class="fn" x="500" y="68" text-anchor="middle">1</text>
+    <circle cx="420" cy="106" r="10" fill="#286EBE"/><text class="fn" x="420" y="110" text-anchor="middle">3</text>
+    <circle cx="352" cy="64" r="10" fill="#286EBE"/><text class="fn" x="352" y="68" text-anchor="middle">2</text>
+    <circle cx="286" cy="106" r="10" fill="#286EBE"/><text class="fn" x="286" y="110" text-anchor="middle">3</text>
+    <circle cx="200" cy="64" r="10" fill="#BE3232" opacity="0.35"/><text class="fn" x="200" y="68" text-anchor="middle">4</text>
+    <line x1="192" y1="56" x2="208" y2="72" stroke="#BE3232" stroke-width="2"/>
+    <line x1="208" y1="56" x2="192" y2="72" stroke="#BE3232" stroke-width="2"/>
+    <circle cx="150" cy="106" r="10" fill="#286EBE"/><text class="fn" x="150" y="110" text-anchor="middle">5</text>
+    <circle cx="126" cy="64" r="10" fill="#286EBE"/><text class="fn" x="126" y="68" text-anchor="middle">6</text>
+  </g>
+  <text class="fs" x="200" y="140" text-anchor="middle" fill="#BE3232">perdu</text>
+  <text class="fs" x="286" y="140" text-anchor="middle" fill="#C88C14">doublon du 3</text>
+  <text class="fs" x="320" y="172" text-anchor="middle">Ordre d'arrivee : 1, 3, 2, 3, 5, 6 &#8212; le 4 ne vient jamais.</text>
+  <text class="fs" x="320" y="188" text-anchor="middle">Partis dans l'ordre 1 a 6, ils arrivent melanges.</text>
+</svg>
+</div>
+
+<div data-fig="fig5">
+<svg viewBox="0 0 640 224" xmlns="http://www.w3.org/2000/svg">
+  <text class="fs" x="320" y="24" text-anchor="middle">casier = hachage(cle) modulo 4 &#8212; meme cle, meme casier</text>
+  <rect x="30" y="118" width="130" height="80" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="190" y="118" width="130" height="80" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="350" y="118" width="130" height="80" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <rect x="505" y="118" width="105" height="80" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+  <text class="fs" x="95" y="214" text-anchor="middle">casier 0</text>
+  <text class="fs" x="255" y="214" text-anchor="middle">casier 1</text>
+  <text class="fs" x="415" y="214" text-anchor="middle">casier 2</text>
+  <text class="fs" x="557" y="214" text-anchor="middle">casier 3</text>
+  <g>
+    <circle cx="95" cy="184" r="11" fill="#286EBE"/><text class="fk" x="95" y="188" text-anchor="middle">A</text>
+    <circle cx="95" cy="160" r="11" fill="#286EBE"/><text class="fk" x="95" y="164" text-anchor="middle">A</text>
+    <circle cx="95" cy="136" r="11" fill="#286EBE"/><text class="fk" x="95" y="140" text-anchor="middle">E</text>
+    <circle cx="255" cy="184" r="11" fill="#286EBE"/><text class="fk" x="255" y="188" text-anchor="middle">B</text>
+    <circle cx="255" cy="160" r="11" fill="#286EBE"/><text class="fk" x="255" y="164" text-anchor="middle">F</text>
+    <circle cx="415" cy="184" r="11" fill="#286EBE"/><text class="fk" x="415" y="188" text-anchor="middle">C</text>
+    <circle cx="557" cy="184" r="11" fill="#286EBE"/><text class="fk" x="557" y="188" text-anchor="middle">D</text>
+    <circle cx="557" cy="160" r="11" fill="#286EBE"/><text class="fk" x="557" y="164" text-anchor="middle">H</text>
+  </g>
+  <g>
+    <circle cx="150" cy="60" r="11" fill="#C88C14"/><text class="fk" x="150" y="64" text-anchor="middle">A</text>
+    <circle cx="300" cy="60" r="11" fill="#C88C14"/><text class="fk" x="300" y="64" text-anchor="middle">F</text>
+    <circle cx="470" cy="60" r="11" fill="#C88C14"/><text class="fk" x="470" y="64" text-anchor="middle">H</text>
+    <path d="M150 74 L100 118" stroke="#BFBFBF" stroke-width="1.4" stroke-dasharray="3 3"/>
+    <path d="M300 74 L258 118" stroke="#BFBFBF" stroke-width="1.4" stroke-dasharray="3 3"/>
+    <path d="M470 74 L548 118" stroke="#BFBFBF" stroke-width="1.4" stroke-dasharray="3 3"/>
+  </g>
+  <text class="fs" x="95" y="110" text-anchor="middle">3 messages</text>
+  <text class="fs" x="255" y="110" text-anchor="middle">2</text>
+  <text class="fs" x="415" y="110" text-anchor="middle">1</text>
+  <text class="fs" x="557" y="110" text-anchor="middle">2</text>
+</svg>
+</div>
+
+<div data-fig="fig6">
+<svg viewBox="0 0 640 234" xmlns="http://www.w3.org/2000/svg">
+  <text class="fl" x="10" y="28" fill="#288C3C">Heure d'evenement &#8212; quand le fait s'est produit</text>
+  <line x1="30" y1="56" x2="610" y2="56" stroke="#BFBFBF" stroke-width="2"/>
+  <g>
+    <circle cx="80" cy="56" r="10" fill="#288C3C"/><text class="fn" x="80" y="60" text-anchor="middle">1</text>
+    <circle cx="185" cy="56" r="10" fill="#288C3C"/><text class="fn" x="185" y="60" text-anchor="middle">2</text>
+    <circle cx="290" cy="56" r="10" fill="#288C3C"/><text class="fn" x="290" y="60" text-anchor="middle">3</text>
+    <circle cx="395" cy="56" r="10" fill="#288C3C"/><text class="fn" x="395" y="60" text-anchor="middle">4</text>
+    <circle cx="500" cy="56" r="10" fill="#288C3C"/><text class="fn" x="500" y="60" text-anchor="middle">5</text>
+  </g>
+  <path d="M80 66 L95 166" stroke="#BFBFBF" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <path d="M185 66 L330 166" stroke="#BE3232" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <path d="M290 66 L215 166" stroke="#BE3232" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <path d="M395 66 L480 166" stroke="#BE3232" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <path d="M500 66 L420 166" stroke="#BE3232" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text class="fl" x="10" y="152" fill="#C88C14">Heure de traitement &#8212; quand le message arrive</text>
+  <line x1="30" y1="176" x2="610" y2="176" stroke="#BFBFBF" stroke-width="2"/>
+  <g>
+    <circle cx="95" cy="176" r="10" fill="#C88C14"/><text class="fn" x="95" y="180" text-anchor="middle">1</text>
+    <circle cx="215" cy="176" r="10" fill="#C88C14"/><text class="fn" x="215" y="180" text-anchor="middle">3</text>
+    <circle cx="330" cy="176" r="10" fill="#C88C14"/><text class="fn" x="330" y="180" text-anchor="middle">2</text>
+    <circle cx="420" cy="176" r="10" fill="#C88C14"/><text class="fn" x="420" y="180" text-anchor="middle">5</text>
+    <circle cx="480" cy="176" r="10" fill="#C88C14"/><text class="fn" x="480" y="180" text-anchor="middle">4</text>
+  </g>
+  <text class="fs" x="320" y="212" text-anchor="middle">Partis dans l'ordre 1, 2, 3, 4, 5 &#8212; arrives dans l'ordre 1, 3, 2, 5, 4.</text>
+  <text class="fs" x="320" y="228" text-anchor="middle">Les traits rouges marquent les croisements : un fait plus ancien arrive apres un plus recent.</text>
+</svg>
+</div>
+
+<div data-fig="fig7">
+<svg viewBox="0 0 640 214" xmlns="http://www.w3.org/2000/svg">
+  <text class="fs" x="320" y="22" text-anchor="middle">3 machines actives sur 4 &#8212; la part de M3 est reprise par les autres</text>
+  <g>
+    <rect x="30" y="36" width="110" height="128" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+    <rect x="38" y="129" width="94" height="27" fill="#286EBE"/>
+    <text class="fl" x="85" y="56" text-anchor="middle">M1</text>
+    <text class="fs" x="85" y="72" text-anchor="middle">33 %</text>
+    <rect x="185" y="36" width="110" height="128" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+    <rect x="193" y="129" width="94" height="27" fill="#286EBE"/>
+    <text class="fl" x="240" y="56" text-anchor="middle">M2</text>
+    <text class="fs" x="240" y="72" text-anchor="middle">33 %</text>
+    <rect x="340" y="36" width="110" height="128" rx="3" fill="#FDEBEB" stroke="#BE3232" stroke-width="1.4" stroke-dasharray="5 3"/>
+    <text class="fl" x="395" y="56" text-anchor="middle" fill="#BE3232">M3</text>
+    <text class="fs" x="395" y="72" text-anchor="middle" fill="#BE3232">en panne</text>
+    <line x1="356" y1="96" x2="434" y2="150" stroke="#BE3232" stroke-width="1.6"/>
+    <line x1="434" y1="96" x2="356" y2="150" stroke="#BE3232" stroke-width="1.6"/>
+    <rect x="495" y="36" width="110" height="128" rx="3" fill="#fff" stroke="#22497A" stroke-width="1.4"/>
+    <rect x="503" y="129" width="94" height="27" fill="#286EBE"/>
+    <text class="fl" x="550" y="56" text-anchor="middle">M4</text>
+    <text class="fs" x="550" y="72" text-anchor="middle">33 %</text>
+  </g>
+  <text class="fs" x="320" y="186" text-anchor="middle">Avec 4 machines : 25 % chacune. Avec 3 : 33 %. Avec 1 : 100 %, la charge devient intenable.</text>
+  <text class="fs" x="320" y="204" text-anchor="middle">C'est tout l'interet du cluster, et aussi sa limite.</text>
+</svg>
+</div>
+
+<div data-fig="fig8">
+<svg viewBox="0 0 640 224" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="14" width="340" height="156" rx="3" fill="#F5F5F5" stroke="#BFBFBF" stroke-width="1"/>
+  <rect x="16" y="62" width="328" height="18" fill="#FFF7E6" stroke="#C88C14" stroke-width="1"/>
+  <text class="fc" x="24" y="32">def capteur():</text>
+  <text class="fc" x="24" y="50">    while True:</text>
+  <text class="fc" x="24" y="68">        t = random.gauss(25, 2)</text>
+  <text class="fc" x="24" y="86">        yield round(t, 1)</text>
+  <text class="fc" x="24" y="104">        time.sleep(1)</text>
+  <text class="fc" x="24" y="134">for valeur in capteur():</text>
+  <text class="fc" x="24" y="152">    print("Nouvelle mesure :", valeur)</text>
+  <text class="fs" x="178" y="190" text-anchor="middle" fill="#C88C14">yield : la valeur part, la fonction se met en pause ici</text>
+  <text class="fl" x="372" y="34">Flux produit, valeur par valeur</text>
+  <line x1="362" y1="100" x2="630" y2="100" stroke="#BFBFBF" stroke-width="2"/>
+  <text class="fv" x="382" y="92" text-anchor="middle">26.3</text>
+  <text class="fv" x="432" y="92" text-anchor="middle">24.1</text>
+  <text class="fv" x="482" y="92" text-anchor="middle">25.8</text>
+  <text class="fv" x="532" y="92" text-anchor="middle">23.4</text>
+  <text class="fv" x="582" y="92" text-anchor="middle">27.0</text>
+  <circle cx="382" cy="100" r="3" fill="#C88C14"/><circle cx="432" cy="100" r="3" fill="#C88C14"/>
+  <circle cx="482" cy="100" r="3" fill="#C88C14"/><circle cx="532" cy="100" r="3" fill="#C88C14"/>
+  <circle cx="582" cy="100" r="3" fill="#C88C14"/>
+  <text class="fs" x="496" y="128" text-anchor="middle">elles ne s'accumulent jamais :</text>
+  <text class="fs" x="496" y="144" text-anchor="middle">une seule valeur existe a la fois</text>
+  <text class="fs" x="496" y="190" text-anchor="middle">memoire occupee : constante</text>
+</svg>
+</div>
+
+<div data-cap="fig1"><b>Figure 1 · La seconde de Salma</b>L'&eacute;v&eacute;nement est cr&eacute;&eacute; par le terminal, traverse le r&eacute;seau, re&ccedil;oit un score &agrave; la banque, et la d&eacute;cision revient. La latence totale <i>L</i>&nbsp;=&nbsp;143&nbsp;ms reste sous le d&eacute;lai utile <i>D</i>&nbsp;=&nbsp;300&nbsp;ms&nbsp;: la r&eacute;ponse a encore de la valeur. Si le r&eacute;seau ralentit &agrave; 160&nbsp;ms par trajet, <i>L</i> monte &agrave; 367&nbsp;ms et le paiement est refus&eacute; pour d&eacute;passement de d&eacute;lai.</div>
+
+<div data-cap="fig2"><b>Figure 2 · Deux fa&ccedil;ons de traiter</b>Les m&ecirc;mes &eacute;v&eacute;nements arrivent dans les deux couloirs. En haut ils s'accumulent dans le bac et ne produisent un r&eacute;sultat qu'&agrave; la fin de la p&eacute;riode&nbsp;; en bas chacun traverse le calcul imm&eacute;diatement. Le travail total est identique&nbsp;: seul l'instant du r&eacute;sultat change, et avec lui la latence.</div>
+
+<div data-cap="fig3"><b>Figure 3 · L'initiative appartient au client</b>Le serveur ne fait rien tant qu'on ne lui demande rien. Quand plusieurs demandes arrivent ensemble, elles s'empilent dans sa file et sont trait&eacute;es l'une apr&egrave;s l'autre&nbsp;: c'est l&agrave; que na&icirc;t le maillon &laquo;&nbsp;file d'attente&nbsp;&raquo; du budget de latence de la notion&nbsp;1.</div>
+
+<div data-cap="fig4"><b>Figure 4 · Le r&eacute;seau n'est pas parfait</b>Les six messages partent num&eacute;rot&eacute;s, dans l'ordre. Ils arrivent m&eacute;lang&eacute;s (1,&nbsp;3,&nbsp;2,&nbsp;3,&nbsp;5,&nbsp;6)&nbsp;: le&nbsp;3 est re&ccedil;u deux fois, le&nbsp;4 n'arrive jamais. Retard, duplication et perte ne sont pas des pannes&nbsp;: c'est le fonctionnement normal d'un r&eacute;seau partag&eacute;.</div>
+
+<div data-cap="fig5"><b>Figure 5 · La cl&eacute; d&eacute;cide du casier</b>Les cl&eacute;s <i>A</i>, <i>B</i>, <i>C</i>&hellip; tombent toujours dans le m&ecirc;me casier, quel que soit le moment de leur arriv&eacute;e&nbsp;; ici <i>A</i> et <i>E</i> partagent le casier&nbsp;0. C'est exactement le m&eacute;canisme de partitionnement de Kafka, que nous verrons au chapitre&nbsp;3.</div>
+
+<div data-cap="fig6"><b>Figure 6 · Les deux heures d'un message</b>En haut, les faits se produisent dans l'ordre&nbsp;; en bas, ils arrivent avec des retards in&eacute;gaux. Les traits rouges marquent les croisements&nbsp;: un &eacute;v&eacute;nement plus ancien peut arriver apr&egrave;s un plus r&eacute;cent. Un calcul fait en heure de traitement les rangerait dans le mauvais ordre.</div>
+
+<div data-cap="fig7"><b>Figure 7 · Partager le travail, survivre aux pannes</b>Chaque machine prend une part de la charge&nbsp;: 25&nbsp;% chacune &agrave; quatre, 33&nbsp;% &agrave; trois lorsque M3 tombe. C'est le gain du cluster, et aussi sa limite&nbsp;: &agrave; une seule machine restante, la charge devient intenable.</div>
+
+<div data-cap="fig8"><b>Figure 8 · Le g&eacute;n&eacute;rateur, premi&egrave;re image d'un flux</b>La ligne surlign&eacute;e montre o&ugrave; en est la fonction. &Agrave; chaque <span class="c-kw">yield</span> elle rend une valeur et se met en pause&nbsp;; elle reprend exactement l&agrave; quand la boucle <span class="c-kw">for</span> en redemande une. Les valeurs ne s'accumulent jamais&nbsp;: la m&eacute;moire occup&eacute;e reste constante.</div>

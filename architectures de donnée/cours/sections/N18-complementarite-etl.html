@@ -1,0 +1,520 @@
+<h2 class="notion" id="n18">N18 — La complémentarité OLTP / OLAP et le processus ETL</h2>
+
+<h3 id="n18-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Tableau de comparaison :</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Critère</th><th>OLTP — traitement des transactions</th><th>OLAP — analyse des données</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Objectif</strong></td><td>Opérer</td><td>Analyser</td></tr>
+        <tr><td><strong>Opération</strong></td><td>INSERT / UPDATE / transaction</td><td>SELECT / agrégation</td></tr>
+        <tr><td><strong>Données</strong></td><td>courantes</td><td>historiques</td></tr>
+        <tr><td><strong>Charge</strong></td><td>nombreuses petites requêtes</td><td>moins de requêtes mais lourdes</td></tr>
+        <tr><td><strong>Exemple</strong></td><td>commande</td><td>KPI mensuel</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Complémentarité.</strong> OLTP et OLAP sont <strong>souvent utilisés ensemble</strong>
+      dans les systèmes d'information d'entreprise :</p>
+    <ol>
+      <li><strong>OLTP collecte les données</strong> : gère les transactions quotidiennes comme les
+        ventes ou les interactions clients.</li>
+      <li><strong>OLAP analyse les données</strong> : transforme les données OLTP en informations
+        stratégiques via des tableaux de bord et des rapports.</li>
+      <li><strong>Processus ETL</strong> : <strong>E</strong>xtraction,
+        <strong>T</strong>ransformation et <strong>C</strong>hargement des données d'OLTP vers des
+        entrepôts de données pour OLAP.</li>
+    </ol>
+
+    <p style="text-align:center"><strong>1. OLTP</strong> (INSERT / UPDATE / DELETE) →
+      <strong>2. ETL</strong> (Extract · Transform · Load) → <strong>3. OLAP</strong></p>
+  </div>
+</div>
+
+<h3 id="n18-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le tableau résume ligne à ligne les deux notions précédentes, et l'on peut le relire comme une
+      vérification : chaque ligne oppose un terme de N16 à un terme de N17 — opérer contre analyser,
+      écrire contre lire, courant contre historique, beaucoup de petit contre peu de lourd. Mais le
+      véritable apport de cette notion n'est pas le tableau : c'est le <strong>troisième
+      élément</strong>, celui qui relie les deux colonnes. Sans lui, on n'a pas deux mondes
+      complémentaires, on a deux systèmes sans rapport.</p>
+
+    <p>Et la première chose que dit la chaîne « OLTP collecte → ETL → OLAP analyse », c'est une
+      asymétrie fondamentale : <strong>le système analytique ne collecte rien</strong>. Il n'a aucune
+      source propre. Toutes ses données viennent des systèmes opérationnels, qui sont les seuls à être
+      en contact avec la réalité du métier. Conséquence directe, et lourde :
+      <strong>l'existence, la fraîcheur et la qualité de tout ce que l'on analyse dépendent d'une
+      chaîne que quelqu'un doit construire et maintenir</strong>. L'ETL n'est donc pas un détail
+      technique entre deux plateformes : c'est le <em>seul</em> lien entre le monde qui agit et le monde
+      qui comprend.</p>
+
+    <p>Les trois lettres ont chacune leur travail, et chacune sa difficulté propre :</p>
+    <ul>
+      <li><strong>Extract</strong> — sortir les données du système opérationnel. La contrainte n'est pas
+        de savoir lire, elle est de lire <strong>sans perturber</strong> : toute la leçon de N9 est là.
+        D'où l'extraction nocturne, ou incrémentale, ou par capture des changements (le CDC de N6).</li>
+      <li><strong>Transform</strong> — passer du modèle opérationnel, normalisé et tourné vers
+        l'opération, au modèle analytique, organisé par axes et par grain. <strong>C'est ici que vivent
+        les règles métier</strong> : ce qu'on appelle un client actif, ce qu'on compte dans le chiffre
+        d'affaires, comment on traite les annulations.</li>
+      <li><strong>Load</strong> — écrire le résultat dans l'entrepôt, sous la forme préparée que N10 a
+        décrite.</li>
+    </ul>
+
+    <p>Le point le plus important de toute la notion tient dans la deuxième lettre.
+      <strong>La transformation est l'endroit où la définition de la vérité est implémentée.</strong>
+      Le chiffre d'affaires de l'entreprise n'est pas dans la base de caisse : il est dans la règle qui
+      décide ce qu'on y inclut. C'est un avantage considérable — une règle écrite une fois, appliquée
+      partout, et la divergence des chiffres de N1 disparaît. C'est aussi le risque le plus sérieux :
+      <strong>une règle fausse produit un indicateur faux que tout le monde citera, et que rien ne
+      signalera</strong>, puisqu'aucune opération n'est bloquée (N17).</p>
+
+    <p>Deuxième conséquence structurelle : la chaîne crée un <strong>décalage temporel</strong>. Le
+      monde analytique est toujours en retard sur le monde opérationnel, exactement de la durée du
+      cycle. Ce décalage n'est pas un défaut à corriger — c'est <em>le prix de la séparation</em>, et
+      c'est ce qui permet aux caisses de fonctionner pendant qu'on analyse. Il doit en revanche être
+      choisi, écrit et affiché (N17, exercice 12.3) : promettre du temps réel au bout d'une chaîne
+      nocturne est une contradiction dans les termes.</p>
+
+    <p>Un mot enfin sur l'ordre des lettres, car il recouvre une décision d'architecture. L'ETL
+      transforme <em>avant</em> de charger ; on peut aussi charger le brut puis transformer dans la
+      plateforme — c'est ce que N10 appelait « transformées avant <em>ou pendant</em> le chargement »,
+      et ce que l'arrivée du lac et du Lakehouse a rendu courant. Les deux ordres font le même travail ;
+      ils ne le font pas au même endroit, et <strong>le second conserve le brut</strong>, donc la
+      possibilité de rejouer une transformation quand une règle change.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Un ETL n'est pas un projet, c'est un flux permanent.</strong> Il tourne tous les jours,
+        il casse, il doit être surveillé — la huitième ligne de la grille de N6 s'applique ici en
+        priorité.</li>
+      <li><strong>Si l'ETL s'arrête, l'analytique ne tombe pas en panne : elle se fige.</strong> Les
+        chiffres restent affichés, plausibles et faux. C'est précisément le cas de N17,
+        exercice 12.3.</li>
+      <li><strong>Ne jamais implémenter la même règle à deux endroits.</strong> Une définition dans
+        l'ETL et une autre dans l'outil de tableau de bord produisent deux chiffres — la divergence de
+        N1 réintroduite par la porte de service.</li>
+      <li><strong>L'extraction ne doit pas perturber la production.</strong> C'est la contrainte
+        pratique numéro un, et celle qui dicte le mode : complet, incrémental ou CDC.</li>
+      <li><strong>Un changement de schéma côté source casse la chaîne.</strong> C'est le point de
+        couplage de N7 : il appelle un contrat d'interface, pas une surveillance renforcée.</li>
+      <li><strong>Le décalage est structurel.</strong> Réduire la période de la chaîne a un coût qui
+        croît très vite ; on ne passe pas du jour à la seconde en changeant d'outil.</li>
+      <li><strong>« Transforme les données OLTP en informations stratégiques » va un peu vite.</strong>
+        L'ETL produit des données <em>préparées</em> ; l'information stratégique suppose encore une
+        interprétation humaine. Aucun pipeline ne fabrique une décision.</li>
+      <li><strong>Un rechargement doit pouvoir être rejoué sans dégât.</strong> Si relancer la chaîne
+        double les lignes, l'incident de demain deviendra une correction manuelle de trois jours.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> جدول المقارنة كيلخص N16 وN17 سطر بسطر (الهدف: <strong>يشغّل</strong>
+    مقابل <strong>يحلل</strong> · العملية: INSERT/UPDATE مقابل SELECT/تجميع · المعطيات:
+    <strong>جارية</strong> مقابل <strong>تاريخية</strong> · الحمل: استعلامات صغيرة وكثيرة مقابل قليلة
+    وثقيلة · المثال: طلبية مقابل KPI شهري). ولكن الجديد فهاد الـnotion هو <strong>العنصر الثالث</strong>
+    اللي كيربط الجوج: <strong>ETL</strong> (استخراج · تحويل · تحميل). وأول حاجة كتقولها السلسلة «OLTP
+    كيجمع ← ETL ← OLAP كيحلل» هي لاتناظر أساسي: <strong>النظام التحليلي ما كيجمع والو</strong> — ما
+    عندو حتى مصدر ديالو، وكلشي كيجي من الأنظمة التشغيلية. يعني <strong>وجود وطراوة وجودة كل اللي
+    كنحللو كيتوقفو على سلسلة خاص شي حد يبنيها ويصونها</strong>. والحرف الثاني هو الأهم:
+    <strong>التحويل هو البلاصة فين كتتكتب القواعد المهنية — يعني فين كيتحدد «الحقيقة»</strong>. رقم
+    المعاملات ماشي فقاعدة الكايسات، هو فالقاعدة اللي كتقرر أشنو كيدخل فيه. وهادا ميزة كبيرة (قاعدة
+    وحدة = ما بقاش اختلاف الأرقام ديال N1) وخطر كبير (<strong>قاعدة غالطة كتعطي مؤشر غالط كيثيق فيه
+    الجميع وما كينبّه ليه حتى شي حاجة</strong>). ونتيجة ثانية: السلسلة كتخلق <strong>تأخر زمني</strong>
+    — وهادا ماشي عيب، هو <strong>ثمن الفصل</strong>، ولكن خاصو يتختار ويتكتب ويتعرض.</p>
+</div>
+
+<h3 id="n18-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Les deux notions précédentes ont séparé deux workloads opposés. Cette séparation résout la
+      dégradation croisée de N9 — mais elle crée aussitôt un problème nouveau :
+      <strong>deux systèmes séparés ne communiquent pas</strong>. L'entrepôt est vide, et il le restera,
+      car il n'a aucun moyen propre d'observer le métier. La séparation sans liaison ne serait pas un
+      progrès, ce serait une amputation.</p>
+    <p>L'ETL traite exactement ce problème : <strong>faire circuler la donnée du monde qui agit vers le
+      monde qui comprend, en la changeant de forme au passage</strong>. Et il en traite un second, moins
+      visible mais plus profond : il fournit le <em>lieu unique</em> où les règles métier sont
+      implémentées. Sans ce lieu, chaque consommateur recalculerait à sa façon — ce qui est exactement
+      la situation que N1 décrivait au début du cours, avec trois services et trois chiffres.</p>
+  </div>
+</div>
+
+<h3 id="n18-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Relier les deux mondes</strong> au lieu de les juxtaposer, et donc rendre la
+        séparation utile.</li>
+      <li><strong>Choisir le mode d'extraction</strong> — complet, incrémental, CDC — en fonction de
+        l'impact admissible sur la production.</li>
+      <li><strong>Centraliser les règles métier</strong> en un seul endroit, versionné et possédé par le
+        métier.</li>
+      <li><strong>Fixer et annoncer le décalage</strong> : la fraîcheur offerte découle de la période de
+        la chaîne, elle ne se négocie pas après coup.</li>
+      <li><strong>Surveiller un flux permanent</strong> : volumétrie, totaux de contrôle, alerte en cas
+        d'échec — sans quoi l'analytique se fige sans bruit.</li>
+      <li><strong>Décider ETL ou ELT</strong> en connaissance de cause, selon qu'on veut ou non
+        conserver le brut pour pouvoir rejouer.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n18-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Pourquoi les deux workloads sont-ils complémentaires et non concurrents ?</strong> Parce
+      qu'ils portent sur <em>les mêmes événements</em>. Il n'y a qu'une réalité — une vente a eu lieu —
+      et deux manières de s'en servir : la faire aboutir, et la comprendre. Deux usages d'un même fait
+      ne s'opposent pas ; ils se succèdent. La seule question est donc de savoir comment le fait passe
+      d'un usage à l'autre.</p>
+
+    <p><strong>Pourquoi le flux va-t-il dans un seul sens ?</strong> Parce que les événements sont
+      <em>créés</em> par l'opération. Le monde analytique observe, il ne produit aucun fait métier :
+      aucune ligne de l'entrepôt ne correspond à une vente qui n'aurait pas eu lieu dans une caisse. La
+      boucle se referme malgré tout, mais par le métier et non par un tuyau : une analyse conduit à une
+      décision — changer un prix, réapprovisionner — qui modifie les opérations, lesquelles produisent
+      de nouveaux événements à analyser.</p>
+
+    <p><strong>Pourquoi une transformation, et pas une simple copie ?</strong> C'est la question
+      décisive, et la réponse a été démontrée en N17. Copier la base opérationnelle dans l'entrepôt
+      reviendrait à y reproduire un modèle normalisé : les requêtes analytiques y coûteraient toujours
+      les cinq jointures et les centaines de millions de lignes parcourues, et l'on aurait perdu le
+      facteur 10 000. <strong>Le « T » n'est donc pas une commodité : il est exigé par l'opposition des
+      modèles.</strong> Séparer les systèmes sans transformer ne donnerait qu'une copie lente.</p>
+
+    <p><strong>Et pourquoi exactement ces trois lettres ?</strong> Retirons-les une à une :</p>
+    <ul>
+      <li>Sans <strong>Extract</strong> : rien n'arrive, l'entrepôt reste vide.</li>
+      <li>Sans <strong>Transform</strong> : les données arrivent dans leur forme d'origine, et les
+        requêtes analytiques restent aussi coûteuses que sur l'OLTP — on a payé une plateforme pour
+        rien.</li>
+      <li>Sans <strong>Load</strong> : le travail de transformation est refait à chaque interrogation,
+        ce qui annule le principe même de N10 — payer une fois à l'écriture pour lire souvent.</li>
+    </ul>
+    <p>Les trois sont donc nécessaires, et dans cet ordre, parce que chacune prépare la suivante.</p>
+
+    <p>Reste à justifier la variante. Si l'on charge avant de transformer — <em>ELT</em> — on conserve
+      le brut dans la plateforme et l'on garde la possibilité de <strong>rejouer</strong> une
+      transformation quand une règle change ou qu'une erreur est découverte. C'est précisément
+      l'argument du Data Lake (N11) appliqué au pipeline, et c'est pourquoi cet ordre s'est répandu avec
+      lui. L'ordre classique, lui, conserve son avantage : il ne charge que ce qui est utile, donc il
+      coûte moins en stockage et expose moins de données brutes.</p>
+  </div>
+</div>
+
+<h3 id="n18-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Dans toute mise en place d'un entrepôt.</strong> Construire la plateforme est le
+        travail visible ; construire et tenir la chaîne d'alimentation est le travail réel, et c'est
+        lui qui dure.</li>
+      <li><strong>Dans la conception des règles de calcul.</strong> C'est l'endroit où l'on écrit ce
+        qu'est un client actif ou un chiffre d'affaires — et donc l'endroit où le métier doit être
+        présent, pas seulement consulté.</li>
+      <li><strong>Dans la protection du système opérationnel.</strong> Le choix du mode et de la fenêtre
+        d'extraction est ce qui garantit que l'analyse ne pèsera pas sur la production.</li>
+      <li><strong>Dans la définition des engagements de fraîcheur.</strong> La période de la chaîne
+        détermine ce qu'on peut promettre ; l'annoncer évite les malentendus de N17.</li>
+      <li><strong>Dans le diagnostic d'un chiffre contesté.</strong> « D'où vient ce nombre ? » se
+        répond en remontant la chaîne : quelle source, quelle règle, quelle version, quelle date.</li>
+      <li><strong>Dans la reprise d'un existant.</strong> Compter les chaînes d'alimentation d'une
+        organisation, et savoir lesquelles sont surveillées, donne une image très fidèle de la maturité
+        de son système d'information.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n18-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« L'entrepôt est en place, il ne reste qu'à le remplir. »</strong> Le « il ne reste
+        que » désigne en réalité l'essentiel du travail et la totalité de la maintenance future.</li>
+      <li><strong>« Le chiffre du tableau de bord ne correspond pas à celui de l'application. »</strong>
+        Question de règle de transformation, ou de décalage temporel : les deux se tranchent en
+        remontant la chaîne.</li>
+      <li><strong>« L'extraction ralentit la production le matin. »</strong> La fenêtre ou le mode
+        d'extraction sont mal choisis : c'est la leçon de N9 qui revient par l'ETL.</li>
+      <li><strong>« Le chargement de cette nuit a échoué. »</strong> Signal normal d'un flux permanent —
+        ce qui compte est le délai de détection, pas l'échec lui-même.</li>
+      <li><strong>« Le chiffre n'a pas bougé depuis trois semaines. »</strong> La chaîne est arrêtée et
+        personne n'a été prévenu : surveillance absente.</li>
+      <li><strong>« La source a ajouté une colonne et tout a cassé. »</strong> Point de couplage sans
+        contrat (N7).</li>
+      <li><strong>« On a changé la règle de calcul, peut-on recalculer le passé ? »</strong> Question qui
+        tranche entre ETL et ELT : sans brut conservé, la réponse est non.</li>
+      <li><strong>« Il nous faut ces indicateurs en temps réel. »</strong> Incompatible avec une chaîne
+        périodique : soit on change la période, soit on change d'approche (N21).</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n18-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Délimiter et fixer la période.</strong> Quelles sources, quelles tables, quel
+      périmètre, et <strong>à quelle fréquence</strong> ? La fréquence ne se choisit pas par habitude :
+      elle découle de la fraîcheur attendue par les usages (sixième ligne de la grille de N6). Une
+      exigence quotidienne appelle une chaîne quotidienne, et rien de plus.</p>
+
+    <p><strong>Étape 2 — Extraire sans perturber.</strong> Choisissez le mode : relecture complète
+      (simple, coûteuse), extraction incrémentale (sur une date de modification), ou capture des
+      changements. Fixez la fenêtre d'exécution et <strong>mesurez l'impact réel sur le système
+      opérationnel</strong> — c'est la contrainte que N9 a rendue non négociable.</p>
+
+    <p><strong>Étape 3 — Transformer, et faire posséder les règles par le métier.</strong> Écrivez
+      chaque règle de calcul, versionnez-la, et nommez son propriétaire métier. Décidez aussi où elle
+      s'applique : avant le chargement, ou après, dans la plateforme. <strong>Aucune règle ne doit
+      exister en double</strong> : si le tableau de bord recalcule ce que l'ETL a déjà calculé, vous
+      aurez deux vérités.</p>
+
+    <p><strong>Étape 4 — Charger de façon rejouable.</strong> Définissez la cible, le grain, et surtout
+      le comportement d'un <em>rejeu</em> : relancer la chaîne sur la même journée doit produire le même
+      résultat, pas des lignes en double. Prévoyez le sort des enregistrements rejetés — écartés,
+      marqués, mis en attente — car il y en aura.</p>
+
+    <p><strong>Étape 5 — Surveiller et déclarer.</strong> Trois contrôles minimum : le nombre de lignes
+      traitées, un total de contrôle comparé à la source, et une alerte si la chaîne n'a pas tourné.
+      Puis publiez la fraîcheur à côté des chiffres. <strong>Un ETL sans surveillance ne signale pas ses
+      pannes : il les diffuse</strong>, sous forme d'indicateurs figés que chacun croit à jour.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le système analytique <strong>ne collecte rien</strong> : tout vient de l'OLTP par l'ETL, qui est
+      le seul lien entre le monde qui agit et celui qui comprend. Le <strong>« T » est exigé par
+      l'opposition des modèles</strong>, et c'est là que la <strong>définition de la vérité</strong> est
+      implémentée — donc là qu'une erreur devient invisible et fait autorité. La chaîne crée un
+      <strong>décalage</strong> : c'est le prix de la séparation, il se choisit et s'affiche.</p>
+    <p class="ar" dir="rtl">النظام التحليلي <strong>ما كيجمع والو</strong>: كلشي كيجي من OLTP عبر
+      ETL، اللي هو الرابط الوحيد بين عالم الفعل وعالم الفهم. و<strong>«T» مفروض بتعاكس
+      النماذج</strong>، وتما كتتكتب <strong>الحقيقة</strong> — يعني تما الغلط كيولي خفي وموثوق.
+      والسلسلة كتخلق <strong>تأخر</strong>: هو ثمن الفصل، كيتختار وكيتعرض.</p>
+  </div>
+</div>
+
+<h3 id="n18-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — concevoir la chaîne de l'enseigne</div>
+  <div class="box-b">
+    <p>Concevez la chaîne d'alimentation des ventes de l'enseigne, des caisses et du site vers
+      l'entrepôt, pour servir le chiffre d'affaires de la veille disponible à 8 h. Les caisses
+      enregistrent jusqu'à minuit ; le site vend 24 h sur 24.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Périmètre et période.</strong> Sources : ventes des 120 caisses, ventes du
+      site, référentiels produits et magasins. Fraîcheur exigée : données de la veille à 8 h, donc une
+      chaîne <strong>quotidienne</strong>. Inutile d'aller plus vite : aucun usage identifié ne le
+      demande, et chaque réduction de période coûte cher.</p>
+
+    <p><strong>Étape 2 — Extraction.</strong> Fenêtre : à partir de 1 h, après la clôture des caisses —
+      ce qui laisse une marge de six heures avant l'engagement de 8 h. Mode : <strong>incrémental</strong>
+      sur la date d'encaissement pour les ventes, car relire l'historique complet chaque nuit serait
+      inutile et pèserait sur la production. Pour les référentiels, qui changent peu mais dont les
+      modifications comptent, une <strong>capture des changements</strong> est préférable. Impact à
+      mesurer : l'extraction ne doit pas s'exécuter pendant les heures d'ouverture, règle héritée de
+      N9. <em>Difficulté propre au site</em> : il vend 24 h sur 24, donc la coupure est conventionnelle.
+      Il faut écrire la règle — on retient les ventes jusqu'à minuit, heure du siège — et s'y tenir,
+      faute de quoi les totaux ne seront jamais rapprochables.</p>
+
+    <p><strong>Étape 3 — Transformation.</strong> Règles à écrire et à faire posséder par le contrôle
+      de gestion : normalisation des montants (HT ou TTC, devise, remises incluses ou non) ;
+      rattachement de chaque vente au bon jour selon l'heure d'encaissement et non l'heure
+      d'enregistrement ; <strong>traitement des annulations et des retours</strong> — sont-ils déduits
+      du jour d'origine ou du jour de l'annulation ? ; rapprochement des référentiels. Chaque règle est
+      versionnée, et le propriétaire est nommé.</p>
+
+    <p><strong>Étape 4 — Chargement rejouable.</strong> Cible : la table de ventes au grain ligne de
+      ticket, plus les agrégats. Comportement de rejeu : relancer la chaîne sur le 23 octobre doit
+      <strong>remplacer</strong> les données du 23 octobre, pas s'y ajouter — sans cette propriété, le
+      premier incident se soldera par des doublons et un chiffre d'affaires surévalué. Rejets : les
+      lignes dont le produit est inconnu du référentiel sont mises de côté et comptées, jamais
+      silencieusement ignorées.</p>
+
+    <p><strong>Étape 5 — Surveillance et déclaration.</strong> Contrôles : nombre de tickets chargés
+      comparé au nombre annoncé par les caisses ; total des montants comparé au total source ; alerte si
+      la chaîne n'a pas terminé à 6 h, soit deux heures avant l'engagement — <strong>c'est ce délai de
+      sécurité qui transforme une alerte en action possible</strong>. Et le tableau de bord affiche
+      « données au 23/10, 23 h 59 ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — la règle fausse</div>
+  <div class="box-b">
+    <p>Pendant sept mois, le chiffre d'affaires mensuel de l'enseigne a été surévalué d'environ 3 %.
+      L'enquête révèle que la transformation déduit les commandes annulées pour les ventes du site,
+      mais pas pour les ventes en magasin, où les annulations sont enregistrées dans une table séparée
+      que l'ETL ne lit pas. Personne ne s'en était aperçu. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Pourquoi sept mois ?</strong> Parce que le chiffre était <em>plausible</em>. Une
+      surévaluation de 3 % ne choque personne : elle ressemble à une bonne tendance. Et parce que
+      l'analytique ne bloque aucune opération (N17), rien ne vient contredire le chiffre. C'est la
+      combinaison la plus dangereuse de tout le cours : <strong>une erreur qui fait autorité, ne gêne
+      personne, et se trouve exactement à l'endroit où tout le monde a confiance</strong>.</p>
+
+    <p><strong>Où est la faute, exactement ?</strong> Pas dans les données sources : les annulations
+      magasin existent bien, dans une table séparée. La faute est dans la <strong>règle de
+      transformation</strong>, qui a traité deux canaux différemment sans que personne ne l'ait décidé.
+      C'est l'illustration du point central de la notion : le chiffre d'affaires n'est pas dans la base
+      de caisse, il est dans la règle — et une règle incomplète produit un chiffre faux avec la même
+      assurance qu'une règle juste.</p>
+
+    <p><strong>Ce qui l'aurait détecté, par ordre de coût croissant.</strong> <em>(a)</em> Un
+      <strong>total de contrôle par canal</strong> comparé à la source : le total magasin de l'entrepôt
+      aurait dépassé celui des caisses de 3 % chaque mois, écart constant et donc suspect. C'est
+      l'étape 5, et c'est presque gratuit. <em>(b)</em> Une <strong>revue de la règle par le
+      métier</strong> : un contrôleur de gestion à qui l'on montre « annulations déduites : site
+      uniquement » voit l'anomalie en dix secondes — encore faut-il que la règle soit écrite et lisible.
+      <em>(c)</em> Un rapprochement périodique avec la comptabilité, qui aurait fini par révéler
+      l'écart.</p>
+
+    <p><strong>Et maintenant, la question difficile : que fait-on du passé ?</strong> Corriger la règle
+      est simple ; recalculer sept mois d'historique ne l'est que si <strong>le brut a été
+      conservé</strong>. Dans une chaîne qui transforme avant de charger et ne garde que le résultat,
+      les données sources de mars ne sont peut-être plus disponibles — l'OLTP les a purgées (N16). C'est
+      l'argument le plus concret en faveur de l'ordre inverse, charger puis transformer :
+      <strong>conserver le brut, c'est garder le droit de corriger le passé</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — la colonne qui change de nom</div>
+  <div class="box-b">
+    <p>Un lundi matin, l'entrepôt de l'enseigne contient 40 % de ventes en moins que d'habitude. La
+      chaîne n'a signalé aucune erreur. En remontant, on découvre qu'une mise à jour du logiciel de
+      caisse déployée le week-end a renommé la colonne <code>mnt_tot</code> en
+      <code>montant_total</code> et ajouté une colonne de devise. L'ETL, ne trouvant plus la colonne
+      attendue, a chargé les lignes avec un montant nul pour les magasins déjà mis à jour. Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Le diagnostic immédiat.</strong> C'est un point de couplage sans contrat (N7) : l'ETL
+      dépendait de la structure interne du système de caisse, et toute modification de celle-ci se
+      propage directement. L'équipe qui a déployé la mise à jour n'avait aucune raison de savoir qu'un
+      pipeline lisait cette colonne — rien ne le lui disait.</p>
+
+    <p><strong>Ce qui est le plus grave n'est pas la casse, c'est le silence.</strong> La chaîne n'a
+      signalé aucune erreur : elle a chargé des lignes à zéro et s'est terminée normalement.
+      <strong>Un échec franc aurait été préférable</strong>, car il aurait déclenché une alerte et
+      laissé l'entrepôt dans son état de la veille. Ici, les données fausses ont remplacé les bonnes.
+      C'est la différence entre une chaîne qui casse et une chaîne qui corrompt.</p>
+
+    <p><strong>Les corrections, dans l'ordre.</strong> <em>(a)</em> <strong>Court terme</strong> :
+      corriger le mappage, rejouer la journée — ce qui n'est possible que si le chargement est
+      rejouable, étape 4 de la démarche — et vérifier les totaux. <em>(b)</em>
+      <strong>Contrôles</strong> : un montant nul sur une ligne de vente est une anomalie métier ; une
+      règle de rejet doit l'écarter et compter les rejets. Un écart de 40 % sur la volumétrie ou le
+      total doit déclencher une alerte avant publication — <strong>le contrôle de vraisemblance aurait
+      arrêté la chaîne au lieu de la laisser publier</strong>. <em>(c)</em>
+      <strong>Contrat d'interface</strong> : l'ETL ne doit pas lire les tables internes du logiciel de
+      caisse, mais une vue ou un export stable dont la structure est un engagement. Tout changement de
+      cette interface devient alors une décision partagée, pas un effet de bord.</p>
+
+    <p><strong>La leçon, qui vaut pour toute la partie.</strong> La complémentarité OLTP/OLAP crée une
+      dépendance permanente entre deux systèmes qui évoluent à des rythmes différents et sous des
+      responsabilités différentes. <strong>Cette dépendance doit être nommée et contractualisée</strong>,
+      sinon chaque évolution d'un côté devient un incident de l'autre — et l'ETL, qui est le lien, est
+      aussi le point où toutes ces tensions se manifestent.</p>
+  </div>
+</div>
+
+<h3 id="n18-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Reproduisez le tableau de comparaison OLTP / OLAP sur ses cinq critères, puis ajoutez-y une
+        sixième ligne de votre choix en la justifiant.</li>
+      <li>Expliquez pourquoi le système analytique ne collecte rien, et quelles conséquences cela a sur
+        sa fiabilité.</li>
+      <li>Détaillez les trois lettres de l'ETL et donnez, pour chacune, la difficulté principale et la
+        décision qu'elle impose.</li>
+      <li>Pourquoi une simple copie de la base opérationnelle vers l'entrepôt ne suffirait-elle pas ?
+        Appuyez-vous sur N16 et N17.</li>
+      <li>Qu'est-ce qu'un chargement rejouable, et que se passe-t-il concrètement s'il ne l'est pas ?</li>
+      <li>Comparez ETL et ELT : que gagne-t-on et que perd-on en chargeant avant de transformer ?</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n18-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque élément à l'étape E, T ou L : lire les commandes modifiées depuis hier ;
+      convertir les montants en dirhams ; écrire dans la table des ventes agrégées ; exclure les
+      commandes annulées ; capturer les changements du référentiel produits ; remplacer les données de
+      la journée rechargée.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une mutuelle veut alimenter son entrepôt depuis trois sources : le logiciel de gestion des
+      contrats (base relationnelle, 2 millions de contrats), la plateforme de remboursement (18 millions
+      d'actes par an) et un fichier mensuel envoyé par un partenaire de santé. Les indicateurs attendus
+      sont mensuels, consultés le 5 de chaque mois. Appliquez les cinq étapes pour chaque source :
+      période, mode d'extraction et impact, règles de transformation avec leur propriétaire, chargement
+      rejouable, contrôles et fraîcheur annoncée. Indiquez quelle source pose le plus de risques et
+      pourquoi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>L'ETL est à la fois ce qui rend la séparation OLTP/OLAP utile et ce qui la rend fragile.
+      Développez ce paradoxe : montrez d'abord que la chaîne apporte trois garanties que la cohabitation
+      sur un seul système ne permettait pas, puis identifiez les trois vulnérabilités qu'elle introduit
+      en échange. Pour chacune des trois vulnérabilités, proposez une contre-mesure et évaluez son coût.
+      Concluez en répondant à la question suivante : à partir de quel moment la complexité de la chaîne
+      dépasse-t-elle le bénéfice de la séparation, et que faudrait-il observer pour le mesurer ?</p>
+  </div>
+</div>

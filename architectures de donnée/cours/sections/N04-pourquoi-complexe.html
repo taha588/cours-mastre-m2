@@ -1,0 +1,522 @@
+<h2 class="notion" id="n04">N4 — Pourquoi la gestion des données devient complexe : les quatre causes et le socle</h2>
+
+<h3 id="n04-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p>La gestion des données devient complexe sous l'effet de <strong>quatre causes</strong> :</p>
+
+    <h4>1. Volume — toujours plus de données</h4>
+    <ul>
+      <li>Croissance rapide des données générées par les applications, les capteurs et les utilisateurs.</li>
+      <li>Passage du Go au To (Mo → Go → To → Po).</li>
+      <li>Nécessité de solutions <em>scalables</em>.</li>
+    </ul>
+
+    <h4>2. Silos — données dispersées</h4>
+    <ul>
+      <li>Multiples applications et métiers (CRM, e-commerce, support, autres applications).</li>
+      <li>Données stockées dans des systèmes hétérogènes et non intégrés.</li>
+      <li>Difficulté d'avoir une vue unifiée.</li>
+    </ul>
+
+    <h4>3. Formats — données hétérogènes</h4>
+    <ul>
+      <li>Données structurées, semi-structurées et non structurées.</li>
+      <li>Formats variés : documents (PDF, Word, TXT), images (JPG, PNG), vidéo (MP4, AVI), audio
+        (MP3, WAV), logs.</li>
+      <li>Nécessité d'outils et de traitements adaptés à chaque type de donnée.</li>
+    </ul>
+
+    <h4>4. IA — nouveaux usages sur les données</h4>
+    <ul>
+      <li>Traitement de gros volumes de données pour l'entraînement des modèles.</li>
+      <li>Nécessité de données de qualité, intégrées et gouvernées.</li>
+      <li>Temps réel et analyses avancées (ML, Deep Learning, GenAI), pour la prédiction, l'analyse de
+        texte, les recommandations.</li>
+    </ul>
+
+    <p><strong>Conséquence.</strong> Les données doivent être <strong>stockées, intégrées, gouvernées,
+      transformées et préparées</strong> pour constituer un <strong>socle de données adéquat</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n04-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>La première chose à comprendre est que ces quatre causes <strong>ne s'additionnent pas : elles se
+      multiplient</strong>. Prise isolément, chacune se traite avec des moyens connus. Du volume seul se
+      règle en achetant de la capacité. Des silos seuls se traitent par un projet d'intégration. Des
+      formats variés seuls se traitent avec l'outil adapté à chacun. Un usage d'IA seul se traite en
+      préparant un jeu de données. <strong>Ce qui casse une architecture, ce n'est aucune des quatre :
+      c'est leur combinaison.</strong></p>
+
+    <p>Regardez ce que produisent les croisements, car c'est là que se joue la difficulté réelle :</p>
+    <ul>
+      <li><strong>Volume × Silos</strong> — avec quelques mégaoctets, recopier les données de chaque
+        système pour les rapprocher est une solution acceptable. À l'échelle du téraoctet, la copie
+        devient le problème : elle coûte, elle vieillit, et elle se démultiplie à chaque nouveau besoin.</li>
+      <li><strong>Silos × Formats</strong> — intégrer deux bases relationnelles est un travail balisé.
+        Intégrer une base, un flux JSON et un corpus de documents suppose d'abord de rendre comparables
+        des choses qui ne le sont pas : le coût n'est plus proportionnel au nombre de sources.</li>
+      <li><strong>Formats × IA</strong> — l'IA veut justement ce qui est le moins exploitable : du texte,
+        de l'image, du son. Le travail d'extraction du sens (N2) cesse d'être optionnel et devient le
+        cœur du projet.</li>
+      <li><strong>Volume × IA</strong> — l'entraînement réclame de l'historique et de la
+        représentativité, c'est-à-dire exactement ce qu'une base opérationnelle, conçue pour aller vite,
+        ne conserve pas.</li>
+    </ul>
+
+    <p>La seconde chose à comprendre tient dans la phrase de conclusion, qu'il faut lire mot à mot : les
+      données doivent être <em>stockées, intégrées, gouvernées, transformées et préparées</em>. Ces cinq
+      verbes ne sont pas des synonymes. <strong>Stocker</strong>, c'est poser quelque part ;
+      <strong>intégrer</strong>, c'est rapprocher ce qui vient de systèmes différents ;
+      <strong>gouverner</strong>, c'est encadrer qui peut en faire quoi ; <strong>transformer</strong>,
+      c'est changer la forme pour la rendre exploitable ; <strong>préparer</strong>, c'est l'ajuster à un
+      usage précis. Une organisation peut très bien stocker beaucoup et n'intégrer rien, ou transformer
+      sans gouverner : chaque verbe manquant laisse un trou visible dans le résultat.</p>
+
+    <p>Reste le mot le plus important de l'énoncé : <strong>« adéquat »</strong>. Le socle n'est pas
+      parfait, ni universel, ni définitif — il est <em>adéquat</em>, c'est-à-dire ajusté aux usages que
+      l'organisation veut servir. Cela a deux conséquences immédiates. D'une part, on ne peut pas juger
+      un socle dans l'absolu : on le juge devant une liste d'usages. D'autre part, <strong>quand les
+      usages changent, le socle qui était adéquat cesse de l'être</strong> — ce qui explique qu'une
+      architecture n'échoue pas parce qu'elle a vieilli, mais parce que la liste des usages s'est
+      allongée. C'est exactement le principe d'évolution que nous verrons en N8.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Le volume est rarement la cause dominante, et c'est pourtant celle qu'on traite en
+        premier.</strong> Il est la plus facile à mesurer et la plus simple à résoudre par l'achat :
+        d'où des projets qui ajoutent de la capacité là où le problème était l'intégration.</li>
+      <li><strong>Les silos ne sont pas une faute d'organisation.</strong> Ils résultent d'un choix
+        rationnel : chaque métier a équipé son besoin avec l'outil qui lui convenait. Les traiter comme
+        une négligence conduit à des projets de centralisation imposés, et donc contournés.</li>
+      <li><strong>Casser tous les silos n'est pas l'objectif.</strong> Tout centraliser recrée un point
+        unique, un goulot d'étranglement et une dépendance. Le but est la <em>vue unifiée</em>, qui
+        n'exige pas que tout soit au même endroit (N13, N14).</li>
+      <li><strong>L'IA n'est pas un quatrième type de données, c'est un nouvel usage.</strong> Elle
+        n'ajoute pas de la matière : elle élève les exigences sur la matière existante — qualité,
+        intégration, gouvernance, fraîcheur.</li>
+      <li><strong>Traiter une cause peut aggraver une autre.</strong> Tout conserver en brut pour
+        satisfaire l'IA fait exploser le volume et le coût ; tout transformer à l'entrée pour simplifier
+        les formats détruit ce dont un futur modèle aurait eu besoin. Les arbitrages se prennent
+        ensemble, jamais cause par cause.</li>
+      <li><strong>« Scalable » ne veut pas dire « sans limite ».</strong> Une solution qui passe à
+        l'échelle déplace la contrainte — vers le réseau, la coordination ou le coût — elle ne la
+        supprime pas (N14, N15).</li>
+      <li><strong>Un socle adéquat aujourd'hui ne l'est pas pour toujours.</strong> Le mesurer une fois
+        et considérer la question réglée est l'erreur que la suite du cours corrige.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> تدبير المعطيات كيولي معقد بسباب <strong>أربع أسباب</strong>:
+    <strong>الحجم</strong> (نمو سريع من التطبيقات والحساسات والمستعملين، من Mo لـPo، وخاص حلول قابلة
+    للتوسع)، <strong>الصوامع</strong> (معطيات مشتتة ف CRM وe-commerce ودعم… أنظمة غير مدمجة، وصعيب تكون
+    عندك رؤية موحدة)، <strong>الفورما</strong> (مهيكلة وشبه مهيكلة وغير مهيكلة: وثائق، صور، فيديو، صوت،
+    logs — كل نوع بغا أدوات ديالو)، و<strong>الذكاء الاصطناعي</strong> (استعمالات جديدة: تدريب النماذج،
+    جودة ودمج وحكامة، وقت حقيقي وتحليلات متقدمة). الفكرة المهمة: <strong>هاد الأربعة ما كيتزادوش،
+    كيتضاربو</strong> — كل وحدة بوحدها عندها حل معروف، اللي كيكسر الأركيتكتير هو تقاطعهم. والنتيجة:
+    خاص المعطيات تكون <strong>مخزنة، مدمجة، محكومة، محولة، ومهيأة</strong> باش يتكون
+    <strong>socle de données adéquat</strong> — و«adéquat» معناها مناسبة للاستعمالات المطلوبة، ماشي
+    كاملة ولا نهائية: ملي كيتبدلو الاستعمالات، السوكل اللي كان مناسب كيحبس يكون مناسب.</p>
+</div>
+
+<h3 id="n04-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le problème est celui d'une dégradation que personne ne sait expliquer. L'architecture a
+      fonctionné pendant dix ans ; depuis deux ans, chaque demande coûte plus cher que la précédente, les
+      délais s'allongent, et les équipes — qui n'ont ni changé ni démérité — se renvoient la
+      responsabilité. Faute d'explication, on cherche un coupable : un outil dépassé, un prestataire,
+      une équipe.</p>
+    <p>La règle fournit l'explication, et elle est structurelle : <strong>quatre causes ont crû en même
+      temps</strong>, et leur combinaison a franchi le point où les méthodes d'avant cessent de tenir.
+      Elle traite donc le problème du <strong>diagnostic</strong> — savoir quelle cause domine ici, chez
+      nous, maintenant — et celui de la <strong>cible</strong> : non pas « un meilleur outil », mais un
+      socle où les données sont stockées, intégrées, gouvernées, transformées et préparées pour les
+      usages que l'on veut servir.</p>
+  </div>
+</div>
+
+<h3 id="n04-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Diagnostiquer la cause dominante</strong> au lieu de traiter la plus visible. Le volume
+        se voit sur une facture ; les silos se voient sur un organigramme ; mais c'est souvent le
+        croisement des deux qui coûte.</li>
+      <li><strong>Prévoir ce qui va casser</strong> : connaissant les quatre causes et leur tendance, on
+        anticipe quel point de l'architecture cédera au prochain projet, plutôt que de le découvrir en
+        production.</li>
+      <li><strong>Refuser un faux remède</strong> avec un argument clair — ajouter de la capacité ne
+        résout pas un problème de silos, et centraliser ne résout pas un problème de formats.</li>
+      <li><strong>Justifier un budget</strong> en nommant la cause traitée et l'usage servi, au lieu de
+        demander une modernisation en bloc.</li>
+      <li><strong>Vérifier un socle existant</strong> en passant les cinq verbes : que fait-on
+        réellement ? stocke-t-on sans intégrer ? transforme-t-on sans gouverner ?</li>
+      <li><strong>Poser la bonne question avant un projet d'IA</strong> : l'IA ne crée pas de données,
+        elle rend visibles les faiblesses du socle. Mieux vaut les connaître avant.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n04-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Les quatre causes ne sont pas une typologie inventée : ce sont les quatre réponses que l'on obtient
+      en demandant, dans des organisations très différentes, <em>qu'est-ce qui a changé depuis que cela
+      ne marche plus ?</em> On répond toujours par l'une des quatre — il y en a plus, elles viennent
+      d'ailleurs, elles n'ont pas la même forme, on veut en faire autre chose.</p>
+
+    <p>Que leur effet soit multiplicatif se démontre simplement. Reprenons l'enseigne et ajoutons les
+      causes une par une, en partant de la chaîne traditionnelle qui fonctionnait.</p>
+    <ul>
+      <li><strong>Volume seul.</strong> Dix fois plus de tickets de caisse, même format, même système :
+        on redimensionne le serveur et l'on continue. La chaîne tient.</li>
+      <li><strong>Silos seuls.</strong> Trois applications, chacune avec sa base, mais toutes
+        relationnelles et de taille modeste : un traitement nocturne recopie et rapproche. La chaîne
+        tient, au prix d'un travail d'intégration classique.</li>
+      <li><strong>Volume + Silos.</strong> Les mêmes trois applications, mais au téraoctet : la recopie
+        nocturne ne tient plus dans la nuit, et chaque nouvel usage réclame sa propre copie.
+        <strong>La méthode qui marchait devient elle-même le problème</strong> — ce n'est plus une
+        question de dimensionnement.</li>
+      <li><strong>+ Formats.</strong> On ajoute les logs du site et les photos du service après-vente.
+        Ces sources n'entrent dans aucun schéma : elles ne sont pas « en retard », elles sont
+        <em>hors de la chaîne</em>. Aucune augmentation de capacité ne les y fera entrer.</li>
+      <li><strong>+ IA.</strong> La prévision de la demande réclame trois ans d'historique, des données
+        rapprochées et représentatives. Elle met en défaut, d'un seul coup, la rétention (volume),
+        l'intégration (silos) et l'exploitabilité (formats). <strong>L'IA ne crée pas une cinquième
+        cause : elle rend intolérables les trois premières.</strong></li>
+    </ul>
+
+    <p>Quant à la conclusion — stocker, intégrer, gouverner, transformer, préparer — elle s'obtient en
+      demandant ce qu'il faudrait pour que chaque cause cesse de nuire : du stockage adapté contre le
+      volume, de l'intégration contre les silos, de la transformation contre les formats, de la
+      gouvernance et de la préparation contre les exigences des nouveaux usages. Les cinq verbes sont
+      donc la <strong>réponse point par point</strong> aux quatre causes, et c'est pourquoi ils figurent
+      dans la même phrase qu'elles.</p>
+  </div>
+</div>
+
+<h3 id="n04-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Au lancement d'un plan de transformation data.</strong> On mesure les quatre causes et
+        l'on écrit laquelle domine. Ce seul document évite la dérive la plus fréquente : un programme
+        dont tout le budget part dans l'infrastructure alors que la cause dominante était l'intégration.</li>
+      <li><strong>Dans le choix d'une architecture cible.</strong> Les quatre causes se traduisent
+        directement en exigences : scalabilité pour le volume, vue unifiée pour les silos, accueil du
+        brut pour les formats, qualité et fraîcheur pour l'IA. C'est ce qui permet de comparer un Data
+        Warehouse, un Data Lake et un Lakehouse sur des critères, et non sur leur réputation (N10 à N12).</li>
+      <li><strong>Dans une étude de charge et de coût.</strong> Projeter séparément le volume, le nombre
+        de sources et le nombre d'usages donne une courbe de coût bien plus réaliste que la seule
+        projection du volume.</li>
+      <li><strong>Avant un projet d'IA.</strong> La quatrième cause sert de liste de vérification : les
+        données existent-elles en quantité, sont-elles intégrées, gouvernées, et disponibles à la
+        fraîcheur requise ?</li>
+      <li><strong>Dans la revue d'un socle existant.</strong> Les cinq verbes forment une grille :
+        stockées ? intégrées ? gouvernées ? transformées ? préparées ? Le verbe manquant explique
+        généralement la plainte des utilisateurs.</li>
+      <li><strong>Dans un comité de direction.</strong> Les quatre causes sont compréhensibles sans
+        vocabulaire technique, ce qui permet de faire admettre qu'une dépense traite une cause précise —
+        et qu'elle n'en traite pas d'autres.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n04-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Ça marchait très bien il y a trois ans. »</strong> Signal d'un franchissement de
+        seuil : rien n'est tombé en panne, une ou plusieurs causes ont simplement crû.</li>
+      <li><strong>« Chaque nouvelle source coûte plus cher que la précédente. »</strong> Silos × Formats :
+        le coût n'est pas proportionnel, il est combinatoire. C'est le signal le plus fiable des quatre.</li>
+      <li><strong>« Le traitement de nuit ne tient plus dans la nuit. »</strong> Volume × Silos : la
+        méthode d'intégration par recopie a atteint sa limite, pas le serveur.</li>
+      <li><strong>« Chaque métier a son outil et son tableau de bord. »</strong> Silos, à l'état pur. La
+        question à poser ensuite est : veut-on une vue unifiée, ou un outil unique ? Ce n'est pas la
+        même chose.</li>
+      <li><strong>« On n'exploite pas nos documents, nos appels, nos images. »</strong> Formats : la
+        matière la plus riche est hors de la chaîne faute de traitement d'extraction.</li>
+      <li><strong>« Le data scientist demande des données que nous ne gardons pas. »</strong> IA ×
+        Volume : conflit entre une rétention courte, conçue pour l'opérationnel, et un besoin
+        d'historique.</li>
+      <li><strong>« Nous avons acheté une plateforme et rien ne s'est amélioré. »</strong> Une cause a été
+        traitée, une autre dominait. C'est le moment de refaire le diagnostic au lieu d'ajouter un outil.</li>
+      <li><strong>« Nous voulons faire de l'IA générative sur nos documents internes. »</strong> Les
+        quatre causes se présentent d'un coup : volume, dispersion, format non structuré et exigence de
+        gouvernance.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n04-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesurer les quatre causes, avec des chiffres.</strong> Volume : taille actuelle
+      et croissance annuelle. Silos : nombre de systèmes détenant une donnée du périmètre, et nombre de
+      ceux qui décrivent le même objet métier. Formats : combien de sources par famille (N2). IA : quels
+      usages avancés sont demandés, et avec quelle fraîcheur. Des chiffres, car « beaucoup » ne se
+      compare pas et ne se projette pas.</p>
+
+    <p><strong>Étape 2 — Désigner la cause dominante.</strong> Posez la question décisive : <em>si cette
+      cause disparaissait demain, le problème serait-il résolu ?</em> Celle dont la disparition change le
+      plus de choses est la dominante. Cette question évite de traiter la cause la plus facile à chiffrer
+      plutôt que la plus coûteuse.</p>
+
+    <p><strong>Étape 3 — Examiner le croisement des deux causes les plus fortes.</strong> C'est là que se
+      trouve la vraie difficulté, et elle a souvent une forme que ni l'une ni l'autre ne laissait prévoir.
+      Écrivez cette forme en une phrase : « notre problème, c'est intégrer dix sources hétérogènes à
+      l'échelle du téraoctet sans multiplier les copies ». Une phrase de ce genre vaut un cahier des
+      charges.</p>
+
+    <p><strong>Étape 4 — Passer les cinq verbes du socle.</strong> Pour le périmètre étudié : les données
+      sont-elles stockées, intégrées, gouvernées, transformées, préparées ? Pour chaque verbe,
+      « oui / partiellement / non », avec un fait à l'appui. Le ou les verbes manquants désignent le
+      chantier.</p>
+
+    <p><strong>Étape 5 — Conclure par une décision, et par ce qu'on ne fait pas.</strong> Énoncez l'usage
+      servi, la cause traitée, le verbe comblé, et — c'est la partie que l'on oublie — les causes que
+      cette décision <em>ne</em> traite <em>pas</em>, ainsi que celles qu'elle risque d'aggraver. Un plan
+      qui ne dit pas ce qu'il laisse de côté sera jugé sur ce qu'il n'avait jamais promis.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p><strong>Volume, silos, formats et IA</strong> ne s'additionnent pas, ils se multiplient : la
+      réponse n'est pas un outil de plus, mais un socle où les données sont <strong>stockées, intégrées,
+      gouvernées, transformées et préparées</strong> — <em>adéquat</em> aux usages, donc toujours
+      révisable.</p>
+    <p class="ar" dir="rtl">الحجم، الصوامع، الفورما، والذكاء الاصطناعي ما كيتزادوش بل
+      <strong>كيتضاربو</strong>: الحل ماشي أداة زايدة، بل سوكل فيه المعطيات <strong>مخزنة، مدمجة،
+      محكومة، محولة، ومهيأة</strong> — <em>مناسب</em> للاستعمالات، يعني دائما قابل للمراجعة.</p>
+  </div>
+</div>
+
+<h3 id="n04-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — l'enseigne, chiffres en main</div>
+  <div class="box-b">
+    <p>Pour l'enseigne du cas d'ouverture : 2 To de données de ventes, croissance de 40 % par an ;
+      6 systèmes détiennent une donnée client (caisse, site, application, fidélité, SAV, ERP) dont 4
+      décrivent le même client ; 3 familles de formats présentes ; usages demandés : un tableau de bord
+      quotidien et une prévision de demande. Appliquez la démarche et formulez la décision.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesure.</strong> <em>Volume</em> : 2 To, +40 % par an, soit environ 5,5 To dans
+      trois ans — significatif mais sans rien d'exceptionnel pour les technologies actuelles.
+      <em>Silos</em> : 6 systèmes, dont 4 décrivent le même client ; c'est ce second chiffre qui compte,
+      car il mesure le travail de rapprochement, non le nombre de connexions. <em>Formats</em> : trois
+      familles, donc trois modes de traitement à prévoir. <em>IA</em> : un usage analytique quotidien et
+      un usage prédictif réclamant de l'historique.</p>
+
+    <p><strong>Étape 2 — Cause dominante.</strong> Appliquons la question : si le volume disparaissait —
+      si l'on n'avait que 200 Go — les trois demandes de la direction seraient-elles satisfaites ? Non :
+      le client resterait non reconnu, les logs resteraient hors de la chaîne, l'historique manquerait
+      toujours. Si les silos disparaissaient — une seule source, un seul identifiant client — deux
+      demandes sur trois tomberaient d'elles-mêmes. <strong>La cause dominante est donc les silos</strong>,
+      pas le volume, alors que le volume est le seul des deux qui figure sur une facture.</p>
+
+    <p><strong>Étape 3 — Croisement des deux plus fortes.</strong> Silos × Volume, et le problème s'énonce
+      ainsi : <em>rapprocher six systèmes dont quatre décrivent le même client, à l'échelle de plusieurs
+      téraoctets, sans multiplier les copies et sans peser sur les systèmes opérationnels.</em> Remarquez
+      que cette phrase exclut d'emblée la solution spontanée — recopier chaque base dans un entrepôt pour
+      chaque besoin — et oriente vers un socle commun alimenté une fois.</p>
+
+    <p><strong>Étape 4 — Les cinq verbes.</strong> Stockées : oui, mais chacune chez elle. Intégrées :
+      non, aucun rapprochement organisé. Gouvernées : non, pas de règle d'accès écrite. Transformées :
+      partiellement, au cas par cas, par chaque demandeur. Préparées : non, aucune donnée n'est mise à
+      disposition sous une forme prête pour un usage identifié. <strong>Quatre verbes sur cinq sont en
+      défaut</strong> — et le seul assuré, le stockage, est précisément celui que le réflexe aurait
+      conduit à renforcer.</p>
+
+    <p><strong>Étape 5 — Décision.</strong> Usage servi en premier : le chiffre d'affaires quotidien par
+      région. Cause traitée : les silos, par une intégration unique des ventes alimentant un socle
+      analytique séparé des systèmes opérationnels. Verbes comblés : intégrer et préparer.
+      <em>Ce que cette décision ne traite pas</em> : les formats — logs et photos restent dehors — et
+      l'historique nécessaire à la prévision. <em>Ce qu'elle risque d'aggraver</em> : le volume, puisque
+      le socle ajoute une copie ; d'où la règle à poser dès maintenant, une seule copie intégrée servant
+      tous les usages, et non une copie par demande. La prévision de demande fera l'objet d'une seconde
+      étape, qui traitera l'historique et la qualité.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — l'hôpital qui veut exploiter ses comptes rendus</div>
+  <div class="box-b">
+    <p>Un hôpital dispose de 40 Go de données structurées (admissions, actes, facturation) stables depuis
+      des années, et de 800 000 comptes rendus médicaux rédigés en texte libre. La direction veut un
+      assistant capable de répondre à des questions à partir de ces comptes rendus. Appliquez la
+      démarche.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesure.</strong> <em>Volume</em> : faible et stable, 40 Go. <em>Silos</em> :
+      peu nombreux, les systèmes administratifs sont intégrés entre eux. <em>Formats</em> : une famille
+      structurée bien maîtrisée, et un corpus massif de texte libre, non structuré. <em>IA</em> : un
+      usage avancé — questions en langage naturel sur du texte médical — avec de fortes exigences de
+      qualité et de confidentialité.</p>
+
+    <p><strong>Étape 2 — Cause dominante.</strong> Si le volume disparaissait, rien ne changerait : il
+      n'est pas en cause. Si les silos disparaissaient, rien ne changerait non plus. Si les comptes
+      rendus étaient structurés, le projet deviendrait presque simple. <strong>La cause dominante est le
+      format</strong> — et c'est l'inverse du cas précédent, ce qui montre que la grille sert à
+      distinguer des situations qu'un vocabulaire commun confondrait sous « nos données sont mal
+      gérées ».</p>
+
+    <p><strong>Étape 3 — Croisement.</strong> Formats × IA : <em>rendre interrogeable un corpus de texte
+      libre contenant des données de santé, avec une exigence de justesse élevée et une contrainte de
+      confidentialité forte.</em> Le cœur du projet est l'extraction du sens et sa validation, pas
+      l'infrastructure.</p>
+
+    <p><strong>Étape 4 — Les cinq verbes.</strong> Stockées : oui. Intégrées : oui pour le structuré, non
+      pour le lien entre un compte rendu et le séjour correspondant — point à vérifier en priorité, car
+      sans ce lien aucune réponse ne pourra être rapportée à un patient ou à un acte. Gouvernées :
+      partiellement ; les données de santé exigent un cadre explicite que l'usage « assistant » ne
+      couvre pas encore. Transformées : non, aucune extraction n'existe. Préparées : non.</p>
+
+    <p><strong>Étape 5 — Décision.</strong> Usage servi : répondre à des questions sur les comptes rendus
+      d'un service, en commençant par un périmètre restreint. Cause traitée : le format, par une chaîne
+      d'extraction et d'indexation évaluée sur un échantillon annoté. Verbes comblés : transformer et
+      préparer ; gouverner doit être traité <em>en même temps</em>, non après, car il conditionne
+      l'autorisation même de l'expérimentation. <em>Ce que cette décision ne traite pas</em> : le
+      volume, hors sujet ici. <em>Ce qu'elle risque d'aggraver</em> : la gouvernance, si l'index produit
+      devient une copie non encadrée de données de santé — risque à traiter dès la première version,
+      pas à la mise en production.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le faux remède</div>
+  <div class="box-b">
+    <p>Une entreprise industrielle a dépensé l'an dernier l'essentiel de son budget data dans une
+      plateforme de stockage très performante et extensible. Un an après : les tableaux de bord sortent
+      toujours avec deux jours de retard, le service qualité n'exploite toujours pas les photos de
+      défauts, et la vue client unique n'existe pas. La direction conclut que « la plateforme était un
+      mauvais choix ». Analysez.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesure rétrospective.</strong> Ce que la dépense a traité : le volume, et lui
+      seul. Ce qui était en jeu dans les trois plaintes : un délai d'intégration (deux jours de retard),
+      un problème de format (photos non exploitées) et un problème de silos (pas de vue client unique).
+      <strong>Aucune des trois plaintes ne portait sur le volume.</strong></p>
+
+    <p><strong>Étape 2 — Cause dominante.</strong> La dominante était les silos, la seconde les formats.
+      La cause traitée arrivait en troisième position. L'erreur n'est pas d'avoir choisi une mauvaise
+      plateforme : c'est d'avoir traité la cause la plus facile à chiffrer, parce qu'elle était la seule
+      pour laquelle il existait un devis.</p>
+
+    <p><strong>Étape 3 — Croisement.</strong> Silos × Formats : <em>rapprocher des sources hétérogènes
+      dont certaines ne sont pas structurées</em>. Une plateforme de stockage est un
+      <strong>prérequis</strong> de cette tâche, elle ne la réalise pas — distinction qui aurait dû
+      figurer dans la décision initiale.</p>
+
+    <p><strong>Étape 4 — Les cinq verbes.</strong> Stockées : oui, et très bien. Intégrées : non.
+      Transformées : non. Gouvernées : non. Préparées : non. Un seul verbe sur cinq a été financé.</p>
+
+    <p><strong>Étape 5 — Conclusion.</strong> La conclusion de la direction est fausse, et il faut le
+      dire avec précision : la plateforme n'était pas un mauvais choix, elle était un choix
+      <strong>incomplet</strong>, et l'erreur est en amont — aucun diagnostic de cause dominante n'avait
+      été posé. La suite ne consiste donc pas à remplacer la plateforme, mais à financer l'intégration
+      et la transformation en s'appuyant sur elle. Point méthodologique à retenir : l'étape 5 de la
+      démarche impose d'écrire <em>ce que la décision ne traite pas</em>. Si cette phrase avait été
+      écrite l'an dernier — « cette dépense ne traite ni les silos ni les formats » — la déception de
+      cette année n'aurait pas eu lieu, car l'attente aurait été juste.</p>
+  </div>
+</div>
+
+<h3 id="n04-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les quatre causes et, pour chacune, le symptôme le plus courant dans une entreprise de
+        votre choix.</li>
+      <li>Expliquez en quelques lignes pourquoi les quatre causes se multiplient au lieu de s'additionner,
+        en prenant un croisement précis et en montrant ce qu'il rend impossible.</li>
+      <li>Donnez trois exemples de « solution qui traite une cause et en aggrave une autre », et dites
+        comment limiter l'effet secondaire dans chaque cas.</li>
+      <li>Les cinq verbes : définissez chacun en une phrase, puis donnez un cas d'entreprise où ce verbe
+        seul manque, et le symptôme correspondant.</li>
+      <li>Pourquoi l'IA n'ajoute-t-elle pas de la matière mais des exigences ? Illustrez par deux exigences
+        précises qu'un usage d'IA impose et qu'un tableau de bord n'impose pas.</li>
+      <li>Une municipalité veut analyser les réclamations des habitants (formulaires web, appels
+        téléphoniques, courriers scannés). Mesurez les quatre causes et désignez la dominante.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n04-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque situation à sa cause : (a) le même client apparaît dans quatre applications ;
+      (b) les enregistrements d'appels ne sont pas analysables ; (c) le stockage passe de 3 à 9 To en
+      deux ans ; (d) un modèle de recommandation exige des données fraîches de moins d'une heure.
+      Puis énoncez les cinq verbes du socle dans l'ordre.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une compagnie de transport urbain gère : la billettique (base relationnelle, 1 To, +15 % par an),
+      la géolocalisation des bus (flux continu, 50 Go par jour), les caméras embarquées (vidéo, 30 To),
+      et un centre d'appels (enregistrements audio). Usages souhaités : information voyageurs en temps
+      réel, optimisation des fréquences, analyse des incidents. Appliquez les cinq étapes, puis proposez
+      un ordre de traitement des causes en justifiant chaque rang par l'usage qu'il débloque. Indiquez
+      pour chaque étape ce qu'elle ne traite pas.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>« Puisque les quatre causes se multiplient, il faut les traiter toutes en même temps dans un
+      programme unique. » Discutez cette affirmation : montrez ce qu'elle a de juste, puis pourquoi elle
+      conduit en pratique à l'échec le plus fréquent des programmes data. Proposez une stratégie
+      alternative qui tienne compte du caractère multiplicatif des causes <em>sans</em> exiger de tout
+      traiter simultanément, et expliquez comment vous choisiriez le premier usage à servir. Votre
+      réponse doit montrer en quoi le mot « adéquat » du socle rend cette stratégie possible.</p>
+  </div>
+</div>
