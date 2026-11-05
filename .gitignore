@@ -1,5 +1,3 @@
 .git_tmp/
 # Cache audio regenerable
 Microservices/animation/outils-video/cache/
-# Enregistrement du cours (trop lourd)
-*.m4a
