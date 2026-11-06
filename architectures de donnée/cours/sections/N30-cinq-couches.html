@@ -1,0 +1,474 @@
+<h1 class="chapitre saut" id="partie7"><span class="num">Partie VII</span>Présentation d'une architecture moderne de données</h1>
+
+<p>Les parties I à VI ont posé les exigences : séparer les usages, choisir sa latence, protéger la
+valeur de la donnée, servir aussi bien le tableau de bord que le modèle. La partie VII montre
+l'<strong>architecture</strong> qui y répond : cinq couches et une couche transverse.</p>
+
+<h2 class="notion" id="n30">N30 — L'architecture moderne : cinq couches et une couche transverse</h2>
+
+<h3 id="n30-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Schéma du support.</strong> Une architecture moderne de données enchaîne cinq
+      couches :</p>
+    <p style="text-align:center"><strong>Sources → Ingestion → Storage → Processing → Analytics / AI</strong></p>
+
+    <p><strong>Couche transverse (support).</strong> Gouvernance • sécurité • métadonnées • qualité •
+      traçabilité • observabilité.</p>
+
+    <p><strong>Phrase clé du support.</strong> La gouvernance, la sécurité, les métadonnées, la
+      qualité et l'observabilité <strong>ne sont pas une étape du pipeline</strong> : elles
+      <strong>traversent toute l'architecture</strong>.</p>
+
+    <p><strong>Vue complète du support (p. 50).</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Couche</th><th>Rôle</th><th>Composants cités</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Sources</strong></td><td>d'où viennent les données</td><td>ERP, CRM, IoT,
+          API, logs, fichiers (CSV, PDF, images), open data</td></tr>
+        <tr><td><strong>Ingestion</strong></td><td>collecter et faire entrer les données</td>
+          <td>batch (fichiers, exports ERP), streaming (IoT, événements), CDC / API (réplication,
+          API REST)</td></tr>
+        <tr><td><strong>Storage</strong></td><td>conserver les données</td><td>bases
+          opérationnelles, data warehouse, data lake / lakehouse</td></tr>
+        <tr><td><strong>Processing</strong></td><td>transformer et enrichir</td><td>nettoyage,
+          transformation, enrichissement, agrégation, features</td></tr>
+        <tr><td><strong>Analytics / AI</strong></td><td>consommer les données</td><td>BI / analytics,
+          ML / IA, GenAI (RAG, assistants)</td></tr>
+        <tr><td><strong>Transverse</strong></td><td>s'applique à toutes les couches</td>
+          <td>gouvernance, métadonnées, observabilité, sécurité, qualité des données</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 id="n30-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Une <strong>couche</strong> est un ensemble de composants qui répondent à
+      <strong>une seule question</strong>. Le support donne ces questions dans les titres de ses
+      pages suivantes : <em>d'où viennent les données ?</em> (sources), <em>comment les faire
+      entrer ?</em> (ingestion), <em>où les conserver ?</em> (storage), <em>que fait-on avec ?</em>
+      (processing), <em>qui les consomme ?</em> (analytics / AI). Chaque couche est détaillée de N31
+      à N35 ; ici, on regarde l'ensemble.</p>
+
+    <p><strong>Les flèches vont de gauche à droite.</strong> La donnée naît dans une source (la
+      caisse d'un magasin), entre dans la plateforme (ingestion), y est conservée (storage),
+      transformée (processing), puis lue par un tableau de bord, un modèle ou un assistant. Chaque
+      couche reçoit le travail de la précédente et prépare celui de la suivante.</p>
+
+    <p><strong>Chaque couche contient plusieurs options.</strong> L'ingestion peut être batch ou
+      streaming (partie IV) ; le stockage peut être une base opérationnelle (OLTP, N16), un entrepôt
+      (N10) ou un lac / lakehouse (N11, N12) ; la consommation peut être de la BI ou de l'IA
+      (partie VI). L'architecture moderne ne choisit pas <em>une</em> génération : elle les range
+      chacune à sa place.</p>
+
+    <p><strong>La couche transverse est dessinée en dessous, avec une flèche vers chaque
+      couche.</strong> Elle n'arrive pas « après » le traitement : une règle d'accès s'applique dès
+      la source, la traçabilité suit la donnée de l'ingestion jusqu'au tableau de bord, la qualité se
+      mesure à chaque passage. C'est ce que veut dire « elles traversent toute l'architecture ».</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Placer la gouvernance en sixième étape, après l'analytique.</strong> C'est l'erreur
+        que la phrase clé interdit : un contrôle appliqué à la fin ne peut plus dire d'où vient une
+        valeur fausse ni empêcher une fuite déjà faite.</li>
+      <li><strong>Confondre couche et produit.</strong> « Storage » n'est pas un logiciel : c'est une
+        fonction, remplie ici par trois types de stockage. Un même outil peut aussi servir deux
+        couches.</li>
+      <li><strong>Croire qu'une donnée traverse toujours les cinq couches dans l'ordre.</strong> Un
+        flux de fraude peut aller de l'ingestion streaming au modèle en passant par un stockage très
+        court ; la vue complète montre la fonction de chaque couche, pas un trajet obligatoire.</li>
+      <li><strong>Confondre avec la chaîne de N5.</strong> N5 décrivait le <em>chemin</em> d'une
+        donnée en 5 étapes ; N30 décrit l'<em>architecture</em> qui l'organise : des couches avec
+        leurs composants, et surtout une couche transverse que la chaîne n'avait pas.</li>
+      <li><strong>Lire « Analytics » et « AI / ML » comme deux couches séparées.</strong> Le schéma
+        les dessine en deux cases, mais le support les traite ensemble : ce sont deux consommateurs
+        du même socle (p. 49, N35).</li>
+      <li><strong>Oublier que la qualité est aussi transverse.</strong> Le nettoyage est une tâche du
+        processing ; la <em>mesure</em> de la qualité (contrôles, alertes) s'applique partout.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> الهندسة الحديثة للمعطيات فيها <strong>خمس طبقات</strong> متسلسلة:
+    <strong>Sources</strong> (منين كتجي المعطيات)، <strong>Ingestion</strong> (كيفاش كتدخل)،
+    <strong>Storage</strong> (فين كنحفظوها)، <strong>Processing</strong> (كنحولوها ونغنيوها)، و
+    <strong>Analytics / AI</strong> (شكون كيستهلكها). كل طبقة كتجاوب على سؤال واحد وفيها عدة اختيارات.
+    ومن تحت كاينة <strong>طبقة أفقية</strong>: الحوكمة، الأمان، الميتاداتا، الجودة، التتبع والمراقبة.
+    الفكرة المفتاح: هاد العناصر <strong>ماشي مرحلة</strong> فالـ pipeline، بل كتقطع <strong>جميع
+    الطبقات</strong> من البداية حتى النهاية.</p>
+</div>
+
+<h3 id="n30-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'enseigne de distribution a accumulé, projet après projet, des liaisons directes : un export
+      de la caisse vers le tableau de bord des ventes, un autre vers le modèle de réassort, un flux
+      des capteurs des chambres froides vers une alerte, une copie de la base des commandes pour
+      l'assistant du service clients. Chaque liaison a son propre script, ses propres règles d'accès,
+      sa propre définition du chiffre d'affaires.</p>
+
+    <p>Quand le chiffre du Nord diffère entre deux rapports, personne ne sait lequel est juste ; quand
+      un auditeur demande qui a vu les données des clients, il faut fouiller dix scripts. Le problème
+      traité par N30 : <strong>organiser les flux en couches partagées, avec des règles communes
+      appliquées partout</strong>, au lieu d'une liaison par besoin.</p>
+  </div>
+</div>
+
+<h3 id="n30-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Lire n'importe quelle architecture.</strong> Devant un schéma d'entreprise, on range
+      chaque composant dans une couche ; ce qui ne se range nulle part, ou ce qui manque, saute aux
+      yeux.</p>
+
+    <p><strong>Concevoir couche par couche.</strong> On répond aux cinq questions l'une après
+      l'autre, puis on vérifie que les six éléments transverses couvrent chacune.</p>
+
+    <p><strong>Partager un socle.</strong> Une nouvelle source s'ajoute une fois et sert à tous les
+      consommateurs ; un nouveau consommateur lit le socle existant au lieu de créer sa propre
+      copie.</p>
+
+    <p><strong>Remplir le contrat de données de N29.</strong> Chaque exigence (consolidation,
+      historique, features, sécurité…) est confiée à une couche précise.</p>
+
+    <p><strong>Structurer la suite.</strong> N31 à N35 détaillent les cinq couches dans l'ordre ; la
+      couche transverse reprend la gouvernance, les métadonnées et l'observabilité de N26.</p>
+  </div>
+</div>
+
+<h3 id="n30-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : chaque couche reprend une conclusion des parties précédentes.</strong></p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Couche</th><th>Ce qu'elle reprend</th><th>Notions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Sources</strong></td><td>les données sont variées : structurées, semi- et non
+          structurées, en volume croissant et dispersées en silos</td><td>N2, N4</td></tr>
+        <tr><td><strong>Ingestion</strong></td><td>la latence se choisit : batch, stream ou entre
+          les deux, selon le coût du retard</td><td>N20-N22</td></tr>
+        <tr><td><strong>Storage</strong></td><td>on sépare l'opérationnel de l'analytique ; chaque
+          génération (entrepôt, lac, lakehouse) a son rôle</td><td>N10-N12, N16-N19</td></tr>
+        <tr><td><strong>Processing</strong></td><td>la qualité dépend de l'usage : une version de la
+          donnée par workload, en gardant le brut</td><td>N25, N29</td></tr>
+        <tr><td><strong>Analytics / AI</strong></td><td>le même socle sert l'humain qui décide et le
+          modèle qui agit</td><td>N27-N29</td></tr>
+        <tr><td><strong>Transverse</strong></td><td>règles, description et mesures de la donnée,
+          pour garder sa valeur</td><td>N23, N26</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Deuxième raison : séparer les questions rend chaque couche remplaçable.</strong> Si
+      l'on change de base de stockage, l'ingestion et les tableaux de bord n'ont pas à être réécrits,
+      tant que la couche garde son rôle. C'est le principe déjà vu en N19 pour l'OLTP et l'OLAP,
+      étendu à toute la chaîne.</p>
+
+    <p><strong>Troisième raison : le socle partagé coûte moins de liaisons.</strong> Avec
+      <em>S</em> sources et <em>C</em> consommateurs reliés deux à deux, il faut
+      <em>S</em> × <em>C</em> liaisons ; en passant par des couches communes, il en faut
+      <em>S</em> + <em>C</em>. Pour 7 sources et 4 consommateurs : 28 liaisons contre 11
+      (exercice 12.3).</p>
+
+    <p><strong>Quatrième raison : un contrôle n'a de sens que là où naît le risque.</strong> Une
+      donnée personnelle doit être protégée dès qu'elle entre ; une colonne qui change de format doit
+      être détectée à l'ingestion ; un chiffre doit pouvoir être remonté jusqu'à sa source. Aucun de
+      ces contrôles ne peut attendre une étape finale : la gouvernance, la sécurité, les
+      métadonnées, la qualité, la traçabilité et l'observabilité sont donc <strong>transverses</strong>
+      par nécessité, pas par choix de présentation.</p>
+  </div>
+</div>
+
+<h3 id="n30-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>La cartographie de l'existant.</strong> Placer chaque base, script, outil et tableau
+      de bord de l'entreprise dans une couche.</p>
+
+    <p><strong>La conception d'une plateforme de données.</strong> Choisir, couche par couche, les
+      composants et les options (batch ou stream, entrepôt ou lakehouse).</p>
+
+    <p><strong>Le cadrage d'un nouvel usage.</strong> Un projet de BI, de ML ou de GenAI se branche
+      sur la couche Analytics / AI et exprime ce qu'il attend des couches amont.</p>
+
+    <p><strong>La sécurité et la conformité.</strong> Vérifier que chaque couche applique les mêmes
+      règles d'accès et garde la trace de ce qu'elle a reçu et transmis.</p>
+
+    <p><strong>Le diagnostic d'un incident.</strong> Remonter couche par couche, grâce au lignage, de
+      la valeur fausse jusqu'à son origine.</p>
+  </div>
+</div>
+
+<h3 id="n30-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Quand les liaisons directes se multiplient.</strong> Chaque nouveau besoin ajoute un
+      export ou une copie.</p>
+
+    <p><strong>Quand deux rapports donnent deux chiffres différents.</strong> Signe qu'il n'y a pas
+      de couche de traitement commune ni de définitions partagées.</p>
+
+    <p><strong>Quand on ne sait plus d'où vient une valeur.</strong> La traçabilité manque : elle doit
+      devenir transverse.</p>
+
+    <p><strong>Quand un même socle doit servir la BI et l'IA.</strong> C'est le cas que la vue
+      complète du support dessine.</p>
+
+    <p><strong>Quand un énoncé demande de « présenter », « schématiser » ou « critiquer » une
+      architecture de données.</strong> On répond par les cinq couches et la couche transverse.</p>
+  </div>
+</div>
+
+<h3 id="n30-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lister les sources.</strong> Pour chacune : format, fréquence, qualité
+      (N31).</p>
+
+    <p><strong>Étape 2 — Choisir l'ingestion de chaque source.</strong> Batch, streaming ou CDC /
+      API, selon la latence exigée par ses consommateurs (N32).</p>
+
+    <p><strong>Étape 3 — Choisir le stockage.</strong> Opérationnel, entrepôt, lac ou lakehouse,
+      selon le workload, le coût et le cycle de vie (N33).</p>
+
+    <p><strong>Étape 4 — Définir les traitements.</strong> Nettoyage, transformation, enrichissement,
+      agrégation, features : une version par usage (N34).</p>
+
+    <p><strong>Étape 5 — Brancher les consommateurs.</strong> BI, ML, GenAI sur le même socle
+      (N35).</p>
+
+    <p><strong>Étape 6 — Vérifier la couche transverse sur chaque couche.</strong> Pour chacune des
+      cinq couches, dire comment sont assurées la gouvernance, la sécurité, les métadonnées, la
+      qualité, la traçabilité et l'observabilité. Une case vide est un risque.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Une architecture moderne de données enchaîne <strong>cinq couches</strong> :
+      <strong>Sources → Ingestion → Storage → Processing → Analytics / AI</strong>, chacune répondant
+      à une seule question. Une <strong>couche transverse</strong> — gouvernance, sécurité,
+      métadonnées, qualité, traçabilité, observabilité — <strong>n'est pas une étape du
+      pipeline</strong> : elle <strong>traverse toute l'architecture</strong>.</p>
+    <p class="ar" dir="rtl">الهندسة الحديثة للمعطيات فيها <strong>خمس طبقات</strong>: Sources ←
+      Ingestion ← Storage ← Processing ← Analytics / AI، وكل وحدة كتجاوب على سؤال واحد. و
+      <strong>الطبقة الأفقية</strong> — الحوكمة، الأمان، الميتاداتا، الجودة، التتبع، المراقبة —
+      <strong>ماشي مرحلة</strong> فالـ pipeline، بل <strong>كتقطع الهندسة كاملة</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n30-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — ranger les composants de l'enseigne</div>
+  <div class="box-b">
+    <p>Placez chaque élément dans sa couche (Sources, Ingestion, Storage, Processing, Analytics / AI,
+      Transverse) : (a) le logiciel de caisse des 120 magasins ; (b) l'export nocturne des ventes de
+      23 h 30 ; (c) le flux continu des capteurs des chambres froides ; (d) l'entrepôt des ventes
+      consolidées ; (e) le lac où l'on garde les tickets bruts et les avis clients ; (f) le calcul du
+      chiffre d'affaires par région ; (g) le calcul des ventes des 7 derniers jours par article pour
+      le modèle ; (h) le tableau de bord commercial ; (i) l'assistant du service clients ; (j) le
+      catalogue qui indique, pour chaque table, son responsable et son lignage ; (k) la règle « un
+      conseiller ne voit que les clients de son magasin ».</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On pose la question de chaque couche : l'élément produit-il la
+      donnée, la fait-il entrer, la conserve-t-il, la transforme-t-il, la consomme-t-il, ou
+      s'applique-t-il à tout ?</p>
+
+    <table>
+      <thead>
+        <tr><th>Élément</th><th>Couche</th><th>Raison</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) caisse</td><td>Sources</td><td>la vente y naît (application OLTP)</td></tr>
+        <tr><td>(b) export de 23 h 30</td><td>Ingestion (batch)</td><td>fait entrer un lot à heure
+          fixe</td></tr>
+        <tr><td>(c) flux des capteurs</td><td>Ingestion (streaming)</td><td>fait entrer chaque
+          mesure à son arrivée</td></tr>
+        <tr><td>(d) entrepôt</td><td>Storage</td><td>conserve les données préparées</td></tr>
+        <tr><td>(e) lac</td><td>Storage</td><td>conserve le brut, varié, à grande échelle</td></tr>
+        <tr><td>(f) CA par région</td><td>Processing (agrégation)</td><td>transforme le détail en
+          KPI</td></tr>
+        <tr><td>(g) ventes 7 jours</td><td>Processing (features)</td><td>prépare l'entrée du
+          modèle</td></tr>
+        <tr><td>(h) tableau de bord</td><td>Analytics / AI (BI)</td><td>consomme pour un
+          humain</td></tr>
+        <tr><td>(i) assistant</td><td>Analytics / AI (GenAI)</td><td>consomme pour rédiger</td></tr>
+        <tr><td>(j) catalogue</td><td>Transverse (métadonnées, traçabilité)</td><td>décrit toutes les
+          couches</td></tr>
+        <tr><td>(k) règle d'accès</td><td>Transverse (sécurité, gouvernance)</td><td>s'applique du
+          lac jusqu'à l'assistant</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarque.</strong> (d) et (e) sont dans la même couche mais ne sont pas le même
+      stockage : la couche est une fonction, elle contient plusieurs options.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le budget de latence de deux trajets</div>
+  <div class="box-b">
+    <p>Deux usages traversent les couches. <strong>Tableau de bord</strong> : les caisses ferment à
+      22 h ; export à 23 h 30 ; ingestion 1 h 30 ; chargement dans l'entrepôt 1 h ; agrégation 2 h ;
+      le directeur lit à 8 h. <strong>Fraude</strong> : la décision doit tomber en moins de 2 s ;
+      ingestion streaming 300 ms ; lecture des features 200 ms ; calcul du score 150 ms ; retour à la
+      caisse 100 ms. (a) À quelle heure le tableau de bord est-il prêt ? Quelle marge reste-t-il ?
+      (b) Quelle est la latence totale de la fraude ? Est-elle tenue ? (c) Si les features de fraude
+      n'étaient recalculées qu'une fois par nuit dans l'entrepôt, quel serait le défaut ? (d) Que
+      montre l'exercice sur le rôle des couches ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Tableau de bord.</strong> 23 h 30 + 1 h 30 = 1 h ; + 1 h = 2 h ; + 2 h =
+      <strong>4 h</strong>. Le directeur lit à 8 h : marge de <strong>4 h</strong>. La donnée a
+      cependant <strong>10 h</strong> d'âge à la lecture (22 h → 8 h), ce que le reporting accepte
+      (N20).</p>
+
+    <p><strong>(b) Fraude.</strong> 300 + 200 + 150 + 100 = <strong>750 ms</strong> &lt; 2 000 ms :
+      tenue, avec 1 250 ms de marge.</p>
+
+    <p><strong>(c) Features nocturnes.</strong> Le calcul reste rapide, mais la feature « nombre de
+      paiements de la carte dans les 10 dernières minutes » serait vieille de plusieurs heures : le
+      modèle ne verrait pas les 4 paiements en 10 minutes de N21. La latence de bout en bout serait
+      respectée, la <em>fraîcheur</em> de la donnée non.</p>
+
+    <p><strong>(d) Conclusion.</strong> Les deux usages ont les mêmes couches mais pas les mêmes
+      options : ingestion batch et entrepôt pour l'un, streaming et features fraîches pour l'autre.
+      Le budget se calcule couche par couche, et la fraîcheur se surveille de façon transverse
+      (observabilité, N26).</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — liaisons directes ou couches partagées</div>
+  <div class="box-b">
+    <p>L'enseigne a 7 sources (caisses, ERP, CRM, capteurs, site web, avis clients, fichiers
+      fournisseurs) et 4 consommateurs (tableau de bord, analyse régionale, modèle de réassort,
+      assistant). (a) Combien de liaisons faut-il si chaque consommateur se branche directement sur
+      chaque source ? (b) Combien avec des couches partagées (une ingestion par source, une
+      consommation par usage) ? (c) Les 6 éléments transverses doivent être réglés sur chaque
+      liaison : combien de réglages dans chaque cas ? (d) On ajoute une 8e source : combien de
+      liaisons nouvelles dans chaque cas ? Conclure.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Liaisons directes.</strong> 7 × 4 = <strong>28 liaisons</strong>.</p>
+
+    <p><strong>(b) Couches partagées.</strong> 7 + 4 = <strong>11 liaisons</strong>.</p>
+
+    <p><strong>(c) Réglages transverses.</strong> Directes : 28 × 6 = <strong>168 réglages</strong>,
+      chacun écrit à la main, avec 28 occasions d'oublier une règle d'accès. Couches partagées :
+      11 × 6 = 66 points de contrôle, mais surtout <strong>6 services communs</strong> (un catalogue,
+      une politique d'accès, une surveillance…) appliqués à toutes les couches.</p>
+
+    <p><strong>(d) Nouvelle source.</strong> Directes : <strong>4 liaisons</strong> nouvelles (une
+      par consommateur). Couches : <strong>1 seule</strong> (son ingestion) ; les 4 consommateurs la
+      voient aussitôt dans le socle.</p>
+
+    <p><strong>Conclusion.</strong> Le nombre de liaisons passe d'un produit à une somme. L'écart
+      grandit avec la taille : 20 sources et 10 consommateurs donnent 200 liaisons contre 30. C'est
+      la raison concrète du principe de N35 : plusieurs consommateurs partagent un même socle
+      gouverné.</p>
+  </div>
+</div>
+
+<h3 id="n30-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Reproduisez le schéma du support : les cinq couches, la couche transverse et ses six
+        éléments.</li>
+      <li>Donnez la question à laquelle répond chaque couche.</li>
+      <li>Expliquez la phrase clé : pourquoi la gouvernance n'est-elle pas une étape du
+        pipeline ?</li>
+      <li>Citez deux composants de chaque couche d'après la vue complète du support.</li>
+      <li>Différenciez la chaîne de la donnée de N5 et l'architecture en couches de N30.</li>
+      <li>Montrez, sur un exemple, qu'un contrôle de qualité placé seulement à la fin arrive trop
+        tard.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n30-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Rangez dans les couches : (a) une API de météo ; (b) une réplication CDC de la base des
+      commandes ; (c) un data warehouse ; (d) le remplacement des codes postaux invalides ; (e) un
+      modèle de recommandation ; (f) une alerte « table des ventes non mise à jour depuis 6 h » ;
+      (g) un fichier PDF de politique de retour ; (h) un assistant RAG.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un rapport affiche un chiffre d'affaires du magasin 47 trois fois trop élevé. Décrivez,
+      couche par couche, où l'erreur a pu naître (au moins une hypothèse par couche) et quel élément
+      transverse permet de la localiser. Dans quel ordre vérifiez-vous les couches, et pourquoi ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Construisez une matrice 5 × 6 : en lignes les cinq couches, en colonnes les six éléments
+      transverses. Remplissez chaque case par une mesure concrète pour l'enseigne (par exemple,
+      Ingestion × Observabilité : « alerte si moins de 110 magasins sur 120 ont envoyé leur
+      export »). Repérez les deux cases les plus critiques pour l'assistant du service clients et
+      justifiez.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N31</div>
+  <div class="box-b">
+    <p>La première couche est celle d'où tout part. Les sources de l'enseigne — caisses, ERP, CRM,
+      capteurs, fichiers, open data — n'ont ni le même format, ni la même fréquence, ni la même
+      qualité. Les décrire précisément est le point de départ de toute l'architecture : c'est l'objet
+      de N31.</p>
+  </div>
+</div>

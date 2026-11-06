@@ -1,0 +1,490 @@
+<h2 class="notion" id="n21">N21 — Le stream processing : traiter au fil de l'eau</h2>
+
+<h3 id="n21-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Le <strong>traitement streaming</strong> (stream processing)
+      <strong>traite les événements au fur et à mesure de leur arrivée</strong>, <strong>ou sur de très
+      petites fenêtres</strong>.</p>
+
+    <p><strong>Exemples :</strong> alerte capteur • détection de fraude • suivi de flotte •
+      monitoring applicatif.</p>
+
+    <p><strong>Le schéma du support :</strong> une chaîne continue
+      <em>événement 1 → événement 2 → événement 3 → événement 4 → événement 5 → …</em>, chaque
+      événement étant pris en charge dès qu'il se présente, sans attendre les suivants.</p>
+  </div>
+</div>
+
+<h3 id="n21-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Comme pour le batch (N20), la définition se lit morceau par morceau. Et chaque morceau se
+      comprend le mieux <em>par contraste</em> avec ce que faisait le batch.</p>
+
+    <p><strong>« Traite les événements ».</strong> L'unité de travail n'est plus le <em>lot</em>, c'est
+      l'<strong>événement</strong> : un fait daté, petit, qui vient de se produire — un paiement par
+      carte, une mesure de température, une position GPS, une erreur dans un journal applicatif. Le
+      batch découpait l'activité en morceaux fermés ; le stream la voit comme ce qu'elle est
+      réellement, <strong>un flux qui ne s'arrête jamais</strong>. Il n'y a pas de « fin du flux » à
+      attendre : le schéma du support ne se termine pas à l'événement 5, il continue.</p>
+
+    <p><strong>« Au fur et à mesure de leur arrivée ».</strong> C'est ici que disparaît le terme
+      dominant de la latence du batch. N20 l'a décomposée en <em>attente d'accumulation + attente du
+      démarrage + durée du traitement</em>. En streaming, il n'y a <strong>plus d'accumulation</strong>
+      et <strong>plus de démarrage</strong> : le traitement tourne en permanence, il attend
+      l'événement et non l'inverse. La latence se réduit à <strong>temps de transport + durée du
+      traitement d'un seul événement</strong> — typiquement de quelques millisecondes à quelques
+      secondes. C'est ce qui rend possibles les quatre exemples du support : une alerte capteur qui
+      arrive une heure après la panne n'est plus une alerte, c'est un constat.</p>
+
+    <p><strong>« Ou sur de très petites fenêtres ».</strong> Ce second morceau est souvent oublié, et
+      pourtant il est essentiel. Beaucoup de décisions ne portent pas sur un événement isolé mais sur
+      un <em>petit voisinage</em> : « plus de 5 paiements avec la même carte <strong>en 10
+      minutes</strong> », « température moyenne <strong>sur la dernière minute</strong> », « taux
+      d'erreurs <strong>sur les 30 dernières secondes</strong> ». Le stream découpe alors le flux en
+      <strong>fenêtres</strong> courtes et calcule sur chacune. On distingue deux formes :</p>
+    <ul>
+      <li>la <strong>fenêtre fixe</strong> (ou « tumbling ») : des tranches consécutives qui ne se
+        chevauchent pas — 10 h 00-10 h 01, 10 h 01-10 h 02… ;</li>
+      <li>la <strong>fenêtre glissante</strong> (« sliding ») : à chaque nouvel événement, on regarde
+        « les N dernières minutes » — les fenêtres se chevauchent.</li>
+    </ul>
+    <p>Une fenêtre ressemble à un petit lot, mais la différence est d'ordre de grandeur : quelques
+      secondes ou minutes au lieu d'une journée, et un résultat émis dès que la fenêtre se ferme.</p>
+
+    <p><strong>Ce que le stream gagne, et ce qu'il paie.</strong> Mettons en regard les quatre qualités
+      du batch établies en N20.</p>
+    <ul>
+      <li><strong>La complétude devient impossible.</strong> Le flux n'est jamais fermé : au moment où
+        l'on décide, on ne sait pas ce qui arrivera dans une seconde. Le stream décide sur ce qu'il
+        <em>sait déjà</em>, et accepte de décider avec une information partielle.</li>
+      <li><strong>L'efficacité diminue.</strong> Le coût fixe n'est plus amorti sur un million de lignes ;
+        le système doit rester allumé 24 h sur 24, même quand le flux est calme.</li>
+      <li><strong>La rejouabilité demande un effort.</strong> Rejouer un flux suppose d'avoir conservé
+        les événements dans un journal ; sans cela, un événement traité est un événement passé.</li>
+      <li><strong>Le choix du moment disparaît.</strong> Le traitement a lieu quand l'événement arrive —
+        c'est-à-dire souvent pendant les pics d'activité, pas la nuit.</li>
+    </ul>
+    <p>En échange de ces quatre renoncements, il offre une seule chose, mais décisive :
+      <strong>agir pendant que l'action est encore possible</strong>. Bloquer la carte
+      <em>avant</em> que le paiement soit accepté, ouvrir la porte de la chambre froide
+      <em>avant</em> que la marchandise soit perdue, redémarrer le serveur <em>avant</em> que les clients
+      s'en aillent. La phrase d'ouverture de la partie s'applique dans l'autre sens : le stream n'est
+      pas « la version moderne du batch » — <strong>il est la bonne réponse quand la décision ne peut
+      pas attendre</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Stream ne veut pas dire meilleur.</strong> Calculer en continu un chiffre qui n'est lu
+        qu'une fois par jour, c'est payer 24 h de machine pour une seule lecture.</li>
+      <li><strong>Deux horloges.</strong> Un événement a une <strong>heure d'événement</strong> (quand il
+        s'est produit) et une <strong>heure d'arrivée</strong> (quand le système le reçoit). Un camion
+        dans un tunnel renvoie ses positions avec 3 minutes de retard : les fenêtres doivent être
+        calculées sur l'heure d'événement, sinon les positions tombent dans la mauvaise fenêtre.</li>
+      <li><strong>Les retardataires existent aussi en stream.</strong> Il faut décider combien de temps
+        une fenêtre reste ouverte aux événements en retard — un court délai de grâce — et ce que l'on
+        fait des événements arrivés après.</li>
+      <li><strong>L'ordre n'est pas garanti.</strong> L'événement 4 peut arriver avant l'événement 3. Un
+        traitement qui suppose l'ordre d'arrivée se trompe.</li>
+      <li><strong>Un événement peut arriver deux fois.</strong> Après une coupure réseau, l'émetteur
+        renvoie ce qu'il n'est pas sûr d'avoir transmis. Comme en N20, le traitement doit être
+        <strong>idempotent</strong> — ici, en reconnaissant l'identifiant de l'événement.</li>
+      <li><strong>Le stream a une mémoire.</strong> Compter « 5 paiements en 10 minutes » oblige à
+        garder un <strong>état</strong> par carte. Si la machine redémarre et perd cet état, les
+        compteurs repartent de zéro et la fraude passe.</li>
+      <li><strong>Le débit d'entrée peut dépasser le débit de traitement.</strong> Pendant un pic, les
+        événements s'empilent en file d'attente et la latence remonte : un stream mal dimensionné
+        devient un batch involontaire.</li>
+      <li><strong>Réagir n'est pas comprendre.</strong> Le stream déclenche une alerte ; l'analyse de
+        fond — pourquoi la fraude augmente-t-elle ce trimestre ? — reste un travail sur l'historique
+        complet.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> <strong>المعالجة المتدفقة (stream)</strong> كتعالج
+    <strong>الأحداث وحدة بوحدة فاش كيوصلو</strong>، <strong>ولا على نوافذ زمنية صغيرة بزاف</strong>
+    (أمثلة: إنذار ديال capteur، كشف الاحتيال، تتبع الأسطول ديال الشاحنات، مراقبة التطبيقات). الوحدة ماشي
+    هي الدفعة، هي <strong>الحدث</strong>: واقعة صغيرة مؤرخة. والتدفق ما كيساليش أبداً. بما أنه ما كاينش
+    انتظار التجميع ولا انتظار الانطلاق، التأخير كيولي غير <strong>وقت النقل + وقت معالجة حدث واحد</strong>
+    — من ميلي ثانية حتى لبضع ثواني. و«النوافذ الصغيرة» كتخلينا نحسبو على جوار قصير (مثلاً 5 دفعات بنفس
+    البطاقة ف10 دقايق): نافذة ثابتة ولا نافذة منزلقة. المقابل: <strong>ما كاينش الاكتمال</strong> (القرار
+    كيتاخد بمعلومة ناقصة)، فعالية أقل، النظام خاصو يبقى شاعل ديما، وإعادة التشغيل كتطلب نحتافظو بالأحداث.
+    ولكن كيعطي حاجة وحدة حاسمة: <strong>نتصرفو مازال الوقت</strong>. الخلاصة: stream ماشي «النسخة
+    الحديثة» ديال batch — هو الجواب الصحيح <strong>ملي القرار ما يقدرش يتسنى</strong>.</p>
+</div>
+
+<h3 id="n21-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le stream traite le problème que N20 a laissé ouvert, et que son signal inverse annonçait :
+      <strong>certaines décisions perdent toute leur valeur si elles attendent la fin d'une
+      période</strong>. Une fraude détectée le lendemain matin a déjà été payée ; une panne de chambre
+      froide découverte au rapport de 7 h a déjà gâché la marchandise ; un serveur tombé à 14 h et
+      signalé le soir a déjà coûté un après-midi de ventes.</p>
+    <p>Pour ces décisions, la valeur de l'information <strong>décroît avec le temps</strong>, souvent
+      très vite. Le problème n'est donc pas de calculer plus vite le même résultat — l'exercice 14.3 de
+      N20 a montré que raccourcir la période du batch finit par ne plus marcher — mais de
+      <strong>changer d'unité de traitement</strong> : passer du lot à l'événement, pour que la latence
+      ne dépende plus d'aucune période.</p>
+  </div>
+</div>
+
+<h3 id="n21-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Reconnaître un besoin stream</strong> : une décision qui doit être prise pendant que
+        l'action est encore possible.</li>
+      <li><strong>Calculer la latence d'un traitement continu</strong> et la comparer à celle du batch
+        sur le même besoin.</li>
+      <li><strong>Choisir la bonne fenêtre</strong> — aucune, fixe ou glissante — et sa durée, à partir de
+        la règle métier.</li>
+      <li><strong>Distinguer heure d'événement et heure d'arrivée</strong>, et décider du traitement des
+        retardataires.</li>
+      <li><strong>Concevoir un traitement robuste</strong> aux doublons, au désordre et aux pics.</li>
+      <li><strong>Préparer le critère de choix de N22</strong> en sachant exactement ce que le stream
+        offre et ce qu'il coûte par rapport au batch.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n21-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Le traitement événement par événement n'est pas né avec le big data. Les systèmes de
+      <strong>contrôle industriel</strong> surveillent depuis longtemps des capteurs en continu, et les
+      réseaux de cartes bancaires autorisent chaque paiement à la volée. Ce qui a changé, c'est
+      l'<strong>ampleur</strong> : des millions de capteurs, de téléphones, de véhicules et de serveurs
+      émettent aujourd'hui des événements en permanence. Il a fallu des outils capables de traiter ces
+      flux de façon <em>distribuée</em> (N14), en conservant les événements dans un journal que l'on
+      peut relire. Mais, comme pour le batch, la raison d'être du stream n'est pas technique.</p>
+
+    <p><strong>La raison économique : la valeur décroissante de l'information.</strong> Prenons une
+      carte volée qui sert à un paiement frauduleux de 1 500 MAD toutes les 10 minutes. Détectée en
+      streaming au 2<sup>e</sup> paiement suspect, la perte est de 1 500 MAD. Détectée par le batch du
+      lendemain à 7 h, après une nuit d'utilisation, elle peut atteindre plusieurs dizaines de milliers
+      de dirhams. Le coût d'un système allumé en permanence se compare donc non pas au coût du batch,
+      mais <strong>au coût du retard</strong>. Quand ce dernier est élevé, le stream est rentable ; quand
+      il est nul, il ne l'est jamais.</p>
+
+    <p><strong>La raison logique.</strong> N20 a montré que certains résultats sont <em>définis</em> sur
+      un ensemble fermé. Symétriquement, d'autres sont <em>définis</em> sur l'instant : « cette
+      transaction est-elle suspecte ? », « la température dépasse-t-elle le seuil
+      <em>maintenant</em> ? », « où est le camion <em>en ce moment</em> ? ». Ces questions n'ont pas
+      de période naturelle : les traiter en lot reviendrait à leur en inventer une.</p>
+
+    <p><strong>Pourquoi « ou sur de très petites fenêtres » ?</strong> Retirons ce morceau de la
+      définition : il ne resterait que le traitement d'événements isolés. On saurait dire « ce paiement
+      dépasse 10 000 MAD », mais pas « cette carte a payé 6 fois en 4 minutes dans trois villes ». Or
+      la plupart des signaux utiles — une fraude, une dérive de température, une rafale d'erreurs — sont
+      des <strong>motifs dans le temps</strong>, pas des événements isolés. La fenêtre est le minimum
+      de contexte qui permet de les voir, tout en restant assez courte pour que la décision arrive à
+      temps. Une fenêtre trop longue redevient un batch ; pas de fenêtre du tout rend aveugle aux
+      motifs.</p>
+  </div>
+</div>
+
+<h3 id="n21-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Les alertes de capteurs.</strong> Chambres froides, machines industrielles, réseaux
+        d'eau ou d'électricité : un seuil franchi doit déclencher une action immédiate.</li>
+      <li><strong>La détection de fraude.</strong> Paiements par carte, connexions suspectes, abus de
+        promotions : la décision doit tomber pendant la transaction.</li>
+      <li><strong>Le suivi de flotte.</strong> Camions de livraison, taxis, livreurs : la position et
+        l'heure d'arrivée estimée n'ont de valeur que fraîches.</li>
+      <li><strong>Le monitoring applicatif.</strong> Taux d'erreurs, temps de réponse, saturation : une
+        panne doit être signalée en secondes, pas au rapport du lendemain.</li>
+      <li><strong>La personnalisation en direct.</strong> Recommander un produit en fonction des pages
+        que le client vient de consulter, pendant sa visite.</li>
+      <li><strong>L'alimentation continue de tableaux de bord opérationnels</strong> — stocks en rayon,
+        files d'attente en caisse — consultés par des équipes qui agissent dans l'heure.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n21-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Il faut bloquer avant que ce soit accepté. »</strong> La décision s'insère dans
+        l'opération elle-même : signal stream typique.</li>
+      <li><strong>« Chaque minute de retard coûte. »</strong> La valeur de l'information décroît vite :
+        le coût du retard justifie un système permanent.</li>
+      <li><strong>« Alerter si… dans les X dernières minutes. »</strong> Un motif sur une courte durée :
+        stream avec fenêtre glissante.</li>
+      <li><strong>« Où en est-on en ce moment ? »</strong> La question porte sur l'état présent, sans
+        période naturelle.</li>
+      <li><strong>Signal d'alerte — « l'alerte arrive de plus en plus tard aux heures de
+        pointe ».</strong> Le débit de traitement est inférieur au débit d'entrée : la file s'allonge.</li>
+      <li><strong>Signal d'alerte — « certaines alertes sont envoyées deux fois ».</strong> Les doublons
+        ne sont pas éliminés : le traitement n'est pas idempotent.</li>
+      <li><strong>Signal d'alerte — « après le redémarrage, plus aucune fraude détectée pendant 10
+        minutes ».</strong> L'état des fenêtres a été perdu.</li>
+      <li><strong>Signal inverse — « le chiffre n'est lu qu'à la réunion du lundi ».</strong> La décision
+        peut attendre : le stream n'apporte rien, voir N20.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n21-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Mesurer le coût du retard.</strong> Quelle décision utilise le résultat, et
+      combien coûte chaque minute d'attente ? Écrivez une latence maximale chiffrée — « alerte en moins
+      de 30 secondes ». Si la décision peut attendre la fin d'une période, arrêtez-vous : c'est un
+      batch (N20).</p>
+
+    <p><strong>Étape 2 — Définir l'événement.</strong> Quel fait déclenche le traitement ? Quels champs
+      porte-t-il — au minimum un <strong>identifiant unique</strong> et une <strong>heure
+      d'événement</strong> ? Sans identifiant, impossible d'éliminer les doublons ; sans heure
+      d'événement, impossible de ranger les retardataires.</p>
+
+    <p><strong>Étape 3 — Choisir la fenêtre à partir de la règle métier.</strong> Événement isolé
+      (« paiement &gt; 10 000 MAD ») : pas de fenêtre. Mesure par tranche (« moyenne par minute ») :
+      fenêtre fixe. Motif récent (« 5 paiements en 10 minutes ») : fenêtre glissante. Fixez aussi le
+      <strong>délai de grâce</strong> accordé aux retardataires, et ce qu'on fait de ceux qui le
+      dépassent.</p>
+
+    <p><strong>Étape 4 — Dimensionner pour le pic.</strong> Le débit de traitement doit dépasser le
+      débit d'entrée <em>au pire moment</em>, pas en moyenne. Calculez l'état à conserver (une fenêtre
+      par carte, par capteur…) et prévoyez de le <strong>sauvegarder</strong> pour qu'un redémarrage ne
+      l'efface pas.</p>
+
+    <p><strong>Étape 5 — Rendre le traitement sûr et rejouable.</strong> Éliminez les doublons par
+      l'identifiant, conservez les événements dans un journal pour pouvoir rejouer, et surveillez en
+      permanence la <strong>latence observée</strong> — l'écart entre l'heure d'événement et l'heure du
+      résultat. <strong>Un stream dont personne ne mesure la latence est un batch qui
+      s'ignore.</strong></p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le stream <strong>traite chaque événement à son arrivée, ou sur de très petites fenêtres</strong>.
+      Sa latence ne dépend plus d'aucune période : transport + traitement d'un événement. En échange, il
+      renonce à la <strong>complétude</strong>, coûte un système toujours allumé et doit gérer
+      <strong>doublons, désordre, retardataires et état</strong>. Il est le bon choix chaque fois que la
+      décision ne peut pas attendre.</p>
+    <p class="ar" dir="rtl">الـstream <strong>كيعالج كل حدث فاش كيوصل، ولا على نوافذ صغيرة بزاف</strong>.
+      التأخير ديالو ما بقاش مربوط بشي مدة: نقل + معالجة حدث واحد. وفالمقابل كيتخلى على
+      <strong>الاكتمال</strong>، كيكلف نظام شاعل ديما، وخاصو يتعامل مع <strong>التكرار، الفوضى فالترتيب،
+      الأحداث المتأخرة والحالة</strong>. وهو الاختيار الصحيح كل ما القرار ما يقدرش يتسنى.</p>
+  </div>
+</div>
+
+<h3 id="n21-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — la chambre froide du magasin 47</div>
+  <div class="box-b">
+    <p>Chaque magasin de l'enseigne possède une chambre froide équipée d'un capteur qui envoie la
+      température toutes les 30 secondes. Au-delà de 8 °C pendant plus de 20 minutes, la marchandise
+      — 60 000 MAD en moyenne par chambre — doit être jetée. Au magasin 47, la porte reste mal fermée à
+      14 h 10 ; la température dépasse 8 °C à 14 h 25. Comparez deux solutions : (A) les mesures sont
+      intégrées au batch nocturne de N20 (rapport publié à 7 h) ; (B) un traitement streaming alerte le
+      responsable dès que la moyenne sur une fenêtre de 2 minutes dépasse 8 °C, avec une latence de
+      traitement de 5 secondes. Le responsable met 6 minutes à intervenir après l'alerte.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Solution A — le batch.</strong> La mesure de 14 h 25 attend la fermeture du lot
+      (23 h 30), puis le traitement : l'anomalie apparaît au rapport de 7 h le lendemain. Latence :
+      <strong>16 h 35</strong>. Le seuil de 20 minutes est dépassé dès 14 h 45 : la marchandise est
+      perdue <em>bien avant</em> que quiconque le sache. Perte : <strong>60 000 MAD</strong>. Le
+      rapport est exact et complet — mais il n'est plus qu'un constat.</p>
+
+    <p><strong>Solution B — le stream.</strong> Il faut que la moyenne sur 2 minutes dépasse 8 °C.
+      Supposons, en étant prudent, que cela demande la fenêtre complète qui suit 14 h 25 : la fenêtre se
+      ferme vers 14 h 27. Ajoutons 5 secondes de traitement : alerte vers <strong>14 h 27</strong>.
+      Intervention 6 minutes plus tard : porte fermée vers <strong>14 h 33</strong>. La température est
+      restée au-dessus de 8 °C pendant 8 minutes, moins que les 20 tolérées. Perte :
+      <strong>0 MAD</strong>.</p>
+
+    <p><strong>Pourquoi une fenêtre et non l'événement seul ?</strong> Une mesure isolée à 8,3 °C peut
+      venir d'une porte ouverte 20 secondes pour sortir une caisse. Alerter sur chaque mesure
+      déclencherait des dizaines de fausses alertes par jour, et le responsable finirait par les ignorer.
+      La fenêtre de 2 minutes filtre ces pics brefs tout en coûtant moins de 2 minutes de latence sur un
+      budget de 20 : <strong>c'est le « très petites fenêtres » de la définition, à l'œuvre</strong>.</p>
+
+    <p><strong>La leçon.</strong> Le même capteur, les mêmes données, deux latences : 16 h 35 et
+      2 minutes. Seule la seconde est inférieure au délai de 20 minutes pendant lequel l'action reste
+      possible. Le critère n'est ni la modernité ni le volume : <strong>c'est la comparaison entre la
+      latence obtenue et le temps dont dispose la décision</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — fenêtre fixe ou glissante ?</div>
+  <div class="box-b">
+    <p>La règle anti-fraude de l'enseigne est : « alerter si une même carte effectue
+      <strong>4 paiements ou plus en 10 minutes</strong> ». Une carte effectue des paiements à 10 h 06,
+      10 h 08, 10 h 11 et 10 h 13. Un développeur propose des fenêtres fixes de 10 minutes
+      (10 h 00-10 h 10, 10 h 10-10 h 20…). La fraude est-elle détectée ? Que faut-il utiliser, et quel
+      état le système doit-il conserver ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Avec des fenêtres fixes.</strong> La fenêtre 10 h 00-10 h 10 contient 10 h 06 et
+      10 h 08 : <strong>2 paiements</strong>. La fenêtre 10 h 10-10 h 20 contient 10 h 11 et 10 h 13 :
+      <strong>2 paiements</strong>. Aucune n'atteint 4 : <strong>la fraude n'est pas détectée</strong>,
+      alors que les quatre paiements tiennent en 7 minutes. La frontière fixe de 10 h 10 a coupé le
+      motif en deux.</p>
+
+    <p><strong>Avec une fenêtre glissante.</strong> À chaque nouveau paiement, on compte les paiements
+      de la même carte dans les 10 minutes qui précèdent. Au paiement de 10 h 13, la fenêtre va de
+      10 h 03 à 10 h 13 et contient 10 h 06, 10 h 08, 10 h 11 et 10 h 13 : <strong>4 paiements →
+      alerte à 10 h 13</strong>, pendant l'autorisation du quatrième paiement, qui peut être refusé.</p>
+
+    <p><strong>Pourquoi le choix découle de la règle.</strong> La règle métier dit « en 10 minutes »,
+      c'est-à-dire <em>n'importe quelles</em> 10 minutes, et non « entre deux heures rondes ». Une fenêtre
+      fixe répond à une autre question — « combien de paiements par tranche horaire ? », utile pour une
+      statistique — mais pas à celle-ci. C'est l'étape 3 : <strong>la fenêtre se déduit de la phrase
+      métier</strong>, pas d'une préférence technique.</p>
+
+    <p><strong>L'état à conserver.</strong> Pour chaque carte active, la liste des heures de ses
+      paiements des 10 dernières minutes ; les heures plus anciennes sont effacées au fil de l'eau.
+      Si l'enseigne voit 3 000 cartes différentes en 10 minutes aux heures de pointe, l'état reste
+      modeste — mais il doit être <strong>sauvegardé</strong> : s'il est perdu lors d'un redémarrage,
+      les compteurs repartent à zéro et une fraude en cours passe inaperçue (signal d'alerte n° 7 de la
+      section 10).</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — les camions et le tunnel</div>
+  <div class="box-b">
+    <p>Les 40 camions de livraison de l'enseigne envoient leur position toutes les 15 secondes. Un
+      tableau de bord compte, par fenêtre fixe d'une minute, le nombre de positions reçues de chaque
+      camion pour repérer ceux qui ont « disparu ». Le camion 12 traverse un tunnel de 10 h 02 à
+      10 h 04 : ses positions de cette période sont stockées dans le boîtier et envoyées d'un coup à
+      10 h 04 min 10 s ; à cause d'une coupure, le boîtier renvoie aussi deux fois la position de
+      10 h 01 min 45 s. Le tableau de bord range les positions selon leur heure d'arrivée. Qu'affiche-t-il,
+      et comment corriger ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Ce qu'affiche le tableau de bord.</strong> Rangées par heure d'arrivée, les fenêtres de
+      10 h 02 et 10 h 03 ne reçoivent <strong>aucune</strong> position du camion 12 : il apparaît
+      « disparu » pendant deux minutes. Puis la fenêtre de 10 h 04 reçoit d'un coup les 8 positions du
+      tunnel, plus les siennes, plus le doublon : <strong>environ 13 positions au lieu de 4</strong>. Le
+      tableau de bord affiche donc une disparition suivie d'une rafale — deux anomalies qui n'ont jamais
+      eu lieu.</p>
+
+    <p><strong>Première correction — l'heure d'événement.</strong> Chaque position porte l'heure à
+      laquelle elle a été <em>mesurée</em>. En rangeant selon cette heure, les positions du tunnel
+      retournent dans les fenêtres de 10 h 02 et 10 h 03. Mais ces fenêtres doivent pour cela rester
+      ouvertes un peu après leur fin : c'est le <strong>délai de grâce</strong>. Avec un délai de 3
+      minutes, la fenêtre de 10 h 02 attend jusqu'à 10 h 06 avant d'émettre son résultat final — les
+      positions arrivées à 10 h 04 min 10 s sont acceptées.</p>
+
+    <p><strong>Le prix de cette correction.</strong> Le résultat définitif de chaque fenêtre est retardé
+      de 3 minutes. On retrouve à petite échelle le compromis de N20 entre <em>attendre pour être
+      complet</em> et <em>publier vite</em> : le délai de grâce est un réglage de ce compromis, à choisir
+      selon l'usage. Pour un tableau de bord de flotte, 3 minutes sont acceptables ; pour la fraude, non.</p>
+
+    <p><strong>Seconde correction — les doublons.</strong> Chaque position reçoit un identifiant
+      (numéro de camion + heure de mesure). Une position dont l'identifiant a déjà été vu est ignorée :
+      le doublon de 10 h 01 min 45 s n'est compté qu'une fois. Le traitement devient
+      <strong>idempotent</strong>, exactement comme le batch de l'exercice 12.2 de N20.</p>
+
+    <p><strong>La leçon.</strong> Un flux réel n'est ni ordonné, ni ponctuel, ni sans doublon. C'est
+      pourquoi l'étape 2 exige, pour chaque événement, <strong>un identifiant et une heure
+      d'événement</strong> : sans eux, aucune des deux corrections n'est possible.</p>
+  </div>
+</div>
+
+<h3 id="n21-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition du stream processing et expliquez ce qu'impose chacun de ses morceaux,
+        en particulier « ou sur de très petites fenêtres ».</li>
+      <li>Comparez terme à terme la décomposition de la latence d'un batch (N20) et celle d'un stream.
+        Quels termes disparaissent, et pourquoi ?</li>
+      <li>Pour chacune des quatre qualités du batch — complétude, efficacité, rejouabilité, choix du
+        moment —, dites ce qu'elle devient en streaming.</li>
+      <li>Expliquez la différence entre heure d'événement et heure d'arrivée sur un exemple de votre
+        choix, et montrez l'erreur produite si l'on confond les deux.</li>
+      <li>Donnez une règle métier qui appelle une fenêtre fixe et une autre qui appelle une fenêtre
+        glissante. Justifiez chaque choix à partir de la phrase de la règle.</li>
+      <li>Un collègue affirme que « le stream rend le batch inutile ». Répondez avec deux exemples du
+        support de N20 et deux exemples du support de N21.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n21-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque besoin, indiquez s'il relève d'un traitement événement par événement, d'une fenêtre
+      fixe, d'une fenêtre glissante, ou s'il n'a pas besoin de stream du tout : refuser un paiement
+      supérieur au plafond de la carte ; afficher le nombre de clients entrés par minute dans un
+      magasin ; alerter si plus de 50 erreurs surviennent sur le site web dans les 30 dernières secondes ;
+      calculer le chiffre d'affaires du mois ; afficher la position actuelle d'un livreur ; déclencher
+      une alarme si un capteur de fumée dépasse son seuil.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Le site de vente en ligne de l'enseigne reçoit en moyenne 200 événements de navigation par
+      seconde, et jusqu'à 1 500 pendant les soldes. Le traitement de recommandation traite 1 000
+      événements par seconde. (a) Que se passe-t-il pendant un pic de soldes d'une heure ? Calculez la
+      file d'attente accumulée et la latence atteinte en fin de pic. (b) Combien de temps faut-il, une
+      fois le pic terminé, pour résorber la file ? (c) Appliquez l'étape 4 : quel débit minimal faut-il
+      prévoir, et pourquoi la moyenne est-elle un mauvais repère ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>L'enseigne veut un tableau de bord du chiffre d'affaires « en direct » par magasin, alimenté en
+      streaming par les caisses, en plus du rapport consolidé de 7 h. Le soir, le directeur constate que
+      le total « en direct » de la journée diffère de 2 % du rapport du lendemain. Identifiez au moins
+      trois causes possibles de cet écart parmi les pièges de la section 5 (retardataires, doublons,
+      ordre, état perdu, caisses hors ligne…), proposez pour chacune une correction, puis expliquez
+      pourquoi il est raisonnable de conserver les deux traitements plutôt que d'en supprimer un. Quel
+      chiffre fait foi pour la comptabilité, et pourquoi ?</p>
+  </div>
+</div>

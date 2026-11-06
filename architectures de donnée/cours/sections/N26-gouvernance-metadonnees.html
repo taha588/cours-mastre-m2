@@ -1,0 +1,526 @@
+<h2 class="notion" id="n26">N26 — Gouvernance, métadonnées et observabilité : première introduction</h2>
+
+<h3 id="n26-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Énoncé du support.</strong> Trois concepts accompagnent toute donnée qui doit avoir de
+      la valeur ; chacun répond à une question principale.</p>
+
+    <table>
+      <thead>
+        <tr><th>Concept</th><th>Contenu (support)</th><th>Question principale (support)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Gouvernance</strong></td><td>politiques, responsabilités, règles d'accès,
+          qualité, conformité</td><td>Qui peut faire quoi et selon quelles règles ?</td></tr>
+        <tr><td><strong>Métadonnées</strong></td><td>informations sur les données : définition,
+          source, propriétaire, schéma, sens, qualité, classification</td><td>Que représente cette
+          donnée ?</td></tr>
+        <tr><td><strong>Observabilité</strong></td><td>surveiller l'état, la disponibilité, la
+          qualité et les changements des données et pipelines</td><td>Que se passe-t-il avec cette
+          donnée / ce pipeline ?</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Exemple du support.</strong> Une donnée peut être <strong>accessible</strong> mais mal
+      documentée, documentée mais <strong>non fiable</strong>, fiable mais
+      <strong>indisponible</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n26-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>N25 a laissé l'enseigne avec plusieurs versions d'une même donnée : une version brute, une
+      version nettoyée et agrégée pour le reporting, une version préservée pour les modèles. Avoir
+      plusieurs versions est la bonne solution, mais elle pose trois questions que la donnée ne sait
+      pas résoudre toute seule. Le support leur donne trois noms.</p>
+
+    <p><strong>La gouvernance : les règles du jeu.</strong> Elle répond à « qui peut faire quoi et
+      selon quelles règles ? ». Elle désigne un <em>responsable</em> pour chaque donnée, fixe les
+      <em>règles d'accès</em> (qui lit, qui modifie, qui supprime), les <em>exigences de qualité</em>
+      (celles de N25, workload par workload) et le respect de la <em>conformité</em> (lois et règlements,
+      par exemple sur les données personnelles). C'est une affaire d'organisation avant d'être une
+      affaire d'outils.</p>
+
+    <p><strong>Les métadonnées : la notice.</strong> Ce sont des <em>données sur les données</em>. Une
+      colonne qui s'appelle <code>mt_ttc</code> ne dit rien à un nouvel analyste ; la métadonnée lui
+      dit que c'est le « montant du ticket toutes taxes comprises, en dirhams, issu des caisses,
+      propriétaire : direction commerciale, mis à jour chaque nuit ». Le support liste ce qu'une
+      notice complète contient : définition, source, propriétaire, schéma, sens, qualité,
+      classification (public, interne, confidentiel, personnel).</p>
+
+    <p><strong>L'observabilité : le tableau de bord du pipeline.</strong> Elle répond à « que se
+      passe-t-il en ce moment avec cette donnée ? ». Elle surveille si la donnée est arrivée
+      (<em>disponibilité</em>), si elle est encore conforme (<em>qualité</em>), dans quel état est le
+      pipeline (<em>état</em>) et ce qui a changé (<em>changements</em> : une colonne ajoutée, un
+      volume qui chute). Les métadonnées décrivent la donnée telle qu'elle <em>devrait</em> être ;
+      l'observabilité constate ce qu'elle <em>est</em> aujourd'hui.</p>
+
+    <p><strong>L'exemple du support : trois défaillances indépendantes.</strong> La phrase « accessible
+      mais mal documentée, documentée mais non fiable, fiable mais indisponible » montre que régler un
+      des trois aspects ne règle pas les autres. On peut ouvrir l'accès à tout le monde (gouvernance
+      réglée) et laisser chacun deviner ce que signifient les colonnes ; on peut écrire une notice
+      parfaite pour une table que personne ne surveille ; on peut avoir une donnée exacte que le
+      pipeline n'a pas livrée ce matin. Une donnée n'est utilisable que si les trois tiennent en même
+      temps : c'est le « et » multiplicatif des conditions de N23 (disponibilité, confiance, usage).</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Réduire la gouvernance à la sécurité.</strong> Les règles d'accès en sont une partie ;
+        le support y met aussi les responsabilités, la qualité et la conformité. Une donnée bien
+        protégée mais sans responsable n'est pas gouvernée.</li>
+      <li><strong>Croire que gouverner, c'est fermer.</strong> Une gouvernance qui refuse tout rend la
+        donnée indisponible, donc sans valeur (N23). Le but est un accès <em>réglé</em>, pas un accès
+        interdit.</li>
+      <li><strong>Confondre schéma et métadonnées.</strong> Le schéma (noms et types des colonnes) n'est
+        qu'une des métadonnées du support. Savoir que <code>mt_ttc</code> est un décimal ne dit ni
+        son sens, ni sa source, ni son propriétaire.</li>
+      <li><strong>Confondre observabilité et supervision des serveurs.</strong> Un serveur en bonne
+        santé peut livrer une table vide : le pipeline « a réussi » mais la donnée est fausse.
+        L'observabilité du support porte sur <em>la donnée et le pipeline</em>, pas seulement sur la
+        machine.</li>
+      <li><strong>Écrire les métadonnées une fois pour toutes.</strong> Une notice qui n'est pas mise à
+        jour quand la source change est pire qu'une absence de notice : elle trompe avec assurance.
+        C'est l'observabilité qui signale qu'il faut la réviser.</li>
+      <li><strong>Prendre le titre à la légère.</strong> Le support parle de « première introduction » :
+        ces trois concepts reviennent dans la couche transverse de l'architecture moderne (N30). Ici,
+        on apprend à les distinguer et à savoir pourquoi les trois sont nécessaires.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> كاينين ثلاث مفاهيم كيرافقو أي معطى بغيناه يكون عندو قيمة.
+    <strong>الحوكمة</strong> (Gouvernance): السياسات، المسؤوليات، قواعد الولوج، الجودة والامتثال للقانون؛
+    السؤال ديالها: «<strong>شكون يقدر يدير شنو، وبأي قواعد؟</strong>». <strong>المعطيات الوصفية</strong>
+    (Métadonnées): معلومات على المعطيات بحال التعريف، المصدر، المالك، البنية (schéma)، المعنى، الجودة
+    والتصنيف؛ السؤال: «<strong>شنو كيمثل هاد المعطى؟</strong>». <strong>القابلية للمراقبة</strong>
+    (Observabilité): مراقبة الحالة، التوفر، الجودة والتغييرات ديال المعطيات والـpipelines؛ السؤال:
+    «<strong>شنو واقع دابا لهاد المعطى ولا هاد الـpipeline؟</strong>». المثال ديال الدرس: معطى يقدر يكون
+    متاح ولكن ماموثقش مزيان، موثق ولكن ماشي موثوق، موثوق ولكن ماشي متوفر — يعني خاص الثلاثة يكونو
+    مجموعين.</p>
+</div>
+
+<h3 id="n26-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Lundi, 9 h, comité de direction de l'enseigne de 120 magasins. Le tableau de bord annonce un
+      chiffre d'affaires de la semaine en baisse de 30 %. Panique, puis trois questions sans réponse.
+      <em>Quelle table alimente ce chiffre ?</em> Il en existe trois versions depuis N25, et personne ne
+      sait laquelle le tableau lit. <em>Qui peut expliquer ?</em> L'analyste qui a construit le
+      tableau a quitté l'entreprise ; aucun responsable n'est désigné. <em>Que s'est-il passé ?</em>
+      On découvre à 11 h que le chargement nocturne de 38 magasins a échoué samedi, sans alerte : le
+      pipeline s'est terminé « avec succès » sur une partie des fichiers.</p>
+
+    <p>Les données étaient exactes ; ce qui manquait, c'étaient des règles (gouvernance), une notice
+      (métadonnées) et une surveillance (observabilité). La règle de N26 traite ce problème : une
+      donnée n'est pas utilisable par sa seule existence, il faut aussi savoir qui en répond, ce
+      qu'elle signifie et dans quel état elle est.</p>
+  </div>
+</div>
+
+<h3 id="n26-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Diagnostiquer vite une donnée inutilisable.</strong> Les trois questions principales du
+      support forment une grille : devant un incident, on cherche lequel des trois aspects a cédé. La
+      réponse oriente vers la bonne équipe et le bon remède.</p>
+
+    <p><strong>Rendre la donnée réutilisable par d'autres.</strong> Sans métadonnées, chaque nouvel
+      utilisateur refait l'enquête (d'où vient cette colonne ? que veut dire ce code ?). Avec un
+      catalogue, la donnée devient un actif partagé et non le savoir d'une seule personne.</p>
+
+    <p><strong>Respecter la loi et la confiance des clients.</strong> La classification (métadonnée) et
+      les règles d'accès (gouvernance) permettent de savoir où sont les données personnelles et qui
+      les voit, ce qu'exige par exemple la loi marocaine 09-08 sur la protection des données à
+      caractère personnel.</p>
+
+    <p><strong>Détecter les pannes avant les utilisateurs.</strong> L'observabilité transforme
+      « le comité découvre l'erreur » en « l'équipe données reçoit une alerte à 6 h 30 ». C'est la
+      différence entre une donnée fiable par chance et une donnée fiable par construction.</p>
+
+    <p><strong>Préparer l'architecture moderne.</strong> Dans le schéma en couches (N30), ces trois
+      concepts forment la couche transverse qui traverse sources, ingestion, stockage, traitement et
+      consommation. N26 en est la première rencontre.</p>
+  </div>
+</div>
+
+<h3 id="n26-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Point de départ : une valeur ne dit pas d'où elle vient.</strong> La cellule « 1200 »
+      (exemple de N2) ne contient ni son unité, ni sa source, ni la personne autorisée à la modifier,
+      ni l'heure de son dernier chargement. Ces informations ne peuvent donc pas être tirées de la
+      donnée : il faut les produire et les tenir à part. C'est ce qui justifie l'existence de trois
+      disciplines distinctes, chacune apportant ce qui manque à la valeur brute.</p>
+
+    <p><strong>Trois manques, trois natures d'information.</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Concept</th><th>Nature de l'information</th><th>Qui la produit</th><th>Change quand</th>
+          <th>Défaillance typique (support)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Gouvernance</strong></td><td>des <em>règles</em> et des
+          <em>rôles</em></td><td>la direction, les responsables de données</td><td>rarement
+          (décision)</td><td>accessible mais personne n'en répond</td></tr>
+        <tr><td><strong>Métadonnées</strong></td><td>une <em>description</em></td><td>le producteur
+          de la donnée, outils de catalogue</td><td>à chaque changement de source ou de
+          schéma</td><td>accessible mais mal documentée</td></tr>
+        <tr><td><strong>Observabilité</strong></td><td>des <em>mesures</em> en continu</td><td>le
+          pipeline lui-même, outils de surveillance</td><td>à chaque exécution</td><td>documentée mais
+          non fiable ; fiable mais indisponible</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Pourquoi la gouvernance devient nécessaire.</strong> Tant qu'une seule équipe produit et
+      consomme une donnée, les règles sont implicites. Dès que plusieurs workloads la partagent (N25),
+      il faut trancher : qui décide du nettoyage BI ? qui a le droit de voir les numéros de téléphone
+      des clients fidèles ? qui corrige quand deux versions divergent ? Sans réponse écrite, chacun
+      décide pour soi, et l'on retrouve les silos de N4. On distingue souvent le
+      <em>propriétaire</em> (data owner, responsable métier qui décide), le <em>gestionnaire</em>
+      (data steward, qui veille au quotidien à la qualité et à la documentation) et les
+      <em>consommateurs</em>.</p>
+
+    <p><strong>Pourquoi les métadonnées sont nécessaires.</strong> Une donnée sans définition est
+      interprétée différemment par chacun : « client actif » vaut « a acheté ce mois-ci » pour le
+      marketing et « possède une carte non expirée » pour la finance. Les deux chiffres sont exacts et
+      contradictoires. La métadonnée « définition » fixe le sens ; la métadonnée « source » et le
+      <em>lignage</em> (d'où vient la donnée, par quelles transformations elle est passée) disent
+      quelle version on lit — la question restée sans réponse au §6.</p>
+
+    <p><strong>Pourquoi l'observabilité est nécessaire.</strong> Un pipeline peut échouer de façon
+      <em>silencieuse</em> : il se termine sans erreur mais livre trop peu de lignes, trop tard, ou
+      avec une colonne vide. On surveille donc des signaux mesurables sur la donnée elle-même :</p>
+    <ul>
+      <li><strong>fraîcheur</strong> : la donnée est-elle arrivée à l'heure (par exemple prête à
+        6 h 30, fenêtre de N20) ?</li>
+      <li><strong>volume</strong> : le nombre de lignes est-il dans la plage habituelle ?</li>
+      <li><strong>schéma</strong> : une colonne a-t-elle été ajoutée, renommée, supprimée ?</li>
+      <li><strong>distribution</strong> : les valeurs restent-elles plausibles (part de nulls,
+        montants négatifs) ?</li>
+      <li><strong>lignage</strong> : quelles tables en aval sont touchées si celle-ci est fausse ?</li>
+    </ul>
+    <p>Fraîcheur et volume vérifient la <em>disponibilité</em> ; distribution et schéma vérifient la
+      <em>qualité</em> et les <em>changements</em> ; le lignage mesure la portée d'un incident.</p>
+
+    <p><strong>Conclusion de la justification.</strong> Les trois concepts répondent à trois manques de
+      nature différente (règles, description, mesures), produits par des acteurs différents et à des
+      rythmes différents. Aucun ne peut remplacer les autres, d'où l'exemple du support : chaque
+      combinaison « deux sur trois » laisse la donnée inutilisable.</p>
+  </div>
+</div>
+
+<h3 id="n26-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Le catalogue de données.</strong> Terrain des métadonnées : un inventaire consultable
+      où chaque table a sa fiche (définition, source, propriétaire, classification, lignage).</p>
+
+    <p><strong>Les accès aux zones de stockage.</strong> Terrain de la gouvernance : la zone brute,
+      qui contient des données personnelles, n'est pas ouverte comme la zone BI agrégée. Les droits
+      suivent la classification.</p>
+
+    <p><strong>Les pipelines d'ingestion et de transformation.</strong> Terrain de l'observabilité :
+      chaque exécution mesure fraîcheur, volume, schéma et distribution, et alerte en cas
+      d'écart.</p>
+
+    <p><strong>Les échanges entre équipes.</strong> Quand une équipe fournit une donnée à une autre, un
+      <em>contrat de données</em> écrit réunit les trois : responsable (gouvernance), description
+      (métadonnées), engagements mesurés comme « livrée avant 6 h 30, moins de 1 % de nulls »
+      (observabilité).</p>
+
+    <p><strong>Les données personnelles et réglementées.</strong> Clients fidèles, salariés, données
+      de paiement : la classification et les règles d'accès y sont obligatoires, pas seulement
+      utiles.</p>
+  </div>
+</div>
+
+<h3 id="n26-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Quand deux équipes donnent deux chiffres différents pour « la même chose ».</strong>
+      Signal de métadonnées absentes (définitions divergentes) ou de lignage inconnu.</p>
+
+    <p><strong>Quand personne ne sait qui peut autoriser un accès ou corriger une erreur.</strong>
+      Signal de gouvernance absente.</p>
+
+    <p><strong>Quand les utilisateurs découvrent les pannes avant l'équipe données.</strong> Signal
+      d'observabilité absente : la donnée est fiable par chance.</p>
+
+    <p><strong>Quand une même donnée existe en plusieurs versions (N25)</strong> ou sert plusieurs
+      workloads : les trois deviennent indispensables, car l'implicite ne tient plus.</p>
+
+    <p><strong>Quand on manipule des données personnelles</strong> ou qu'on prépare un audit : la
+      conformité impose de savoir où elles sont et qui y accède.</p>
+
+    <p><strong>Quand un énoncé décrit une donnée « inutilisable » sans préciser pourquoi</strong> : on
+      applique la grille des trois questions du support.</p>
+  </div>
+</div>
+
+<h3 id="n26-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Poser les trois questions du support sur la donnée.</strong> Qui peut faire
+      quoi et selon quelles règles ? Que représente-t-elle ? Que se passe-t-il avec elle et son
+      pipeline ? Noter pour chacune si la réponse existe, et où elle est écrite.</p>
+
+    <p><strong>Étape 2 — Gouvernance : nommer et régler.</strong> Désigner un propriétaire et un
+      gestionnaire ; classer la donnée (public, interne, confidentiel, personnel) ; écrire la matrice
+      d'accès (rôle × version × droit) ; reprendre les exigences de qualité de N25 par workload.</p>
+
+    <p><strong>Étape 3 — Métadonnées : rédiger la fiche.</strong> Définition, source, propriétaire,
+      schéma, sens de chaque colonne, niveau de qualité, classification, lignage. La publier dans un
+      catalogue consultable.</p>
+
+    <p><strong>Étape 4 — Observabilité : choisir les signaux et les seuils.</strong> Fraîcheur (heure
+      limite), volume (plage normale), schéma (colonnes attendues), distribution (part de nulls,
+      valeurs impossibles). Fixer pour chacun un seuil d'alerte et le destinataire de l'alerte (le
+      gestionnaire désigné à l'étape 2).</p>
+
+    <p><strong>Étape 5 — Relier les trois.</strong> Une alerte d'observabilité renvoie à la fiche
+      (métadonnées) pour savoir qui prévenir (gouvernance) et quelles tables en aval sont touchées
+      (lignage). Un changement de schéma détecté déclenche la mise à jour de la fiche.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p><strong>Gouvernance</strong> (politiques, responsabilités, règles d'accès, qualité, conformité) :
+      « Qui peut faire quoi et selon quelles règles ? ». <strong>Métadonnées</strong> (définition,
+      source, propriétaire, schéma, sens, qualité, classification) : « Que représente cette
+      donnée ? ». <strong>Observabilité</strong> (état, disponibilité, qualité, changements des données
+      et pipelines) : « Que se passe-t-il avec cette donnée / ce pipeline ? ». Une donnée peut être
+      <strong>accessible</strong> mais mal documentée, documentée mais <strong>non fiable</strong>,
+      fiable mais <strong>indisponible</strong> : il faut les trois à la fois.</p>
+    <p class="ar" dir="rtl"><strong>الحوكمة</strong>: «شكون يقدر يدير شنو وبأي قواعد؟» —
+      <strong>المعطيات الوصفية</strong>: «شنو كيمثل هاد المعطى؟» — <strong>القابلية للمراقبة</strong>:
+      «شنو واقع لهاد المعطى ولا الـpipeline؟». المعطى يقدر يكون <strong>متاح</strong> وماموثقش، موثق
+      و<strong>ماشي موثوق</strong>، موثوق و<strong>ماشي متوفر</strong>: خاص الثلاثة مجموعين.</p>
+  </div>
+</div>
+
+<h3 id="n26-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — quel pilier a cédé ?</div>
+  <div class="box-b">
+    <p>Pour chaque incident de l'enseigne, dites si le défaut relève de la gouvernance, des
+      métadonnées ou de l'observabilité, et rattachez-le, si possible, à une partie de l'exemple du
+      support. (a) Un stagiaire a pu télécharger la liste complète des clients fidèles avec leurs
+      téléphones. (b) Le marketing compte 310 000 « clients actifs », la finance 452 000. (c) Le
+      fichier des ventes de dimanche est arrivé à 10 h au lieu de 6 h 30, sans que personne ne soit
+      prévenu. (d) Une colonne <code>remise</code> a été ajoutée par le fournisseur de caisses ; depuis,
+      les montants du rapport sont décalés d'une colonne. (e) Une table <code>tk_v2_final</code> est
+      lue par quatre tableaux de bord, mais personne ne sait qui l'a créée ni si on peut la
+      supprimer.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> Pour chaque incident, on cherche la question du support restée sans
+      réponse : <em>qui peut ?</em> (gouvernance), <em>que représente ?</em> (métadonnées), <em>que se
+      passe-t-il ?</em> (observabilité).</p>
+
+    <p><strong>(a) Gouvernance.</strong> La question « qui peut faire quoi ? » n'a pas de bonne
+      réponse : une donnée personnelle (classification, qui est une métadonnée) n'était protégée par
+      aucune règle d'accès. C'est aussi un problème de conformité. Défaillance la plus dangereuse :
+      la donnée est trop accessible.</p>
+
+    <p><strong>(b) Métadonnées.</strong> Deux définitions de « client actif » coexistent. Les deux
+      chiffres peuvent être exacts : il manque une définition partagée et écrite. Exemple du support :
+      <em>accessible mais mal documentée</em>.</p>
+
+    <p><strong>(c) Observabilité.</strong> Signal de fraîcheur non surveillé. La donnée était exacte
+      mais <em>indisponible</em> à l'heure utile, et personne ne l'a su : exemple du support
+      <em>fiable mais indisponible</em>.</p>
+
+    <p><strong>(d) Observabilité</strong> (changement de schéma non détecté), avec une conséquence sur
+      les <strong>métadonnées</strong> (la fiche décrit un schéma qui n'existe plus). Exemple du
+      support : <em>documentée mais non fiable</em>.</p>
+
+    <p><strong>(e) Gouvernance et métadonnées.</strong> Pas de propriétaire (gouvernance : personne ne
+      peut décider de la supprimer) et pas de fiche ni de lignage (métadonnées : on ignore sa source et
+      son sens). Le nom « v2_final » est un symptôme classique : le nom tient lieu de
+      documentation.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — un pipeline qui « réussit » en silence</div>
+  <div class="box-b">
+    <p>Chacun des 120 magasins envoie chaque nuit environ 500 tickets. Le pipeline doit livrer la table
+      des ventes avant 6 h 30 ; le comité la lit à 9 h. Samedi soir, le pipeline se termine sans erreur
+      à 8 h 10 et livre 41 000 lignes. (a) Quel volume est attendu ? Quel est l'écart, en lignes et en
+      pourcentage ? (b) Combien de magasins manquent probablement ? (c) Quel est le retard de
+      fraîcheur ? (d) Avec une règle d'alerte « volume hors de ±15 % de l'attendu » et « fraîcheur
+      dépassée », à quelle heure l'équipe aurait-elle été prévenue, et de combien de temps disposait-elle
+      avant le comité ? (e) Pourquoi la supervision des serveurs n'a-t-elle rien vu ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Volume.</strong> Attendu : 120 × 500 = <strong>60 000 lignes</strong>. Écart :
+      60 000 − 41 000 = <strong>19 000 lignes</strong>, soit 19 000 / 60 000 ≈ <strong>31,7 %</strong>
+      en moins. C'est plus du double du seuil de 15 % : l'alerte de volume se déclenche.</p>
+
+    <p><strong>(b) Magasins manquants.</strong> 19 000 / 500 = <strong>38 magasins</strong>,
+      exactement le cas du §6. La baisse de 30 % du chiffre d'affaires affichée au comité n'est pas
+      une baisse des ventes : c'est 38 / 120 ≈ 32 % des magasins absents.</p>
+
+    <p><strong>(c) Fraîcheur.</strong> 8 h 10 − 6 h 30 = <strong>1 h 40</strong> de retard.</p>
+
+    <p><strong>(d) Heure d'alerte.</strong> L'alerte de fraîcheur part dès <strong>6 h 30</strong>,
+      quand la table n'est pas prête à l'heure limite ; l'alerte de volume s'y ajoute à 8 h 10.
+      L'équipe dispose donc de <strong>2 h 30</strong> (de 6 h 30 à 9 h) pour relancer le chargement
+      ou, au minimum, prévenir le comité que la donnée est incomplète. Sans observabilité, l'incident
+      est découvert à 11 h, deux heures <em>après</em> la décision.</p>
+
+    <p><strong>(e) Supervision des serveurs.</strong> Les serveurs étaient en marche et le pipeline n'a
+      renvoyé aucune erreur : du point de vue de la machine, tout allait bien. Seule une mesure sur la
+      <em>donnée</em> (volume, fraîcheur) révèle le défaut. C'est le sens du « que se passe-t-il avec
+      cette donnée/pipeline ? » du support.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — fiche et matrice d'accès</div>
+  <div class="box-b">
+    <p>La donnée des tickets existe en trois versions (N25) : <em>brute</em> (une ligne par article,
+      avec numéro de carte fidélité et téléphone du client), <em>BI</em> (agrégée par magasin, jour et
+      catégorie), <em>IA</em> (une ligne par ticket, client remplacé par un identifiant non
+      réversible). (a) Rédigez la fiche de métadonnées de la version BI (sept rubriques du support).
+      (b) Classez les trois versions. (c) Remplissez la matrice d'accès en lecture pour quatre rôles :
+      directeur de magasin, contrôleur de gestion, data scientist, équipe d'ingestion. (d) Combien de
+      cases « oui » la matrice contient-elle, et que montre-t-elle ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Fiche « ventes_bi ».</strong> <em>Définition</em> : chiffre d'affaires TTC et nombre
+      de tickets par magasin, jour et catégorie. <em>Source</em> : version brute des tickets, issue des
+      caisses des 120 magasins. <em>Propriétaire</em> : direction commerciale (gestionnaire : équipe
+      BI). <em>Schéma</em> : magasin, date (AAAA-MM-JJ), catégorie, ca_ttc (DH), nb_tickets.
+      <em>Sens</em> : CA après remises, remboursements déduits. <em>Qualité</em> : dates ISO à 100 %,
+      catégories du référentiel à 100 %, livrée avant 6 h 30. <em>Classification</em> : interne.</p>
+
+    <p><strong>(b) Classification.</strong> Brute : <strong>personnel</strong> (téléphone et carte
+      identifient le client). IA : <strong>confidentiel</strong> (détail par ticket, mais plus
+      d'identité directe). BI : <strong>interne</strong>.</p>
+
+    <p><strong>(c) Matrice d'accès en lecture.</strong></p>
+    <table>
+      <thead>
+        <tr><th>Rôle</th><th>Brute</th><th>BI</th><th>IA</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Directeur de magasin</td><td>non</td><td>oui (son magasin)</td><td>non</td></tr>
+        <tr><td>Contrôleur de gestion</td><td>non</td><td>oui</td><td>non</td></tr>
+        <tr><td>Data scientist</td><td>non</td><td>oui</td><td>oui</td></tr>
+        <tr><td>Équipe d'ingestion</td><td>oui</td><td>oui</td><td>oui</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>(d) Lecture.</strong> <strong>7</strong> cases « oui » sur 12. Une seule équipe lit la
+      version personnelle, parce qu'elle doit la produire ; la version BI est la plus ouverte car elle
+      ne contient plus de personne. La règle est lisible : <em>plus la classification est sensible,
+      moins il y a de lecteurs</em>. Les trois concepts travaillent ensemble : la classification est
+      une métadonnée, la matrice est une décision de gouvernance, et l'observabilité vérifiera que la
+      version IA ne contient jamais de téléphone (contrôle de distribution).</p>
+  </div>
+</div>
+
+<h3 id="n26-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Donnez les trois concepts du support, ce que chacun contient et sa question principale.</li>
+      <li>Expliquez l'exemple « accessible mais mal documentée, documentée mais non fiable, fiable mais
+        indisponible » à l'aide d'un cas concret pour chaque partie de la phrase.</li>
+      <li>Expliquez pourquoi le schéma d'une table ne suffit pas à la documenter.</li>
+      <li>Montrez sur un exemple qu'un pipeline peut se terminer « avec succès » en livrant une donnée
+        fausse, et quel signal d'observabilité l'aurait détecté.</li>
+      <li>Distinguez propriétaire, gestionnaire et consommateur d'une donnée.</li>
+      <li>Expliquez pourquoi les trois concepts deviennent indispensables quand une donnée existe en
+        plusieurs versions (N25).</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n26-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque élément au concept du support (gouvernance, métadonnées ou observabilité) :
+      « le propriétaire de la table est la direction commerciale » ; « seuls les RH lisent les
+      salaires » ; « la colonne <code>mt_ttc</code> est en dirhams » ; « la table n'a reçu que 41 000
+      lignes cette nuit » ; « la donnée est classée personnelle » ; « une colonne a été renommée
+      hier » ; « les données clients sont conservées trois ans au plus ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Les 40 chambres froides (N21) envoient une température par minute. (a) Combien de mesures la
+      table doit-elle recevoir par heure et par jour ? (b) Proposez un seuil d'alerte de volume et un
+      seuil de fraîcheur adaptés à une surveillance de la chaîne du froid. (c) Une nuit, la table reçoit
+      55 200 mesures : combien de capteurs-heures manquent, et est-ce une alerte ? (d) Rédigez les
+      rubriques « définition », « propriétaire » et « classification » de la fiche.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>L'enseigne veut lancer un programme de fidélité personnalisé à partir des tickets et des
+      données clients. Rédigez un plan qui couvre les trois concepts : (a) gouvernance : rôles,
+      classification, matrice d'accès, règles de conformité et de conservation ; (b) métadonnées : les
+      fiches nécessaires et la définition écrite de « client actif » ; (c) observabilité : quatre
+      signaux avec un seuil chiffré chacun. Montrez ensuite, pour chaque partie de l'exemple du
+      support, quel élément de votre plan l'empêche de se produire.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers la partie suivante</div>
+  <div class="box-b">
+    <p>La partie V a montré qu'une donnée devient un actif quand elle est disponible, digne de confiance
+      et utilisée (N23), que le volume ne suffit pas (N24), que la qualité dépend de l'usage (N25) et
+      qu'il faut des règles, une notice et une surveillance pour la tenir (N26). Reste à savoir ce que
+      fait une organisation qui dispose d'une telle donnée : elle peut <strong>décider</strong> à partir
+      d'elle. C'est l'organisation <strong>data-driven</strong>, ouverture de la partie VI (N27).</p>
+  </div>
+</div>

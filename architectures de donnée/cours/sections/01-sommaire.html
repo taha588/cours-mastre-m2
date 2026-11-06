@@ -1,8 +1,58 @@
 <h1 class="chapitre" id="sommaire"><span class="num">0</span>Sommaire</h1>
 
 <div class="toc">
-  <!-- Genere a la tache T10.4 : une ligne .row par section ; le numero de page est ecrit par
-       build.py --toc dans chaque span de classe "p" portant l'attribut data-ref de l'ancre. -->
-  <div class="row l1"><span class="e">Le sommaire est produit en fin de projet (T10.4)</span>
-    <span class="dots"></span><span class="p" data-ref="sommaire">2</span></div>
+  <div class="row l1"><a href="#ouverture">Ouverture — Objectifs, problème et préambule</a><span class="dots"></span><span class="p" data-ref="ouverture">4</span></div>
+  <div class="row l2"><a href="#f-s1">1. Objectifs du cours</a><span class="dots"></span><span class="p" data-ref="f-s1">4</span></div>
+  <div class="row l2"><a href="#f-s2">2. Un problème du réel</a><span class="dots"></span><span class="p" data-ref="f-s2">5</span></div>
+  <div class="row l2"><a href="#f-s3">3. Préambule</a><span class="dots"></span><span class="p" data-ref="f-s3">6</span></div>
+  <div class="row l1"><a href="#partie0">Partie 0 — Fondations : la donnée, sa gestion, son architecture</a><span class="dots"></span><span class="p" data-ref="partie0">8</span></div>
+  <div class="row l2"><a href="#n01">N1 — La donnée : définition et condition de valeur</a><span class="dots"></span><span class="p" data-ref="n01">8</span></div>
+  <div class="row l2"><a href="#n02">N2 — Données structurées, semi-structurées et non structurées</a><span class="dots"></span><span class="p" data-ref="n02">20</span></div>
+  <div class="row l2"><a href="#n03">N3 — La gestion des données et ses cinq missions</a><span class="dots"></span><span class="p" data-ref="n03">33</span></div>
+  <div class="row l2"><a href="#n04">N4 — Pourquoi la gestion des données devient complexe : les quatre causes et le socle</a><span class="dots"></span><span class="p" data-ref="n04">45</span></div>
+  <div class="row l2"><a href="#n05">N5 — L'architecture de données : définition opérationnelle</a><span class="dots"></span><span class="p" data-ref="n05">58</span></div>
+  <div class="row l2"><a href="#n06">N6 — La grille des décisions de l'architecte</a><span class="dots"></span><span class="p" data-ref="n06">71</span></div>
+  <div class="row l1"><a href="#partie1">Partie I — Évolution des architectures de données</a><span class="dots"></span><span class="p" data-ref="partie1">84</span></div>
+  <div class="row l2"><a href="#n07">N7 — Les sept contraintes et la loi du découplage</a><span class="dots"></span><span class="p" data-ref="n07">84</span></div>
+  <div class="row l2"><a href="#n08">N8 — Le principe d'évolution architecturale</a><span class="dots"></span><span class="p" data-ref="n08">97</span></div>
+  <div class="row l2"><a href="#n09">N9 — L'architecture traditionnelle : Applications → Base de données → Reporting</a><span class="dots"></span><span class="p" data-ref="n09">110</span></div>
+  <div class="row l2"><a href="#n10">N10 — Le Data Warehouse</a><span class="dots"></span><span class="p" data-ref="n10">123</span></div>
+  <div class="row l2"><a href="#n11">N11 — Le Data Lake</a><span class="dots"></span><span class="p" data-ref="n11">135</span></div>
+  <div class="row l2"><a href="#n12">N12 — Le Lakehouse</a><span class="dots"></span><span class="p" data-ref="n12">147</span></div>
+  <div class="row l1"><a href="#partie2">Partie II — Architectures centralisées et distribuées</a><span class="dots"></span><span class="p" data-ref="partie2">159</span></div>
+  <div class="row l2"><a href="#n13">N13 — L'architecture centralisée</a><span class="dots"></span><span class="p" data-ref="n13">160</span></div>
+  <div class="row l2"><a href="#n14">N14 — L'architecture distribuée</a><span class="dots"></span><span class="p" data-ref="n14">172</span></div>
+  <div class="row l2"><a href="#n15">N15 — Scale-up et scale-out</a><span class="dots"></span><span class="p" data-ref="n15">184</span></div>
+  <div class="row l1"><a href="#partie3">Partie III — OLTP et OLAP</a><span class="dots"></span><span class="p" data-ref="partie3">195</span></div>
+  <div class="row l2"><a href="#n16">N16 — OLTP : le traitement transactionnel</a><span class="dots"></span><span class="p" data-ref="n16">196</span></div>
+  <div class="row l2"><a href="#n17">N17 — OLAP : le traitement analytique</a><span class="dots"></span><span class="p" data-ref="n17">208</span></div>
+  <div class="row l2"><a href="#n18">N18 — La complémentarité OLTP / OLAP et le processus ETL</a><span class="dots"></span><span class="p" data-ref="n18">220</span></div>
+  <div class="row l2"><a href="#n19">N19 — Pourquoi séparer OLTP et OLAP</a><span class="dots"></span><span class="p" data-ref="n19">233</span></div>
+  <div class="row l1"><a href="#partie4">Partie IV — Batch processing et stream processing</a><span class="dots"></span><span class="p" data-ref="partie4">245</span></div>
+  <div class="row l2"><a href="#n20">N20 — Le batch processing : traiter par lots</a><span class="dots"></span><span class="p" data-ref="n20">246</span></div>
+  <div class="row l2"><a href="#n21">N21 — Le stream processing : traiter au fil de l'eau</a><span class="dots"></span><span class="p" data-ref="n21">258</span></div>
+  <div class="row l2"><a href="#n22">N22 — Batch ou stream : le critère de choix, et le cas IoV</a><span class="dots"></span><span class="p" data-ref="n22">270</span></div>
+  <div class="row l1"><a href="#partie5">Partie V — La donnée comme actif stratégique</a><span class="dots"></span><span class="p" data-ref="partie5">281</span></div>
+  <div class="row l2"><a href="#n23">N23 — La donnée comme actif stratégique</a><span class="dots"></span><span class="p" data-ref="n23">282</span></div>
+  <div class="row l2"><a href="#n24">N24 — Volume ≠ valeur : les cinq causes</a><span class="dots"></span><span class="p" data-ref="n24">294</span></div>
+  <div class="row l2"><a href="#n25">N25 — La qualité des données est relative à l'usage</a><span class="dots"></span><span class="p" data-ref="n25">306</span></div>
+  <div class="row l2"><a href="#n26">N26 — Gouvernance, métadonnées et observabilité : première introduction</a><span class="dots"></span><span class="p" data-ref="n26">317</span></div>
+  <div class="row l1"><a href="#partie6">Partie VI — Data-driven vs AI-driven organizations</a><span class="dots"></span><span class="p" data-ref="partie6">329</span></div>
+  <div class="row l2"><a href="#n27">N27 — L'organisation data-driven</a><span class="dots"></span><span class="p" data-ref="n27">330</span></div>
+  <div class="row l2"><a href="#n28">N28 — L'organisation AI-driven</a><span class="dots"></span><span class="p" data-ref="n28">340</span></div>
+  <div class="row l2"><a href="#n29">N29 — Du reporting à l'IA : des exigences croissantes</a><span class="dots"></span><span class="p" data-ref="n29">350</span></div>
+  <div class="row l1"><a href="#partie7">Partie VII — Présentation d'une architecture moderne de données</a><span class="dots"></span><span class="p" data-ref="partie7">360</span></div>
+  <div class="row l2"><a href="#n30">N30 — L'architecture moderne : cinq couches et une couche transverse</a><span class="dots"></span><span class="p" data-ref="n30">361</span></div>
+  <div class="row l2"><a href="#n31">N31 — Couche 1, les sources : d'où viennent les données ?</a><span class="dots"></span><span class="p" data-ref="n31">371</span></div>
+  <div class="row l2"><a href="#n32">N32 — Couche 2, l'ingestion : comment faire entrer les données ?</a><span class="dots"></span><span class="p" data-ref="n32">380</span></div>
+  <div class="row l2"><a href="#n33">N33 — Couche 3, le stockage : où conserver les données ?</a><span class="dots"></span><span class="p" data-ref="n33">389</span></div>
+  <div class="row l2"><a href="#n34">N34 — Couche 4, le traitement : que fait-on avec les données ?</a><span class="dots"></span><span class="p" data-ref="n34">398</span></div>
+  <div class="row l2"><a href="#n35">N35 — Couche 5, Analytics / AI : qui consomme les données ?</a><span class="dots"></span><span class="p" data-ref="n35">409</span></div>
+  <div class="row l1"><a href="#cloture">Clôture — Problèmes du réel, banque d'exercices et corrigés</a><span class="dots"></span><span class="p" data-ref="cloture">419</span></div>
+  <div class="row l2"><a href="#k-s15">15. Problèmes du réel</a><span class="dots"></span><span class="p" data-ref="k-s15">419</span></div>
+  <div class="row l2"><a href="#k-s16">16. Banque d'exercices</a><span class="dots"></span><span class="p" data-ref="k-s16">430</span></div>
+  <div class="row l3"><a href="#k-s16-f">16.A — Dix exercices faciles</a><span class="dots"></span><span class="p" data-ref="k-s16-f">430</span></div>
+  <div class="row l3"><a href="#k-s16-m">16.B — Dix exercices moyens</a><span class="dots"></span><span class="p" data-ref="k-s16-m">433</span></div>
+  <div class="row l3"><a href="#k-s16-d">16.C — Dix exercices difficiles</a><span class="dots"></span><span class="p" data-ref="k-s16-d">435</span></div>
+  <div class="row l2"><a href="#k-s17">17. Corrigés des exercices de la section 16</a><span class="dots"></span><span class="p" data-ref="k-s17">439</span></div>
 </div>

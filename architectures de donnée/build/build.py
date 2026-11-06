@@ -126,6 +126,13 @@ def numeros_de_pages():
             titres.append((m.group(2), texte))
     trouves = {}
     with fitz.open(PDF) as d:
+        # 1) liens internes du sommaire (<a href="#ancre">) : Chromium les resout en page exacte
+        for page in d:
+            for lien in page.get_links():
+                nom, cible = lien.get("nameddest"), lien.get("page", -1)
+                if nom and cible is not None and cible >= 0 and nom not in trouves:
+                    trouves[nom] = cible + 1
+        # 2) repli : recherche du titre dans le texte des pages
         for i, page in enumerate(d, start=1):
             texte_page = re.sub(r"\s+", " ", page.get_text())
             for ancre, titre in titres:

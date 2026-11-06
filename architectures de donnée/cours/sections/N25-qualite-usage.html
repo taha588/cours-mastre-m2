@@ -1,0 +1,487 @@
+<h2 class="notion" id="n25">N25 — La qualité des données est relative à l'usage</h2>
+
+<h3 id="n25-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Énoncé du support.</strong> Qualité des données ≠ même qualité pour tous les usages.</p>
+
+    <table>
+      <thead>
+        <tr><th>Usage</th><th>Ce que la qualité exige (support)</th><th>Exemple (support)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>BI / Reporting</strong></td><td>une donnée peut être <strong>nettoyée</strong> et
+          <strong>agrégée</strong> pour produire un <strong>indicateur stable</strong></td>
+          <td>corriger des formats de date, harmoniser les catégories produit</td></tr>
+        <tr><td><strong>IA / ML</strong></td><td>la <strong>représentativité</strong> devient
+          essentielle : certaines valeurs rares, erreurs ou cas atypiques peuvent être
+          <strong>utiles</strong> selon le cas d'usage</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Question d'architecte (support).</strong> « Quelle qualité est nécessaire pour
+      <strong>CE</strong> workload ? »</p>
+  </div>
+</div>
+
+<h3 id="n25-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>N24 s'est terminée sur un constat : les tickets des magasins urbains étaient exacts, et
+      pourtant ils étaient mauvais pour prévoir les magasins ruraux. N25 en tire la règle générale :
+      <strong>une donnée n'est pas « de bonne qualité » dans l'absolu ; elle est de bonne qualité
+      <em>pour</em> un usage</strong>. Le support l'illustre en opposant deux usages qui demandent des
+      choses presque contraires.</p>
+
+    <p><strong>Côté BI / reporting : on lisse.</strong> Un rapport sert à suivre un indicateur dans le
+      temps (chiffre d'affaires mensuel, taux de rupture, panier moyen). Ce qu'on attend de lui, c'est
+      d'être <em>stable</em> et <em>comparable</em> d'un mois à l'autre. On a donc le droit, et même le
+      devoir, de <strong>nettoyer</strong> (corriger les formats de date, fusionner « Boissons »,
+      « boissons » et « BOISSONS ») puis d'<strong>agréger</strong> (sommer par mois, par magasin, par
+      catégorie). Un détail ligne à ligne perdu au passage ne gêne pas : le rapport ne le montrera
+      jamais.</p>
+
+    <p><strong>Côté IA / ML : on préserve.</strong> Un modèle apprend à partir des exemples qu'on lui
+      montre, et il ne peut reconnaître que ce qu'il a vu. Pour lui, la qualité première est la
+      <strong>représentativité</strong> : les données doivent ressembler à la réalité sur laquelle il
+      sera utilisé, y compris dans ce qu'elle a de rare. D'où la phrase surprenante du support :
+      <em>valeurs rares, erreurs ou cas atypiques peuvent être utiles</em>. Une transaction frauduleuse
+      est un cas atypique ; un capteur qui envoie une valeur aberrante juste avant de tomber en panne
+      aussi. Les retirer « pour nettoyer », c'est retirer exactement ce que le modèle devait
+      apprendre.</p>
+
+    <p><strong>Les mots « selon le cas d'usage ».</strong> Le support ne dit pas que toute erreur est
+      utile à l'IA. Une date mal saisie reste une erreur pour un modèle de prévision ; mais une série
+      de valeurs impossibles peut être le signal recherché par un modèle de détection d'anomalies.
+      C'est l'usage qui tranche, encore une fois.</p>
+
+    <p><strong>La question d'architecte.</strong> Elle déplace le débat. On ne demande plus « nos
+      données sont-elles propres ? » mais « <em>quelle</em> qualité est nécessaire pour
+      <em>ce</em> workload ? ». Le mot workload (charge de travail : un rapport, un modèle, un flux
+      d'alerte) rappelle que la même donnée sert plusieurs consommateurs, et que chacun a ses propres
+      exigences. La conséquence d'architecture est immédiate : <strong>on ne nettoie pas une fois pour
+      toutes à la source</strong>, on garde la donnée brute et on prépare une version adaptée à chaque
+      usage.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Croire que l'IA tolère les données sales.</strong> Le support dit que <em>certaines</em>
+        erreurs ou valeurs rares peuvent être utiles, pas que la qualité compte moins. L'IA est même
+        plus exigeante : elle demande la représentativité <em>en plus</em> de l'exactitude.</li>
+      <li><strong>Confondre « atypique » et « faux ».</strong> Un ticket de 48 000 DH pour un mariage
+        est atypique mais vrai ; un ticket de −48 000 DH est faux. Le premier est une information, le
+        second une erreur de saisie.</li>
+      <li><strong>Nettoyer en amont pour tout le monde.</strong> Supprimer les valeurs extrêmes dès
+        l'ingestion arrange le rapport et détruit la matière première du modèle de fraude. Le
+        nettoyage BI doit se faire sur une copie, jamais sur l'unique version de la donnée.</li>
+      <li><strong>Croire qu'un indicateur stable est un indicateur juste.</strong> Agréger masque les
+        problèmes au lieu de les résoudre : une moyenne nationale stable peut cacher un segment qui
+        s'effondre (les magasins ruraux de N24).</li>
+      <li><strong>Penser que la représentativité ne concerne que l'IA.</strong> Un sondage ou un rapport
+        sur un échantillon y est soumis aussi ; le support la souligne pour l'IA parce que le modèle
+        <em>généralise</em> sans que personne ne relise chaque prédiction.</li>
+      <li><strong>Oublier le « CE ».</strong> La question d'architecte porte sur un workload précis.
+        Une réponse du type « il nous faut des données de qualité » ne répond pas : il faut dire
+        laquelle, mesurée comment, avec quel seuil.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> جودة المعطيات ماشي وحدة لجميع الاستعمالات. فـ<strong>BI /
+    Reporting</strong> كنقدرو <strong>ننقّيو</strong> المعطيات و<strong>نجمعوها</strong> باش نخرجو مؤشر
+    <strong>مستقر</strong>، بحال تصحيح صيغ التواريخ وتوحيد أصناف المنتجات. أما فـ<strong>IA / ML</strong>
+    فالمهم هو <strong>التمثيلية</strong>: النموذج كيتعلم غير داكشي اللي شاف، وشي قيم نادرة، أخطاء ولا
+    حالات شاذة (بحال الاحتيال) يقدرو يكونو <strong>مفيدين</strong> حسب الاستعمال، وإلا حيدناهم باش
+    ننقّيو، كنحيدو بالضبط داكشي اللي خاص النموذج يتعلمو. سؤال المهندس المعماري: «<strong>شنو هي الجودة
+    اللازمة لهاد workload بالذات؟</strong>» والنتيجة: كنحتافظو بالمعطيات الخام وكنوجدو نسخة مناسبة لكل
+    استعمال.</p>
+</div>
+
+<h3 id="n25-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Après le diagnostic de N24, l'enseigne de 120 magasins lance un grand chantier « qualité ». Une
+      équipe écrit des règles de nettoyage appliquées dès l'arrivée des données : formats de date
+      unifiés, catégories fusionnées, tickets aux montants extrêmes supprimés, capteurs aux valeurs
+      hors plage écartés. Le comité mensuel est ravi : les indicateurs sont enfin stables. Trois mois
+      plus tard, l'équipe fraude constate que son modèle ne détecte presque plus rien, et l'équipe
+      maintenance que les pannes de chambres froides ne sont plus anticipées.</p>
+
+    <p>Personne n'a commis d'erreur de nettoyage : chaque règle était correcte <em>pour le
+      reporting</em>. Le problème est d'avoir appliqué une seule définition de la qualité à tous les
+      usages. La règle de N25 traite ce problème : elle oblige à définir la qualité <strong>par
+      workload</strong>, et donc à organiser l'architecture pour que plusieurs niveaux de préparation
+      coexistent.</p>
+  </div>
+</div>
+
+<h3 id="n25-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Écrire des exigences de qualité mesurables.</strong> Pour chaque workload, on fixe les
+      dimensions qui comptent et leur seuil : par exemple, pour le rapport mensuel, « 100 % des dates
+      au format ISO, 0 catégorie hors référentiel » ; pour le modèle de fraude, « au moins 1 500
+      fraudes confirmées par an, tous les moyens de paiement représentés ».</p>
+
+    <p><strong>Décider où et quand nettoyer.</strong> La règle interdit le nettoyage destructeur en
+      amont. Elle conduit à une architecture en niveaux : une zone brute conservée telle quelle, puis
+      des zones préparées par usage. Les couches de la partie VII (N30-N35) donneront à cette idée sa
+      forme concrète.</p>
+
+    <p><strong>Arbitrer les conflits entre équipes.</strong> Quand le contrôle de gestion veut
+      supprimer les valeurs extrêmes et que l'équipe de data science veut les garder, la question
+      d'architecte fournit l'arbitre : les deux ont raison, chacun pour son workload, et les deux
+      versions doivent exister.</p>
+
+    <p><strong>Préparer la partie VI.</strong> Passer d'une organisation data-driven (rapports, N27) à
+      une organisation AI-driven (modèles, N28) change les exigences de qualité ; N29 montrera qu'elles
+      croissent du reporting à l'IA. N25 en donne la première raison : la représentativité.</p>
+  </div>
+</div>
+
+<h3 id="n25-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Point de départ : la qualité se définit par l'usage.</strong> La tradition de la qualité
+      industrielle la définit comme l'<em>aptitude à l'emploi</em> (<em>fitness for use</em>) : une
+      vis est de qualité si elle convient à l'assemblage prévu, pas en soi. Appliquée aux données,
+      cette définition dit qu'une donnée est de qualité si elle permet au workload de produire une
+      décision correcte. C'est la condition « confiance » de N23 rapportée à un usage précis.</p>
+
+    <p><strong>Les dimensions classiques de la qualité.</strong> On mesure habituellement la qualité
+      d'une donnée selon plusieurs dimensions. Le tableau montre que leur poids change avec l'usage.</p>
+    <table class="long">
+      <thead>
+        <tr><th>Dimension</th><th>Question posée</th><th>BI / reporting</th><th>IA / ML</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Exactitude</strong></td><td>la valeur est-elle vraie ?</td><td>importante</td>
+          <td>importante</td></tr>
+        <tr><td><strong>Validité</strong></td><td>respecte-t-elle le format attendu ?</td>
+          <td>essentielle (dates, catégories)</td><td>importante</td></tr>
+        <tr><td><strong>Cohérence</strong></td><td>les sources disent-elles la même chose ?</td>
+          <td>essentielle (un seul chiffre)</td><td>importante</td></tr>
+        <tr><td><strong>Unicité</strong></td><td>chaque objet n'est-il compté qu'une fois ?</td>
+          <td>essentielle (comptages)</td><td>importante (pas de poids double)</td></tr>
+        <tr><td><strong>Complétude</strong></td><td>manque-t-il des valeurs ?</td><td>tolérée si
+          agrégée</td><td>à traiter cas par cas</td></tr>
+        <tr><td><strong>Fraîcheur</strong></td><td>est-elle assez récente ?</td><td>au rythme du
+          rapport</td><td>récente pour l'inférence</td></tr>
+        <tr><td><strong>Représentativité</strong></td><td>ressemble-t-elle à la population visée ?</td>
+          <td>secondaire</td><td><strong>essentielle</strong> (support)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Pourquoi le nettoyage aide le rapport.</strong> Un indicateur est une somme ou une
+      moyenne. Une date mal lue envoie une vente dans le mauvais mois ; une catégorie mal écrite la
+      sort du total de sa catégorie. Corriger ces deux défauts rend l'indicateur juste et comparable.
+      Et l'agrégation dilue les erreurs résiduelles : une erreur de 5 DH sur un ticket disparaît dans
+      une somme de 4 millions.</p>
+
+    <p><strong>Pourquoi le même nettoyage peut nuire au modèle.</strong> Un modèle estime une règle à
+      partir de la fréquence des exemples. Si un cas représente 0,2 % des lignes et qu'une règle de
+      nettoyage en supprime les trois quarts, le modèle le voit quatre fois moins souvent qu'il ne se
+      produit : il apprend un monde où ce cas n'existe presque pas. C'est le biais de N24, mais
+      <em>fabriqué par le nettoyage</em> au lieu d'être hérité de la collecte. L'agrégation est encore
+      plus radicale : un total mensuel ne contient plus aucune transaction individuelle, donc plus
+      aucune fraude à apprendre.</p>
+
+    <p><strong>Conclusion de la justification.</strong> Nettoyer et agréger sont des transformations
+      <em>avec perte</em>. Elles sont légitimes quand l'information perdue n'intéresse pas l'usage
+      (BI), nuisibles quand elle en est le cœur (IA). D'où la question d'architecte : on ne peut
+      choisir la transformation qu'après avoir nommé le workload.</p>
+  </div>
+</div>
+
+<h3 id="n25-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Les pipelines d'ingestion et de transformation.</strong> C'est là qu'on décide quelles
+      règles s'appliquent et sur quelle copie. Règle pratique : aucune suppression définitive à
+      l'ingestion ; on marque (une colonne « suspect ») plutôt que d'effacer.</p>
+
+    <p><strong>L'entrepôt et les tableaux de bord.</strong> Terrain du nettoyage BI : formats unifiés,
+      référentiels de catégories, agrégats par période. On y vise la stabilité et la comparabilité.</p>
+
+    <p><strong>La préparation des données d'entraînement.</strong> Terrain de la représentativité :
+      vérifier que chaque segment (zone, saison, moyen de paiement, type de capteur) est présent, et
+      conserver les cas rares utiles au modèle.</p>
+
+    <p><strong>La détection d'anomalies et de fraude.</strong> Cas extrême où l'atypique <em>est</em>
+      la cible : supprimer les valeurs aberrantes revient à supprimer la réponse.</p>
+
+    <p><strong>Les contrats entre producteurs et consommateurs de données.</strong> Quand une équipe
+      fournit une donnée à plusieurs autres, la règle impose d'écrire avec chaque consommateur ses
+      exigences de qualité, au lieu d'une promesse unique « données propres ».</p>
+  </div>
+</div>
+
+<h3 id="n25-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Quand une même donnée sert à la fois un rapport et un modèle.</strong> C'est le cas
+      typique : il faut deux définitions de la qualité et probablement deux versions préparées.</p>
+
+    <p><strong>Quand quelqu'un propose de « supprimer les valeurs aberrantes ».</strong> Avant
+      d'accepter, on demande : aberrantes pour quel usage ? Sont-elles fausses, ou seulement rares ?</p>
+
+    <p><strong>Quand un modèle performant en test échoue sur les cas qui comptent.</strong> Signal
+      qu'un nettoyage ou un échantillonnage a retiré ces cas des données d'entraînement.</p>
+
+    <p><strong>Quand un indicateur change brutalement après une modification du pipeline.</strong>
+      Signal qu'une règle de nettoyage (dates, catégories) a changé : la stabilité BI est en jeu.</p>
+
+    <p><strong>Quand un énoncé demande « ces données sont-elles de bonne qualité ? »</strong> sans
+      préciser l'usage : la bonne réponse commence par reformuler avec la question d'architecte.</p>
+  </div>
+</div>
+
+<h3 id="n25-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lister les workloads qui consomment la donnée.</strong> Rapport, tableau de
+      bord, modèle, alerte en flux : chacun est un consommateur distinct.</p>
+
+    <p><strong>Étape 2 — Pour chaque workload, poser la question d'architecte.</strong> Quelles
+      dimensions de qualité comptent (tableau du §8) et avec quel seuil mesurable ?</p>
+
+    <p><strong>Étape 3 — Classer chaque défaut observé.</strong> Pour chaque valeur douteuse :
+      <em>erreur</em> (fausse, à corriger ou écarter), <em>atypique vraie</em> (rare mais réelle) ou
+      <em>signal</em> (l'objet même du workload). Le classement peut différer d'un workload à
+      l'autre.</p>
+
+    <p><strong>Étape 4 — Choisir la transformation par workload.</strong> BI : corriger, harmoniser,
+      agréger. IA : corriger les vraies erreurs, conserver les cas rares, vérifier la représentativité
+      et, si besoin, rééquilibrer. Toujours sur une copie.</p>
+
+    <p><strong>Étape 5 — Garder la donnée brute et tracer.</strong> La version brute reste disponible ;
+      chaque version préparée indique quelles règles lui ont été appliquées. On peut ainsi revenir en
+      arrière quand un nouvel usage apparaît.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Qualité des données ≠ même qualité pour tous les usages. En <strong>BI / reporting</strong>, on
+      <strong>nettoie</strong> et on <strong>agrège</strong> pour obtenir un <strong>indicateur
+      stable</strong> (formats de date, catégories produit). En <strong>IA / ML</strong>, la
+      <strong>représentativité</strong> devient essentielle : valeurs rares, erreurs ou cas atypiques
+      peuvent être <strong>utiles</strong> selon le cas d'usage. Question d'architecte : « Quelle
+      qualité est nécessaire pour <strong>CE</strong> workload ? » Conséquence : garder le brut,
+      préparer une version par usage.</p>
+    <p class="ar" dir="rtl">الجودة ماشي وحدة لجميع الاستعمالات. فـ<strong>BI</strong> كننقّيو
+      وكنجمعو باش نخرجو <strong>مؤشر مستقر</strong>؛ فـ<strong>IA / ML</strong> المهم هو
+      <strong>التمثيلية</strong>، والقيم النادرة ولا الشاذة تقدر تكون <strong>مفيدة</strong>. السؤال:
+      «شنو الجودة اللازمة لـ<strong>هاد</strong> workload؟» — نحتافظو بالخام ونوجدو نسخة لكل استعمال.</p>
+  </div>
+</div>
+
+<h3 id="n25-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — même traitement, deux usages</div>
+  <div class="box-b">
+    <p>Pour chaque traitement, dites s'il est adapté au rapport mensuel des ventes, au modèle de
+      détection de fraude aux paiements, ou aux deux, et justifiez : (a) convertir toutes les dates au
+      format AAAA-MM-JJ ; (b) supprimer les paiements de plus de 20 000 DH ; (c) fusionner
+      « Boissons », « boissons » et « BOISSONS » en une seule catégorie ; (d) remplacer les paiements
+      d'un même client par leur total journalier ; (e) supprimer les lignes dont le montant est
+      négatif.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> Pour chaque traitement, on se demande quelle information il fait
+      perdre, puis si cette information intéresse le workload.</p>
+
+    <p><strong>(a) Dates au format ISO</strong> : adapté aux <strong>deux</strong>. On ne perd rien,
+      on corrige une erreur de validité. Le rapport place chaque vente dans le bon mois ; le modèle
+      calcule correctement les écarts de temps entre paiements.</p>
+
+    <p><strong>(b) Supprimer les paiements &gt; 20 000 DH</strong> : discutable même pour le rapport
+      (le chiffre d'affaires serait faux ; mieux vaut les isoler dans un indicateur à part), et
+      <strong>nuisible pour le modèle de fraude</strong> : les gros montants inhabituels sont souvent
+      la cible. On perd des cas atypiques utiles (support).</p>
+
+    <p><strong>(c) Fusionner les catégories</strong> : <strong>indispensable au rapport</strong>
+      (sinon le CA « boissons » est éclaté sur trois lignes), <strong>neutre</strong> pour le modèle
+      de fraude, qui utilise peu la catégorie. C'est l'exemple même du support.</p>
+
+    <p><strong>(d) Agréger par client et par jour</strong> : acceptable pour un rapport de CA,
+      <strong>destructeur pour la fraude</strong> : quatre paiements en dix minutes (N21) deviennent
+      une seule ligne et le motif disparaît. L'agrégation est une transformation avec perte.</p>
+
+    <p><strong>(e) Supprimer les montants négatifs</strong> : il faut d'abord classer. Si ce sont des
+      remboursements réels, ils sont <em>vrais</em> : le rapport doit les déduire, et le modèle peut en
+      avoir besoin (fraude au remboursement). Si ce sont des erreurs de saisie, on les corrige pour
+      les deux usages. Sans classement, la suppression est injustifiée dans les deux cas.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le nettoyage qui efface la fraude</div>
+  <div class="box-b">
+    <p>Le fichier des paiements de l'année compte 1 000 000 de transactions, dont 2 000 fraudes
+      confirmées. Une règle de nettoyage « supprimer les montants atypiques » retire 4 500 lignes, dont
+      1 500 fraudes. (a) Quel est le taux de fraude avant et après le nettoyage ? (b) Par combien la
+      fréquence de la fraude vue par le modèle est-elle divisée ? (c) Un modèle naïf répond toujours
+      « pas de fraude » : quelle est sa justesse (part de bonnes réponses) avant et après ? Combien de
+      fraudes détecte-t-il ? (d) Que concluez-vous, et que faut-il faire ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Taux de fraude.</strong> Avant : 2 000 / 1 000 000 = <strong>0,2 %</strong>. Après :
+      il reste 1 000 000 − 4 500 = 995 500 lignes et 2 000 − 1 500 = 500 fraudes, soit
+      500 / 995 500 ≈ <strong>0,05 %</strong>.</p>
+
+    <p><strong>(b) Fréquence divisée.</strong> 0,2 / 0,05 ≈ <strong>4</strong>. Le modèle voit un monde
+      où la fraude est quatre fois plus rare qu'en réalité, et il ne dispose plus que de 500 exemples
+      pour apprendre ses formes, dont les 1 500 les plus marquées ont disparu (les montants
+      atypiques).</p>
+
+    <p><strong>(c) Modèle naïf.</strong> Avant : il a raison sur 998 000 lignes sur 1 000 000, soit
+      <strong>99,8 %</strong> de justesse. Après : 995 000 / 995 500 ≈ <strong>99,95 %</strong>. Dans
+      les deux cas il détecte <strong>0 fraude</strong>. La justesse augmente alors que l'utilité est
+      nulle : un indicateur « stable et élevé » n'est pas la bonne mesure de qualité pour ce workload.</p>
+
+    <p><strong>(d) Conclusion.</strong> La règle était peut-être raisonnable pour un rapport ; pour la
+      fraude, elle a supprimé le signal. Il faut conserver la donnée brute, marquer les montants
+      atypiques au lieu de les effacer, et définir pour ce workload une exigence propre (par exemple :
+      « toutes les fraudes confirmées conservées ; part de fraude des données d'entraînement égale à la
+      part réelle, ou rééquilibrée de façon tracée »). C'est la question d'architecte appliquée.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le nettoyage qui répare le rapport</div>
+  <div class="box-b">
+    <p>Le rapport mensuel affiche un chiffre d'affaires total de 4 000 000 DH. La catégorie boissons y
+      apparaît sous quatre libellés : « Boissons » 410 000 DH, « boissons » 230 000 DH, « BOISSONS »
+      95 000 DH, « Drinks » 65 000 DH ; le rapport ne retient que le libellé « Boissons ». (a) Quel CA
+      et quelle part du total le rapport attribue-t-il aux boissons ? Quels sont les vrais chiffres ?
+      (b) La même semaine, 5 000 tickets totalisent 1 000 000 DH, dont un ticket de 48 000 DH pour un
+      mariage. Calculez le panier moyen avec et sans ce ticket. (c) Pour l'indicateur hebdomadaire
+      « panier moyen », que faire de ce ticket ? Et pour le modèle de prévision des commandes
+      d'événements ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Catégories.</strong> Le rapport retient 410 000 DH, soit 410 000 / 4 000 000 =
+      <strong>10,25 %</strong> du CA. Le vrai CA boissons est 410 000 + 230 000 + 95 000 + 65 000 =
+      <strong>800 000 DH</strong>, soit <strong>20 %</strong>. Sans harmonisation, l'indicateur sous-estime
+      la catégorie de moitié, et il varierait chaque mois selon la manière dont les libellés sont saisis.
+      Harmoniser est exactement l'exemple du support : c'est ce qui rend l'indicateur juste et
+      stable.</p>
+
+    <p><strong>(b) Panier moyen.</strong> Avec le ticket : 1 000 000 / 5 000 = <strong>200 DH</strong>.
+      Sans : (1 000 000 − 48 000) / 4 999 = 952 000 / 4 999 ≈ <strong>190,44 DH</strong>. Un seul
+      ticket déplace l'indicateur de près de 10 DH (5 %).</p>
+
+    <p><strong>(c) Deux usages, deux traitements.</strong> Pour l'indicateur hebdomadaire, on veut
+      suivre le comportement habituel : on isole le ticket (indicateur « hors commandes
+      exceptionnelles ») sans l'effacer du CA, sinon le CA serait faux. Pour un modèle qui doit
+      prévoir les commandes d'événements, ce ticket est un exemple rare et <strong>utile</strong> : le
+      supprimer, c'est priver le modèle du cas qu'il doit apprendre. Le ticket est atypique mais
+      vrai ; c'est l'usage qui décide de son traitement.</p>
+  </div>
+</div>
+
+<h3 id="n25-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la règle du support et citez les deux exemples de nettoyage BI qu'il donne.</li>
+      <li>Expliquez pourquoi la représentativité devient essentielle pour l'IA et moins pour un
+        rapport.</li>
+      <li>Donnez un exemple où une erreur de donnée est utile à un modèle, et un exemple où elle est
+        nuisible.</li>
+      <li>Distinguez, sur un exemple de l'enseigne, une valeur fausse, une valeur atypique vraie et un
+        signal.</li>
+      <li>Expliquez pourquoi le nettoyage et l'agrégation sont des transformations « avec perte », et
+        ce que cela implique pour l'architecture.</li>
+      <li>Reformulez la question « nos données clients sont-elles de bonne qualité ? » selon la
+        question d'architecte, pour deux workloads différents.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n25-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez chaque exigence comme plutôt BI ou plutôt IA : « toutes les dates au même format » ;
+      « chaque région présente dans les données d'entraînement » ; « un seul libellé par catégorie » ;
+      « les pannes passées des capteurs conservées » ; « un total mensuel identique entre finance et
+      marketing » ; « les paiements par mobile représentés ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Les 40 chambres froides de l'enseigne envoient une température par minute. Une règle écarte
+      toute valeur hors de l'intervalle [−5 °C ; +10 °C]. Sur un an, 0,3 % des mesures sont écartées,
+      dont la moitié dans les deux heures précédant une panne. (a) Combien de mesures sont écartées
+      par an ? (b) Ce nettoyage convient-il au rapport mensuel « température moyenne par magasin » ?
+      (c) Convient-il à un modèle de maintenance prédictive ? (d) Proposez une organisation des
+      données qui satisfasse les deux.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le fichier des tickets alimente trois workloads : le rapport mensuel du comité, le modèle de
+      prévision de la demande (N24, exercice 12.3) et le modèle de fraude. Rédigez une fiche
+      d'exigences qui, pour chaque workload, (a) pose la question d'architecte ; (b) retient trois
+      dimensions de qualité du §8 avec un seuil chiffré ; (c) classe en erreur, atypique vraie ou
+      signal : les tickets négatifs, les tickets de plus de 20 000 DH, les tickets des magasins
+      ruraux ; (d) indique la transformation retenue. Montrez enfin pourquoi une seule règle de
+      nettoyage en amont ne peut pas satisfaire les trois, et annoncez ce qu'il faut pour savoir
+      quelle version a reçu quelles règles.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers la notion suivante</div>
+  <div class="box-b">
+    <p>Plusieurs versions d'une même donnée, chacune préparée pour un usage, avec ses propres règles :
+      la solution de N25 crée un nouveau besoin. Il faut savoir <strong>qui</strong> décide des règles,
+      <strong>ce que</strong> contient chaque version et d'où elle vient, et <strong>si</strong> elle
+      respecte encore ses exigences aujourd'hui. Ce sont la gouvernance, les métadonnées et
+      l'observabilité : l'objet de N26.</p>
+  </div>
+</div>

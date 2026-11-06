@@ -1,0 +1,445 @@
+<h2 class="notion" id="k-s16">16. Banque d'exercices</h2>
+
+<p>Trente exercices pour s'entraîner sur l'ensemble du cours : <strong>dix faciles</strong> (reconnaître
+  et classer), <strong>dix moyens</strong> (calculer et justifier), <strong>dix difficiles</strong>
+  (concevoir et arbitrer). Ils sont rangés par difficulté, puis dans l'ordre des notions. Les
+  corrigés détaillés des trente exercices sont regroupés en section 17.</p>
+
+<div class="box b-note">
+  <div class="box-t">CAS SUPPORT DE LA BANQUE — le réseau TransVille</div>
+  <div class="box-b">
+    <p>Beaucoup d'énoncés s'appuient sur un cas nouveau, distinct de l'enseigne des sections 2 et 15 :
+      <strong>TransVille</strong>, le réseau de bus d'une grande ville. Il exploite <strong>40 lignes</strong>
+      et <strong>900 bus</strong> équipés d'un boîtier GPS ; ses voyageurs valident un titre (carte
+      d'abonnement ou ticket) sur l'un des valideurs embarqués ; il vend ses abonnements en agence, sur
+      un site web et dans une application mobile ; un centre d'appels reçoit les réclamations. Les
+      autres énoncés utilisent une banque, un groupe hospitalier, une école en ligne et un réseau de
+      pharmacies. Les données chiffrées sont propres à chaque exercice.</p>
+  </div>
+</div>
+
+<!-- ============================ FACILES ============================ -->
+
+<h3 id="k-s16-f">16.A — Dix exercices faciles</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.1 — Nature des données (N1, N2)</div>
+  <div class="box-b">
+    <p>(a) Classez en structurée, semi-structurée ou non structurée : la table SQL des abonnements ; le
+      message JSON envoyé par un boîtier GPS ; la photo d'une pièce d'identité jointe à une demande
+      d'abonnement ; l'enregistrement audio d'un appel au centre d'appels ; le fichier CSV des
+      horaires ; un e-mail de réclamation ; la facture électronique au format XML ; la ligne de log
+      <code>2026-03-04 07:12:09 VAL-118 OK</code>. (b) Un tableur contient la seule valeur
+      « 37 ». Que manque-t-il pour que ce soit une donnée utile ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.2 — Les cinq missions (N3)</div>
+  <div class="box-b">
+    <p>Rattachez chaque action de TransVille à l'une des cinq missions de la gestion des données :
+      (a) archiver après trois ans les validations, puis les supprimer après dix ; (b) brancher
+      l'API des boîtiers GPS ; (c) interdire aux agents commerciaux de voir les numéros de carte
+      bancaire ; (d) ouvrir aux analystes une table des fréquentations par ligne et par heure ;
+      (e) garder les positions GPS dans un stockage adapté aux lectures par intervalle de temps ;
+      (f) savoir de quel fichier source provient chaque ligne du rapport mensuel.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.3 — Les sept contraintes (N4, N7)</div>
+  <div class="box-b">
+    <p>Pour chaque constat d'un groupe hospitalier, nommez la contrainte qui augmente (volume,
+      variété, vitesse, distribution, complexité, gouvernance, IA) : (a) les images d'IRM
+      s'ajoutent aux dossiers textuels ; (b) l'archive des examens grossit de 40 To par an ; (c) les
+      urgences veulent l'occupation des lits à la minute ; (d) trois hôpitaux, deux clouds et un
+      laboratoire externe ; (e) la même base sert à la facturation, au pilotage et à la recherche ;
+      (f) toute consultation d'un dossier doit être tracée ; (g) un modèle de triage doit être
+      entraîné sur des patients de tous âges.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.4 — La grille de l'architecte (N6)</div>
+  <div class="box-b">
+    <p>Voici huit décisions prises par TransVille. Pour chacune, retrouvez la question de la grille
+      à laquelle elle répond : (a) les positions GPS seront lues en continu ; (b) les validations
+      sont conservées dans un lake ; (c) les retards sont calculés dans un traitement de flux ;
+      (d) un modèle de prédiction des retards lira les données ; (e) l'écran d'arrêt doit être à
+      jour à 30 secondes près ; (f) les abonnements entrent par l'API de la billetterie ; (g) seul
+      le service fraude voit l'historique nominatif des validations ; (h) une alerte se déclenche si
+      aucune position n'arrive d'un bus pendant 5 minutes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.5 — L'architecture traditionnelle (N9)</div>
+  <div class="box-b">
+    <p>Une école en ligne enregistre inscriptions, paiements et notes dans une seule base MySQL. Le
+      rapport hebdomadaire de réussite est calculé directement sur cette base, le lundi à 9 h. Les
+      étudiants se plaignent que le site d'inscription est très lent le lundi matin, et la direction
+      voudrait ajouter l'analyse des vidéos de cours regardées. (a) Dessinez la chaîne actuelle.
+      (b) Expliquez la lenteur du lundi. (c) Pourquoi les vidéos regardées entrent-elles mal dans
+      cette architecture ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.6 — Warehouse, lake, lakehouse (N10, N11, N12)</div>
+  <div class="box-b">
+    <p>Vrai ou faux ? Justifiez en une phrase. (a) Un data warehouse impose un schéma avant le
+      chargement. (b) Un data lake ne peut contenir que des fichiers non structurés. (c) Un data
+      lake sans métadonnées ni gouvernance devient un data swamp. (d) Le lakehouse ajoute au lake
+      des transactions et une gestion de schéma. (e) Le warehouse est le meilleur endroit pour
+      garder les enregistrements audio du centre d'appels. (f) Le lakehouse oblige à copier les
+      données dans un warehouse pour faire de la BI.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.7 — Centralisé, distribué, scale-up, scale-out (N13, N14, N15)</div>
+  <div class="box-b">
+    <p>Pour chaque situation, dites s'il s'agit d'une architecture centralisée ou distribuée, et d'un
+      passage à l'échelle vertical (scale-up) ou horizontal (scale-out) : (a) TransVille remplace
+      son serveur de 16 cœurs par un serveur de 64 cœurs ; (b) la banque ajoute six nœuds à son
+      cluster de calcul pour la fin du mois ; (c) le groupe hospitalier garde les dossiers de chaque
+      hôpital sur place et interroge les trois sites ; (d) l'école en ligne double la mémoire de sa
+      base unique. (e) Citez une limite propre au scale-up.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.8 — OLTP ou OLAP ? (N16, N17)</div>
+  <div class="box-b">
+    <p>Classez chaque requête en OLTP ou OLAP, en précisant ce qui vous a décidé (nombre de lignes,
+      lecture ou écriture, utilisateur) : (a) enregistrer la validation d'un ticket ; (b) taux de
+      remplissage moyen par ligne et par tranche horaire sur deux ans ; (c) renouveler l'abonnement
+      du client 448 120 ; (d) comparer les ventes d'abonnements des agences par trimestre ;
+      (e) afficher le solde de la carte d'un voyageur ; (f) évolution mensuelle des réclamations
+      par motif depuis 2022.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.9 — Batch ou stream ? (N20, N21)</div>
+  <div class="box-b">
+    <p>Pour chaque traitement de TransVille, choisissez batch ou stream et donnez la raison :
+      (a) facturer chaque mois les abonnements entreprise ; (b) afficher à l'arrêt le temps
+      d'attente du prochain bus ; (c) recalculer chaque nuit la fréquentation de la veille ;
+      (d) prévenir le régulateur dès qu'un bus s'arrête plus de 3 minutes hors d'un arrêt ;
+      (e) entraîner une fois par semaine un modèle de prévision de fréquentation ; (f) bloquer
+      une carte clonée validée au même moment dans deux bus éloignés.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 16.10 — Signaux d'observabilité (N26)</div>
+  <div class="box-b">
+    <p>Pour chaque incident, nommez le signal d'observabilité qui l'aurait détecté (fraîcheur,
+      volume, schéma, distribution, lignage) : (a) le fichier des validations n'est pas arrivé
+      depuis 26 heures ; (b) la billetterie a renommé la colonne <code>date_val</code> en
+      <code>horodatage</code> ; (c) seulement 18 000 validations hier contre 410 000 habituellement ;
+      (d) 40 % des trajets durent soudain 0 minute ; (e) personne ne sait quelle table alimente le
+      KPI « ponctualité » de la direction.</p>
+  </div>
+</div>
+
+<!-- ============================ MOYENS ============================ -->
+
+<h3 id="k-s16-m">16.B — Dix exercices moyens</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.11 — Coût du scale-up et du scale-out (N15)</div>
+  <div class="box-b">
+    <p>Le calculateur des temps d'attente de TransVille doit tenir un pic de <strong>10 000
+      requêtes/s</strong> pendant 4 heures par jour, et <strong>3 000 requêtes/s</strong> le reste du
+      temps. Option A : un gros serveur (11 000 req/s) à <strong>30 000 DH/mois</strong>. Option B :
+      des nœuds de 1 000 req/s à <strong>1 800 DH/mois</strong> chacun, plus <strong>un nœud de
+      réserve</strong> en permanence. (a) Combien de nœuds faut-il au pic, hors pic ? (b) Coût
+      mensuel de B si l'on garde le nombre de nœuds du pic toute la journée. (c) Coût mensuel de B
+      si le cluster s'adapte à la charge (on paie au prorata des heures). (d) Que se passe-t-il pour A
+      et pour B si un serveur tombe en panne ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.12 — Pourquoi séparer OLTP et OLAP (N18, N19)</div>
+  <div class="box-b">
+    <p>Une banque enregistre <strong>2,5 millions</strong> d'opérations par jour dans sa base
+      transactionnelle. Le contrôle de gestion lance chaque matin un rapport des 90 derniers jours
+      par agence (<strong>150 agences</strong>) et par jour. (a) Combien de lignes ce rapport lit-il
+      sur la base OLTP ? (b) Combien de lignes contient la table agrégée « agence × jour » d'un
+      entrepôt pour la même période ? Quel est le rapport entre les deux ? (c) Quelles sont les
+      trois étapes de l'ETL qui produit cette table, et quand le lancer ? (d) Citez deux risques
+      que la séparation supprime pour les clients de la banque.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.13 — Fenêtre de batch (N20)</div>
+  <div class="box-b">
+    <p>Le traitement nocturne de TransVille démarre à <strong>1 h 00</strong> et enchaîne quatre
+      étapes : extraction 50 min, nettoyage 70 min, calcul des fréquentations 40 min, chargement du
+      tableau de bord 30 min. Le tableau doit être prêt à <strong>6 h 00</strong>. (a) À quelle heure
+      finit le traitement, et quelle est la marge ? (b) Le volume, donc chaque durée, augmente de
+      <strong>40 %</strong> par an. Heure de fin et marge dans un an, puis dans deux ans ?
+      (c) Proposez deux solutions quand la fenêtre est dépassée.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.14 — Le critère de choix (N22)</div>
+  <div class="box-b">
+    <p>On rappelle le critère : un mode convient si <em>temps de réaction exigé ≥ période + temps
+      de traitement</em>. Pour chaque besoin, testez un batch toutes les 15 min (traitement 3 min),
+      un micro-batch toutes les 60 s (traitement 20 s) et un flux (latence 2 s), puis retenez le
+      mode le plus simple qui convient : (a) informer les voyageurs d'un retard en moins de
+      <strong>2 minutes</strong> ; (b) mettre à jour toutes les <strong>30 minutes</strong> la carte
+      de charge des lignes pour les régulateurs ; (c) détecter une carte clonée en moins de
+      <strong>10 secondes</strong> ; (d) publier le rapport de ponctualité du mois le
+      <strong>lendemain</strong>.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.15 — Fenêtres et retards (N21)</div>
+  <div class="box-b">
+    <p>Règle anti-fraude : alerte si une même carte est validée <strong>au moins 4 fois en
+      10 minutes</strong>. La carte 7781 est validée (heure d'événement) à 10 h 00, 10 h 03, 10 h 07,
+      10 h 11, 10 h 12 et 10 h 16. (a) Avec des fenêtres fixes [10 h 00 ; 10 h 10[ et
+      [10 h 10 ; 10 h 20[, y a-t-il une alerte ? (b) Et avec une fenêtre glissante de 10 minutes ?
+      À quelle validation ? (c) La validation de 10 h 07 arrive en réalité à 10 h 14 (bus hors
+      réseau). Avec des fenêtres fixes calculées sur l'heure d'événement et un délai de grâce de
+      2 minutes, où tombe-t-elle ? Et si l'on comptait sur l'heure d'arrivée ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.16 — Le prix des doublons (N24)</div>
+  <div class="box-b">
+    <p>Le fichier clients de l'école en ligne compte <strong>800 000 lignes</strong>, dont
+      <strong>12 %</strong> sont des doublons d'un client déjà présent. Parmi les clients
+      réels, <strong>5 %</strong> ont une adresse invalide. Une brochure imprimée coûte
+      <strong>3,50 DH</strong> envoi compris. (a) Nombre de clients réels. (b) Somme gaspillée en
+      doublons si l'on envoie une brochure par ligne. (c) Somme gaspillée en adresses invalides.
+      (d) À laquelle des cinq causes de N24 chaque gaspillage correspond-il, et quel contrôle aurait
+      dû l'éviter ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.17 — Une même lacune, deux usages (N25)</div>
+  <div class="box-b">
+    <p>Le groupe hospitalier enregistre <strong>50 000 séjours</strong> par an ; le champ « motif
+      d'admission » est vide pour <strong>8 %</strong> d'entre eux. Les vides sont concentrés aux
+      urgences : 30 % des <strong>10 000</strong> séjours d'urgence, contre 1 000 vides pour les
+      40 000 autres séjours. (a) Vérifiez le taux global de 8 %. (b) Le pilotage tolère jusqu'à 10 %
+      de vides : le champ est-il apte pour la BI ? (c) Un modèle est entraîné sur les seuls séjours
+      complets. Quelle part des séjours d'entraînement vient des urgences, contre quelle part dans
+      la réalité ? (d) Concluez sur la qualité « relative à l'usage ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.18 — Automatiser le tri des réclamations (N28)</div>
+  <div class="box-b">
+    <p>Le centre d'appels de TransVille reçoit <strong>12 000 réclamations</strong> écrites par jour ;
+      un agent met <strong>45 secondes</strong> à classer chacune et travaille <strong>7 h 30</strong>
+      par jour. (a) Combien d'heures de tri par jour, et combien d'agents ? (b) Un modèle classe
+      seul <strong>90 %</strong> des réclamations et renvoie les 10 % incertaines à un humain.
+      Combien d'heures et d'agents restent nécessaires ? (c) Quel verbe de l'AI-driven est en jeu ?
+      (d) Quel rôle garde l'humain, et pourquoi le seuil d'incertitude est-il une décision métier ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.19 — Niveaux de stockage (N33)</div>
+  <div class="box-b">
+    <p>Les validations brutes de TransVille représentent <strong>5 Go par jour</strong> et doivent
+      être gardées <strong>3 ans</strong> (1 095 jours). Le stockage chaud coûte <strong>0,40 DH par
+      Go et par mois</strong>, le stockage froid <strong>0,08 DH</strong>. Les analystes ne lisent
+      souvent que les 90 derniers jours. (a) Volume total stocké au bout de 3 ans. (b) Coût mensuel
+      si tout reste en chaud. (c) Coût mensuel si seuls les 90 derniers jours sont en chaud.
+      (d) Combien de fois moins cher ? Quel critère de N33 justifie ce choix ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 16.20 — Copie complète ou CDC (N32)</div>
+  <div class="box-b">
+    <p>La table des abonnés compte <strong>4 millions</strong> de lignes de <strong>500 octets</strong>.
+      Chaque jour, <strong>20 000</strong> lignes sont créées, modifiées ou supprimées. (a) Volume
+      transféré par jour si l'on recopie la table entière toutes les heures. (b) Volume transféré
+      par jour en CDC (une ligne de 500 octets par changement). (c) Rapport entre les deux.
+      (d) Pourquoi une simple requête « lignes modifiées depuis hier » ne suffit-elle pas à
+      remplacer le CDC ?</p>
+  </div>
+</div>
+
+<!-- ============================ DIFFICILES ============================ -->
+
+<h3 id="k-s16-d">16.C — Dix exercices difficiles</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.21 — Faire évoluer une architecture par ses limites (N8 à N12)</div>
+  <div class="box-b">
+    <p>L'école en ligne de l'exercice 16.5 vit trois étapes : (1) la direction veut comparer la
+      réussite par filière sur cinq ans ; (2) elle veut ensuite garder les journaux de lecture des
+      vidéos (JSON) et les copies scannées des examens, sans savoir encore à quoi ils serviront ;
+      (3) deux ans plus tard, les analystes se plaignent de ne plus rien retrouver dans ce stockage
+      et réclament des tables fiables pour leurs tableaux de bord. Pour chaque étape, nommez la
+      génération d'architecture adoptée, le besoin qui l'amène, le compromis accepté et la limite qui
+      prépare l'étape suivante.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.22 — Une banque dans trois pays (N7, N13, N14)</div>
+  <div class="box-b">
+    <p>Une banque opère au Maroc, au Sénégal et en Côte d'Ivoire. La loi de chaque pays impose que les
+      données nominatives des clients restent sur son territoire ; le siège veut pourtant un tableau
+      consolidé des encours par pays et par produit, chaque matin. (a) Une architecture centralisée
+      est-elle possible ? Pourquoi ? (b) Proposez une architecture distribuée qui satisfait la loi et
+      le siège : que reste dans chaque pays, que remonte au siège, sous quelle forme ? (c) Quelles
+      contraintes de N7 justifient ce choix ? (d) Quel nouveau problème la distribution crée-t-elle
+      pour la cohérence des définitions (par exemple « client actif ») ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.23 — Séparer OLTP et OLAP pour un réseau de pharmacies (N16 à N19)</div>
+  <div class="box-b long">
+    <p>Un réseau de <strong>400 pharmacies</strong> enregistre en moyenne <strong>600 tickets par
+      pharmacie et par jour</strong>, chaque ticket comptant en moyenne <strong>3 lignes</strong>
+      (une par médicament). Le siège veut analyser 18 mois (548 jours) de ventes par molécule, par
+      région et par mois ; les pharmaciens exigent que l'encaissement réponde en moins d'une
+      seconde.</p>
+    <ol>
+      <li>Nombre de tickets et de lignes de vente par jour ; nombre de lignes sur 18 mois.</li>
+      <li>Les 400 pharmacies sont réparties en 12 régions et vendent 2 500 molécules. Combien de
+        lignes au plus dans une table agrégée « molécule × région × mois » sur 18 mois ? Comparez.</li>
+      <li>Décrivez le schéma de l'entrepôt (une table de faits, trois dimensions au moins).</li>
+      <li>Décrivez l'ETL : sources, transformations (dont une règle sur les retours de
+        médicaments), chargement et horaire.</li>
+      <li>Expliquez, avec les chiffres trouvés, pourquoi l'analyse ne doit pas tourner sur la base
+        d'encaissement.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.24 — Une même donnée, trois usages : le GPS des bus (N20 à N22)</div>
+  <div class="box-b long">
+    <p>Les <strong>900 bus</strong> envoient une position toutes les <strong>10 secondes</strong> ;
+      chaque message pèse <strong>150 octets</strong>. Trois usages lisent ces positions : l'affichage
+      du temps d'attente aux arrêts, le rapport mensuel de ponctualité par ligne, et un modèle qui
+      prédit les retards à partir de l'historique.</p>
+    <ol>
+      <li>Nombre de messages par seconde, par jour ; volume par jour et par an (365 jours).</li>
+      <li>Pour chacun des trois usages : temps de réaction exigé, mode de traitement retenu (avec le
+        critère de N22), fenêtre éventuelle, état à conserver.</li>
+      <li>Un bus traverse un tunnel et renvoie 3 minutes de positions d'un coup en sortant. Quel
+        usage en souffre, quel autre n'est pas gêné ? Quelle notion de N21 traite ce cas ?</li>
+      <li>Pourquoi faut-il conserver le flux brut même si l'affichage n'en a plus besoin après une
+        minute ?</li>
+    </ol>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.25 — Partager des données de santé avec la recherche (N23, N24, N26)</div>
+  <div class="box-b">
+    <p>Un laboratoire de recherche demande au groupe hospitalier l'accès à cinq ans de dossiers pour
+      étudier les réhospitalisations. (a) En vous appuyant sur les trois conditions de la valeur
+      (N23), dites ce qui manque aujourd'hui pour que ces données aient de la valeur pour le
+      laboratoire. (b) Lesquelles des cinq causes de N24 menacent ce projet ? (c) Rédigez les règles
+      de gouvernance à poser : responsable (owner), steward, version partagée, champs masqués ou
+      pseudonymisés, durée d'accès, traçabilité. (d) Quels métadonnées et signaux d'observabilité
+      le laboratoire doit-il recevoir avec le jeu de données ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.26 — Des réclamations du reporting à l'IA générative (N29)</div>
+  <div class="box-b">
+    <p>Les réclamations de TransVille doivent servir à quatre usages : (1) le nombre mensuel de
+      réclamations par motif ; (2) l'analyse des causes de la hausse de mars ; (3) le modèle de tri
+      de l'exercice 16.18 ; (4) un assistant qui rédige un projet de réponse en s'appuyant sur une base
+      de <strong>1 000 documents</strong> (règlements, tarifs, procédures). (a) Pour chaque usage,
+      listez les exigences sur les données, en montrant qu'elles s'ajoutent. (b) <strong>200</strong>
+      documents de la base sont obsolètes ; l'assistant en lit <strong>4</strong> par réponse
+      (tirages supposés indépendants). Probabilité qu'une réponse s'appuie sur au moins un document
+      obsolète ? (c) Sur <strong>3 000</strong> réponses par mois, combien sont exposées ? Quelle
+      exigence de N29 a été négligée ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.27 — Concevoir les cinq couches de TransVille (N30 à N35)</div>
+  <div class="box-b long">
+    <p>TransVille veut, sur un seul socle : (U1) le temps d'attente en direct aux arrêts ; (U2) un
+      tableau de bord quotidien de fréquentation et de ponctualité ; (U3) un modèle de prévision de
+      la fréquentation par ligne pour adapter les fréquences ; (U4) l'assistant de réponse aux
+      réclamations de l'exercice 16.26. Ses sources : boîtiers GPS, valideurs, billetterie (base
+      relationnelle), site et application mobile, centre d'appels, données météo publiques.</p>
+    <ol>
+      <li>Classez les sources selon les trois axes de N31 (format, fréquence, qualité attendue).</li>
+      <li>Pour chaque source, un mode d'ingestion justifié (N32).</li>
+      <li>Les familles de stockage retenues et ce que chacune contient (N33).</li>
+      <li>Les traitements qui produisent la version prête à l'usage de U1 à U4 (N34).</li>
+      <li>Le consommateur de chaque usage (N35) et la couche transverse : trois règles de
+        gouvernance au moins.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.28 — Le coût des liaisons point à point (N30)</div>
+  <div class="box-b">
+    <p>Un groupe compte <strong>9 sources</strong> et <strong>5 consommateurs</strong>. Aujourd'hui,
+      chaque consommateur a sa propre liaison vers chaque source dont il a besoin ; on suppose le pire
+      cas où chacun lit toutes les sources. Chaque liaison coûte <strong>2 jours</strong> de
+      maintenance par an et chaque source change de schéma <strong>une fois</strong> par an.
+      (a) Nombre de liaisons et jours de maintenance, en point à point puis avec un socle commun.
+      (b) Lors d'un changement de schéma d'une source, combien de liaisons faut-il corriger dans
+      chaque architecture ? (c) Sur un an, nombre total de corrections. (d) Dans quel cas réel le
+      point à point reste-t-il acceptable ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.29 — L'ordre des traitements (N34)</div>
+  <div class="box-b">
+    <p>Un fichier journalier de <strong>2 millions</strong> de validations contient <strong>3 %</strong>
+      de doublons (la même validation reçue deux fois). Le pipeline actuel agrège d'abord la
+      fréquentation par ligne, puis supprime les doublons dans la table agrégée — ce qui ne retire
+      plus rien. Une validation rapporte en moyenne <strong>6 DH</strong> de recette. (a) Nombre de
+      validations réelles. (b) Surestimation de la fréquentation, en nombre et en pourcentage du
+      réel. (c) Recette fictive annoncée chaque jour, puis sur un an. (d) Remettez les cinq opérations
+      de N34 dans le bon ordre pour ce pipeline et expliquez la règle générale. (e) Le modèle de
+      prévision utilise la feature « validations du jour J » pour prédire le jour J : quel défaut ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 16.30 — Du data-driven à l'AI-driven : mesurer l'effet (N27, N28, N35)</div>
+  <div class="box-b">
+    <p>Le tableau de bord montre que la ponctualité de la ligne 12 est tombée à <strong>78 %</strong>.
+      (a) Déroulez la boucle data-driven du support (dashboard → baisse → causes → action) avec des
+      causes plausibles et les données qui permettent de les vérifier. (b) Après l'action (voie
+      réservée sur 2 km), la ligne 12 passe à <strong>86 %</strong> ; pendant la même période, les
+      autres lignes passent de <strong>80 %</strong> à <strong>82 %</strong>. Quel est l'effet net
+      de l'action ? Pourquoi ne pas annoncer +8 points ? (c) TransVille veut ensuite ajuster
+      automatiquement chaque soir les fréquences des 40 lignes. Qu'est-ce qui change en passant à
+      l'AI-driven ? Quel consommateur de N35 intervient, quelle part reste humaine ?</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers les corrigés</div>
+  <div class="box-b">
+    <p>Chercher d'abord seul, au moins jusqu'à une réponse argumentée, avant d'ouvrir la section 17 :
+      la plupart des exercices admettent plusieurs architectures défendables, et le corrigé juge
+      surtout la justification par les contraintes et les chiffres.</p>
+  </div>
+</div>

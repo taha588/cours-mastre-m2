@@ -45,36 +45,51 @@ Critère général d'une notion Nxx : le fragment `cours/sections/Nxx-*.html` co
 
 ## T6 : Batch vs Stream (pages 29-33)
 
-- [ ] T6.1 : N20 Batch processing (p. 29-30)
-- [ ] T6.2 : N21 Stream processing (p. 31)
-- [ ] T6.3 : N22 Critère de choix batch/stream + cas IoV (p. 32-33, pages-schémas)
+- [x] T6.1 : N20 Batch processing (p. 29-30) — 13 pages
+- [x] T6.2 : N21 Stream processing (p. 31) — 12 pages
+- [x] T6.3 : N22 Critère de choix batch/stream + cas IoV (p. 32-33, pages-schémas) — 11 pages — **partie IV terminée**
 
 ## T7 : La donnée comme actif stratégique (pages 34-38)
 
-- [ ] T7.1 : N23 La donnée comme actif stratégique (p. 34-35)
-- [ ] T7.2 : N24 Volume ≠ valeur (p. 36)
-- [ ] T7.3 : N25 Qualité relative à l'usage (p. 37)
-- [ ] T7.4 : N26 Gouvernance / métadonnées / observabilité (p. 38)
+- [x] T7.1 : N23 La donnée comme actif stratégique (p. 34-35) — 13 pages
+- [x] T7.2 : N24 Volume ≠ valeur (p. 36) — 12 pages
+- [x] T7.3 : N25 Qualité relative à l'usage (p. 37) — 11 pages
+- [x] T7.4 : N26 Gouvernance / métadonnées / observabilité (p. 38) — 12 pages — **partie V terminée**
 
 ## T8 : Data-driven vs AI-driven (pages 39-42)
 
-- [ ] T8.1 : N27 Organisation data-driven (p. 39-40)
-- [ ] T8.2 : N28 Organisation AI-driven (p. 41)
-- [ ] T8.3 : N29 Du reporting à l'IA : exigences croissantes (p. 42, page-schéma)
+- [x] T8.1 : N27 Organisation data-driven (p. 39-40) — 11 pages
+- [x] T8.2 : N28 Organisation AI-driven (p. 41) — 10 pages
+- [x] T8.3 : N29 Du reporting à l'IA : exigences croissantes (p. 42, page-schéma) — 10 pages — **partie VI terminée**
 
 ## T9 : Architecture moderne de données (pages 43-50)
 
-- [ ] T9.1 : N30 Les 5 couches + couche transverse (p. 43-44, 50, pages-schémas)
-- [ ] T9.2 : N31 Sources (p. 45)
-- [ ] T9.3 : N32 Ingestion (p. 46)
-- [ ] T9.4 : N33 Storage (p. 47)
-- [ ] T9.5 : N34 Processing (p. 48)
-- [ ] T9.6 : N35 Analytics / AI (p. 49)
+- [x] T9.1 : N30 Les 5 couches + couche transverse (p. 43-44, 50, pages-schémas) — 11 pages
+- [x] T9.2 : N31 Sources (p. 45, page-schéma) — 9 pages
+- [x] T9.3 : N32 Ingestion (p. 46, page-schéma) — 9 pages
+- [x] T9.4 : N33 Storage (p. 47, page-schéma) — 9 pages
+- [x] T9.5 : N34 Processing (p. 48, page-schéma) — 11 pages
+- [x] T9.6 : N35 Analytics / AI (p. 49, page-schéma) — 10 pages — **partie VII terminée**
 
 ## T10 : Khatima et finalisation
 
-- [ ] T10.1 : §15 Problèmes du réel + corrigés — cas e-commerce, grille de décision, TD IoT/Edge (p. 51-56) — Critère : chaque problème a un corrigé détaillé
-- [ ] T10.2 : §16 Banque d'exercices 10 faciles / 10 moyens / 10 difficiles — Critère : 30 énoncés numérotés avec chips
-- [ ] T10.3 : §17 Corrigés des 30 exercices de §16 — Critère : 30 corrigés détaillés, en fin de document
-- [ ] T10.4 : §0 Sommaire avec numéros de pages réels + build final — Critère : chaque entrée du sommaire pointe la bonne page du PDF
-- [ ] T10.5 : Revue finale contre SPEC.md (§3 structure, §4 forme, §5 couverture des 35 notions) — Critère : les 35 notions ont leurs 11 sections, aucune section hors 0-17
+- [x] T10.1 : §15 Problèmes du réel + corrigés — cas e-commerce, grille de décision, TD IoT/Edge (p. 51-56) — Critère : chaque problème a un corrigé détaillé — 4 problèmes, 11 pages
+- [x] T10.2 : §16 Banque d'exercices 10 faciles / 10 moyens / 10 difficiles — Critère : 30 énoncés numérotés avec chips — 30 énoncés, 9 pages
+- [x] T10.3 : §17 Corrigés des 30 exercices de §16 — Critère : 30 corrigés détaillés, en fin de document — 30 corrigés, 15 pages
+- [x] T10.4 : §0 Sommaire avec numéros de pages réels + build final — Critère : chaque entrée du sommaire pointe la bonne page du PDF — 54 entrées vérifiées, 453 p.
+- [x] T10.5 : Revue finale contre SPEC.md (§3 structure, §4 forme, §5 couverture des 35 notions) — Critère : les 35 notions ont leurs 11 sections, aucune section hors 0-17 — 0 écart (`build/revue.py`)
+
+## T11 : Animation + vidéos expliquées (modèle Microservices/animation)
+
+- [x] T11.1 : Page `animation/Archi_donnees_en_mouvement.html` — moteur copié, une carte canvas animée + narration par notion (N1-N19) — Critère : les 19 cartes s'animent et parlent dans le navigateur
+- [x] T11.2 : Studio vidéo 1280×720 + `animation/outils-video/videos.py` (voix Rémy, sous-titres, « À retenir », ffmpeg) — Critère : vidéo N1 rendue, son synchronisé — n1.mp4 61,3 s, 13 phrases
+- [x] T11.3 : Rendu des 18 autres vidéos + affiches — Critère : 19 MP4 vérifiés par images extraites — 19 MP4 (41-68 s) + 19 JPG
+- [x] T11.4 : Bascule Vidéo expliquée / Animation par carte — Critère : chaque carte lit sa vidéo — 19 cartes, `fichiers/video.js`, mode mémorisé
+
+## T12 : Animation + vidéos des parties IV-VII (N20-N35, même méthode que T11)
+
+- [x] T12.1 : Partie IV — cartes N20-N22 (`fichiers/p4.js`, teinte blue, k-4) + narration + 3 vidéos/affiches — Critère : 22 cartes, 3 MP4 vérifiés — n20 63,5 s, n21 55,5 s, n22 57,5 s
+- [x] T12.2 : Partie V — cartes N23-N26 (`p5.js`) + narration + 4 vidéos — Critère : 26 cartes, 4 MP4 vérifiés — n23 62,4 s, n24 52,3 s, n25 54,1 s, n26 58,0 s
+- [x] T12.3 : Partie VI — cartes N27-N29 (`p6.js`) + narration + 3 vidéos — Critère : 29 cartes, 3 MP4 vérifiés — n27 72,8 s, n28 66,2 s, n29 65,0 s
+- [x] T12.4 : Partie VII — cartes N30-N35 (`p7.js`) + narration + 6 vidéos — Critère : 35 cartes, 6 MP4 vérifiés, bascule OK — n30 68,7 s, n31 65,3 s, n32 71,6 s, n33 67,1 s, n34 69,5 s, n35 66,5 s
+

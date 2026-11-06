@@ -1,0 +1,432 @@
+<h2 class="notion" id="n31">N31 — Couche 1, les sources : d'où viennent les données ?</h2>
+
+<h3 id="n31-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Schéma du support (p. 45).</strong> La première couche regroupe les systèmes où la
+      donnée <strong>naît</strong>. Le support en cite six familles :</p>
+    <table class="long">
+      <thead>
+        <tr><th>Famille</th><th>Exemples du support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Applications</strong></td><td>ERP, CRM, e-commerce</td></tr>
+        <tr><td><strong>IoT</strong></td><td>capteurs, véhicules</td></tr>
+        <tr><td><strong>API</strong></td><td>services externes</td></tr>
+        <tr><td><strong>Logs</strong></td><td>événements techniques</td></tr>
+        <tr><td><strong>Fichiers</strong></td><td>CSV, PDF, images</td></tr>
+        <tr><td><strong>Open Data</strong></td><td>sources publiques</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Question posée par le support.</strong> Les sources n'ont <strong>ni le même
+      format</strong>, <strong>ni la même fréquence</strong>, <strong>ni la même qualité</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n31-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Une <strong>source</strong> est un système qui produit la donnée pour son propre besoin :
+      la caisse enregistre une vente pour encaisser, le capteur mesure une température pour
+      surveiller, le serveur web écrit un log pour se dépanner. Aucune source n'a été conçue pour
+      l'analyse. La couche Sources ne se construit donc pas : elle <strong>se constate</strong>, et
+      l'architecte doit la décrire avant de décider quoi que ce soit.</p>
+
+    <p><strong>Les six familles se distinguent par leur origine.</strong> Les
+      <em>applications</em> sont les logiciels de gestion internes (OLTP, N16) ; l'<em>IoT</em>
+      regroupe les objets physiques qui mesurent ; les <em>API</em> donnent accès à des services
+      externes (un transporteur, la météo) ; les <em>logs</em> sont les traces techniques laissées
+      par les systèmes ; les <em>fichiers</em> sont des documents déposés tels quels ; l'<em>open
+      data</em> vient d'organismes publics.</p>
+
+    <p><strong>Trois axes les décrivent.</strong> Le <em>format</em> dit comment la donnée est
+      organisée : structurée, semi-structurée ou non structurée (N2). La <em>fréquence</em> dit à
+      quel rythme elle arrive : en continu, par lots, ou une fois de temps en temps. La
+      <em>qualité</em> dit à quel point on peut s'y fier : complétude, exactitude, fraîcheur (N25).
+      Le message de la page est que ces trois axes <strong>varient d'une source à
+      l'autre</strong>.</p>
+
+    <p><strong>Pourquoi le support le pose en « question ».</strong> Puisque les sources diffèrent
+      sur les trois axes, aucune règle unique ne peut les faire entrer, les stocker et les nettoyer.
+      Le format décidera du stockage (N33), la fréquence décidera de l'ingestion (N32), la qualité
+      décidera des traitements (N34). La description des sources commande donc toute la suite.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Croire que les sources appartiennent à l'équipe data.</strong> Elles appartiennent
+        aux métiers ou à des tiers ; on ne peut pas modifier la caisse pour faciliter l'analyse. On
+        s'adapte à la source, ou l'on négocie un contrat de données avec son propriétaire.</li>
+      <li><strong>Associer une famille à un seul format.</strong> Une application fournit des tables
+        structurées, mais aussi des commentaires libres ; une API renvoie du JSON semi-structuré ;
+        un fichier peut être un CSV structuré ou un PDF non structuré. Le format se constate source
+        par source.</li>
+      <li><strong>Associer l'IoT au seul streaming.</strong> Un capteur mesure en continu, mais un
+        camion sans réseau peut vider sa mémoire en un seul lot à son retour au dépôt.</li>
+      <li><strong>Prendre l'open data pour une donnée fiable par nature.</strong> Elle est publique,
+        pas forcément fraîche ni complète ; sa fréquence de mise à jour est souvent mensuelle ou
+        annuelle.</li>
+      <li><strong>Oublier les logs.</strong> Ils ne contiennent pas de « données métier », mais ils
+        disent ce que font les clients sur le site (pages vues, paniers abandonnés) et ce que font
+        les systèmes (erreurs) : c'est souvent la source la plus volumineuse.</li>
+      <li><strong>Confondre source et ingestion.</strong> L'API est une <em>source</em> quand elle
+        désigne un service externe qui produit la donnée ; « CDC / API » dans N32 désigne la
+        <em>manière</em> de la faire entrer.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> طبقة <strong>Sources</strong> هي البلايص فين كتولد المعطيات.
+    الدعامة كتذكر ست عائلات: <strong>التطبيقات</strong> (ERP، CRM، التجارة الإلكترونية)،
+    <strong>IoT</strong> (الحساسات، العربات)، <strong>API</strong> (خدمات خارجية)،
+    <strong>Logs</strong> (أحداث تقنية)، <strong>الملفات</strong> (CSV، PDF، صور) و
+    <strong>Open Data</strong> (مصادر عمومية). الفكرة المفتاح: هاد المصادر <strong>ماعندهاش نفس
+    الشكل، ولا نفس الوتيرة، ولا نفس الجودة</strong>. الشكل كيحدد التخزين، الوتيرة كتحدد طريقة
+    الإدخال، والجودة كتحدد المعالجة. داكشي علاش وصف المصادر هو أول خطوة فالهندسة.</p>
+</div>
+
+<h3 id="n31-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'enseigne veut un tableau de bord qui croise les ventes, la météo et les avis clients. Le
+      premier projet branche les trois sources avec le même script nocturne : les ventes arrivent
+      bien, mais l'API météo limite le nombre d'appels et renvoie des erreurs, les avis clients sont
+      des textes libres que le script tronque, et les capteurs des chambres froides, ajoutés ensuite,
+      envoient une mesure par minute qu'un traitement nocturne ne sait pas exploiter à temps.</p>
+
+    <p>Le problème traité par N31 : <strong>connaître chaque source avant de la brancher</strong> —
+      son format, sa fréquence, sa qualité — au lieu de traiter toutes les sources comme si elles
+      se ressemblaient.</p>
+  </div>
+</div>
+
+<h3 id="n31-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Dresser l'inventaire des sources.</strong> Une fiche par source, avec sa famille,
+      son propriétaire et ses trois axes.</p>
+
+    <p><strong>Préparer le choix de l'ingestion.</strong> La fréquence de la source et la latence
+      demandée par ses consommateurs désignent le batch, le streaming ou le CDC / API (N32).</p>
+
+    <p><strong>Préparer le choix du stockage.</strong> Une source non structurée (PDF, images,
+      avis) ne va pas dans une table d'entrepôt : elle demande un lac ou un lakehouse (N11, N12,
+      N33).</p>
+
+    <p><strong>Anticiper les traitements.</strong> Une qualité faible annonce du nettoyage, du
+      dédoublonnage, des contrôles (N25, N34).</p>
+
+    <p><strong>Évaluer le risque.</strong> Données personnelles, dépendance à un fournisseur
+      externe, limite d'appels d'une API : la couche transverse commence dès la source (N30).</p>
+  </div>
+</div>
+
+<h3 id="n31-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : les sources sont faites pour opérer, pas pour analyser.</strong>
+      C'est le constat de N9 et de N16 : l'application transactionnelle est optimisée pour
+      enregistrer vite une ligne, pas pour répondre à une question d'ensemble. Ses choix de format
+      et de rythme sont dictés par son métier ; l'architecture les reçoit tels quels.</p>
+
+    <p><strong>Deuxième raison : la variété est la cause de la complexité.</strong> N4 a montré
+      que la gestion devient complexe par le volume, les silos, la diversité des formats et
+      l'arrivée de l'IA. La page 45 en est la traduction concrète : six familles, donc six
+      façons de produire la donnée.</p>
+
+    <p><strong>Troisième raison : chaque axe commande une couche.</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Axe de la source</th><th>Valeurs possibles</th><th>Couche qu'il commande</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Format</strong></td><td>structuré, semi-structuré, non structuré
+          (N2)</td><td>Storage : entrepôt pour le structuré, lac / lakehouse pour le reste
+          (N33)</td></tr>
+        <tr><td><strong>Fréquence</strong></td><td>continue, par lots, ponctuelle</td><td>Ingestion :
+          streaming, batch, CDC / API (N32)</td></tr>
+        <tr><td><strong>Qualité</strong></td><td>complète ou lacunaire, exacte ou douteuse, fraîche
+          ou ancienne (N25)</td><td>Processing : nettoyage, contrôle, enrichissement (N34)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Quatrième raison : on ne corrige pas une source, on la décrit.</strong> Comme
+      l'architecte ne maîtrise pas les sources, la seule manière de rester fiable est de savoir
+      exactement ce qu'elles livrent. C'est pourquoi les métadonnées de N26 (propriétaire,
+      description, fraîcheur attendue) commencent à la source.</p>
+  </div>
+</div>
+
+<h3 id="n31-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>L'inventaire d'une plateforme de données.</strong> Lister toutes les sources de
+      l'entreprise, internes et externes.</p>
+
+    <p><strong>Le cadrage d'un nouveau projet.</strong> Avant un tableau de bord ou un modèle,
+      identifier les sources nécessaires et vérifier qu'elles existent avec la bonne fréquence.</p>
+
+    <p><strong>La négociation avec les propriétaires.</strong> Fixer avec le métier ou le
+      fournisseur un contrat : format, rythme, qualité minimale, préavis en cas de changement.</p>
+
+    <p><strong>L'audit de conformité.</strong> Repérer les sources qui contiennent des données
+      personnelles ou soumises à licence (open data, API payantes).</p>
+
+    <p><strong>Le diagnostic d'un incident.</strong> Une valeur fausse se remonte jusqu'à la source
+      qui l'a produite.</p>
+  </div>
+</div>
+
+<h3 id="n31-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Au tout début d'une architecture.</strong> La couche Sources est la première étape
+      de la démarche de N30.</p>
+
+    <p><strong>Quand une nouvelle source arrive.</strong> Un nouveau fournisseur, un nouveau
+      capteur, une nouvelle application : on la décrit avant de la brancher.</p>
+
+    <p><strong>Quand une source change.</strong> Nouvelle version de l'ERP, colonne renommée, API
+      modifiée : la fiche doit être mise à jour, sinon l'ingestion casse.</p>
+
+    <p><strong>Quand un même script ne suffit plus.</strong> Signe que des sources de formats ou de
+      fréquences différents ont été traitées comme une seule.</p>
+
+    <p><strong>Quand un énoncé demande « d'où viennent les données ? ».</strong> On répond par les
+      familles de sources et leurs trois axes.</p>
+  </div>
+</div>
+
+<h3 id="n31-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lister les sources.</strong> Partir des usages attendus et remonter vers
+      les systèmes qui produisent la donnée.</p>
+
+    <p><strong>Étape 2 — Classer chaque source dans une famille.</strong> Application, IoT, API,
+      logs, fichiers, open data.</p>
+
+    <p><strong>Étape 3 — Décrire le format.</strong> Structuré, semi-structuré ou non structuré,
+      avec un exemple réel d'enregistrement.</p>
+
+    <p><strong>Étape 4 — Décrire la fréquence.</strong> Rythme de production (par seconde, par
+      jour…) et volume par période.</p>
+
+    <p><strong>Étape 5 — Décrire la qualité.</strong> Taux de valeurs manquantes, doublons, retards
+      connus, fiabilité du fournisseur.</p>
+
+    <p><strong>Étape 6 — Noter le propriétaire et les risques.</strong> Qui la gère, données
+      personnelles, limites d'accès. La fiche ainsi remplie sert d'entrée à N32, N33 et N34.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La couche <strong>Sources</strong> regroupe les systèmes où la donnée naît :
+      <strong>applications</strong> (ERP, CRM, e-commerce), <strong>IoT</strong> (capteurs,
+      véhicules), <strong>API</strong> (services externes), <strong>logs</strong> (événements
+      techniques), <strong>fichiers</strong> (CSV, PDF, images) et <strong>open data</strong>
+      (sources publiques). Elles n'ont <strong>ni le même format, ni la même fréquence, ni la même
+      qualité</strong> : les décrire sur ces trois axes commande l'ingestion, le stockage et le
+      traitement.</p>
+    <p class="ar" dir="rtl">طبقة <strong>Sources</strong> فيها الأنظمة اللي كتولد فيها المعطيات:
+      التطبيقات، IoT، API، Logs، الملفات و Open Data. هاد المصادر <strong>ماعندهاش نفس الشكل، ولا
+      نفس الوتيرة، ولا نفس الجودة</strong>؛ ووصفها على هاد المحاور الثلاثة هو اللي كيحدد الإدخال،
+      التخزين والمعالجة.</p>
+  </div>
+</div>
+
+<h3 id="n31-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — classer les sources de l'enseigne</div>
+  <div class="box-b">
+    <p>Rangez chaque élément dans l'une des six familles du support et donnez son format (structuré,
+      semi-structuré, non structuré) : (a) le logiciel de caisse des 120 magasins ; (b) le CRM du
+      programme de fidélité ; (c) les capteurs de température des chambres froides ; (d) le GPS des
+      camions de livraison ; (e) l'API météo ; (f) les journaux du serveur du site e-commerce ;
+      (g) les bons de livraison fournisseurs scannés en PDF ; (h) le recensement de la population
+      par commune publié par l'organisme statistique national.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> La famille dépend de l'<em>origine</em> de la donnée (logiciel
+      interne, objet physique, service externe, trace technique, document, organisme public) ; le
+      format dépend de son <em>organisation</em> (N2).</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Élément</th><th>Famille</th><th>Format</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) caisse</td><td>Applications</td><td>structuré (tables de ventes)</td></tr>
+        <tr><td>(b) CRM fidélité</td><td>Applications</td><td>structuré, avec des champs libres</td></tr>
+        <tr><td>(c) capteurs de froid</td><td>IoT</td><td>semi-structuré (mesures JSON horodatées)</td></tr>
+        <tr><td>(d) GPS des camions</td><td>IoT (véhicules)</td><td>semi-structuré</td></tr>
+        <tr><td>(e) API météo</td><td>API</td><td>semi-structuré (JSON)</td></tr>
+        <tr><td>(f) journaux du site</td><td>Logs</td><td>semi-structuré (lignes d'événements)</td></tr>
+        <tr><td>(g) bons scannés</td><td>Fichiers</td><td>non structuré (PDF image)</td></tr>
+        <tr><td>(h) recensement</td><td>Open Data</td><td>structuré (CSV publié)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarque.</strong> Deux sources de la même famille peuvent avoir des formats
+      différents (CSV et PDF sont tous deux des fichiers), et une même famille comme l'IoT couvre
+      des objets fixes (capteurs) et mobiles (véhicules), exactement comme sur le schéma.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — fréquence et volume de trois sources</div>
+  <div class="box-b">
+    <p>Trois sources de l'enseigne. <strong>Capteurs</strong> : 120 magasins × 4 chambres froides,
+      une mesure par minute, 200 octets par mesure. <strong>Caisses</strong> : 600 000 tickets par
+      jour, 2 Ko par ticket, envoyés en un lot à 23 h 30. <strong>Open data</strong> : un fichier
+      de recensement de 50 Mo publié une fois par an. (a) Calculez le nombre de mesures et le volume
+      par jour des capteurs. (b) Calculez le volume par jour des caisses. (c) Laquelle produit le
+      plus de messages, laquelle le plus d'octets ? (d) Qu'en déduire pour l'ingestion ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Capteurs.</strong> 120 × 4 = 480 chambres froides. Une mesure par minute :
+      480 × 1 440 = <strong>691 200 mesures par jour</strong>. Volume : 691 200 × 200 o =
+      138 240 000 o ≈ <strong>138 Mo par jour</strong>.</p>
+
+    <p><strong>(b) Caisses.</strong> 600 000 × 2 Ko = 1 200 000 Ko ≈ <strong>1,2 Go par
+      jour</strong>, en un seul lot.</p>
+
+    <p><strong>(c) Comparaison.</strong> Les capteurs produisent plus de messages (691 200 contre
+      600 000), mais presque <strong>9 fois moins d'octets</strong> (138 Mo contre 1,2 Go). L'open
+      data, elle, ne pèse que 50 Mo par an, soit environ 0,14 Mo par jour en moyenne.</p>
+
+    <p><strong>(d) Conclusion.</strong> Les capteurs envoient un flux continu de petits messages :
+      ingestion <strong>streaming</strong> (N21). Les caisses livrent un gros lot quotidien :
+      ingestion <strong>batch</strong> (N20). L'open data se recharge une fois par an : un simple
+      téléchargement planifié. Les trois sources diffèrent bien par leur fréquence, comme l'annonce
+      le support, et c'est cette différence — pas le volume total — qui choisit l'ingestion.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — mesurer la qualité d'une source</div>
+  <div class="box-b">
+    <p>Le CRM de fidélité contient 400 000 fiches clients. Un contrôle trouve : 60 000 fiches sans
+      téléphone, 24 000 doublons (même client inscrit deux fois), 8 000 dates de naissance
+      impossibles (avant 1900 ou dans le futur). (a) Calculez le taux de chaque défaut. (b) Combien
+      de clients distincts l'enseigne a-t-elle réellement ? (c) Le service marketing veut envoyer un
+      SMS à tous les clients : quelle part de la base est atteignable, en supposant que les fiches
+      sans téléphone et les doublons ne se recoupent pas ? (d) Quel défaut gêne le plus un modèle
+      qui prédit les achats selon l'âge ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Taux.</strong> Téléphone manquant : 60 000 / 400 000 = <strong>15 %</strong>.
+      Doublons : 24 000 / 400 000 = <strong>6 %</strong>. Dates impossibles : 8 000 / 400 000 =
+      <strong>2 %</strong>.</p>
+
+    <p><strong>(b) Clients distincts.</strong> Chaque doublon est une fiche en trop :
+      400 000 − 24 000 = <strong>376 000 clients</strong>.</p>
+
+    <p><strong>(c) Clients atteignables par SMS.</strong> Parmi les 376 000 clients distincts,
+      60 000 n'ont pas de téléphone : 376 000 − 60 000 = 316 000, soit 316 000 / 376 000 ≈
+      <strong>84 %</strong>. Sans dédoublonnage, on enverrait aussi 24 000 SMS en double.</p>
+
+    <p><strong>(d) Pour le modèle.</strong> Le téléphone manquant ne gêne pas un modèle d'âge ; ce
+      sont les <strong>2 % de dates impossibles</strong> qui faussent la variable utile, et les
+      doublons qui comptent deux fois certains clients. La qualité d'une même source se juge donc
+      selon l'usage (N25) : le défaut le plus grave pour le SMS (15 %) n'est pas celui qui gêne le
+      modèle (2 %).</p>
+  </div>
+</div>
+
+<h3 id="n31-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les six familles de sources du support avec leurs exemples.</li>
+      <li>Énoncez les trois axes sur lesquels les sources diffèrent et donnez la couche que commande
+        chacun.</li>
+      <li>Expliquez pourquoi la couche Sources « se constate » au lieu de se construire.</li>
+      <li>Donnez deux sources d'une même famille qui ont des formats différents.</li>
+      <li>Expliquez la différence entre une API <em>source</em> et une ingestion par API.</li>
+      <li>Rédigez la fiche descriptive (famille, format, fréquence, qualité, propriétaire) des
+        avis clients publiés sur le site de l'enseigne.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n31-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Classez dans les six familles : (a) l'ERP de gestion des stocks ; (b) les photos des rayons
+      prises par les chefs de magasin ; (c) l'API de suivi d'un transporteur ; (d) les traces de
+      connexion à l'application mobile ; (e) les compteurs électriques connectés des magasins ;
+      (f) le calendrier officiel des jours fériés.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Le site e-commerce reçoit 2 millions de pages vues par jour ; chaque page vue écrit une ligne
+      de log de 500 octets. (a) Calculez le volume quotidien et annuel des logs. (b) Comparez au
+      volume des caisses (1,2 Go par jour, exercice 12.2). (c) Les logs n'ont pas de « donnée
+      métier » : citez deux usages qui justifient pourtant de les conserver.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Construisez le tableau d'inventaire des sept sources de l'enseigne (caisses, ERP, CRM,
+      capteurs, site web, avis clients, fichiers fournisseurs) : famille, format, fréquence, qualité
+      attendue, propriétaire. Pour chaque source, proposez ensuite le mode d'ingestion (batch,
+      streaming, CDC / API) en justifiant par sa fréquence et par la latence demandée par ses
+      consommateurs. Identifiez la source dont un changement de format casserait le plus de
+      consommateurs.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N32</div>
+  <div class="box-b">
+    <p>Une source décrite n'est pas encore une source exploitable : il faut faire entrer sa donnée
+      dans la plateforme, au rythme qui convient. Les caisses livrent un lot, les capteurs un flux,
+      l'ERP des modifications à répliquer. Choisir pour chaque source entre batch, streaming et
+      CDC / API est l'objet de N32.</p>
+  </div>
+</div>

@@ -1,0 +1,666 @@
+<h2 class="notion" id="k-s17">17. Corrigés des exercices de la section 16</h2>
+
+<p>Chaque corrigé reprend le numéro de l'exercice. Pour les exercices de conception, plusieurs
+  réponses sont défendables : ce qui compte est de justifier chaque choix par une contrainte ou un
+  chiffre, comme dans les problèmes du réel de la section 15.</p>
+
+<!-- ============================ FACILES ============================ -->
+
+<h3 id="k-s17-f">17.A — Corrigés des exercices faciles</h3>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.1 — Nature des données</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Le critère est : qui porte le schéma, et à quel moment ?</p>
+    <ul>
+      <li><em>Structurées</em> (schéma fixe imposé à l'écriture, lignes × colonnes) : la table SQL
+        des abonnements ; le fichier CSV des horaires (colonnes identiques sur chaque ligne).</li>
+      <li><em>Semi-structurées</em> (balises ou clés portées par chaque enregistrement, schéma
+        souple) : le message JSON du boîtier GPS ; la facture XML ; la ligne de log du valideur —
+        même très régulière, rien ne garantit que la ligne suivante aura la même forme (N2).</li>
+      <li><em>Non structurées</em> (aucun schéma exploitable directement) : la photo de la pièce
+        d'identité ; l'enregistrement audio ; l'e-mail de réclamation (texte libre, même si
+        l'en-tête contient quelques champs).</li>
+    </ul>
+    <p><strong>(b)</strong> « 37 » est une valeur, pas encore une donnée utile : il manque le
+      <em>contexte</em> (de quoi s'agit-il : âge, température, numéro de ligne, retard en minutes ?),
+      l'<em>unité</em>, la <em>date</em> et la <em>source</em>. N1 l'a posé : une donnée n'a de valeur
+      que si elle est interprétable et reliée à un usage. Avec « retard moyen, en minutes, ligne 12,
+      mars 2026, source : boîtiers GPS », le même nombre devient une information exploitable.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.2 — Les cinq missions</div>
+  <div class="box-b">
+    <p>Rappel des missions (N3) : collecter et intégrer ; stocker selon les workloads ; gouverner,
+      sécuriser et contrôler les accès ; gérer cycle de vie, traçabilité et observabilité ; fournir
+      des données utilisables.</p>
+    <ul>
+      <li>(a) Archiver puis supprimer → <em>cycle de vie</em>.</li>
+      <li>(b) Brancher l'API GPS → <em>collecter et intégrer</em>.</li>
+      <li>(c) Masquer les numéros de carte → <em>gouverner, sécuriser, contrôler les accès</em>.</li>
+      <li>(d) Table de fréquentation ouverte aux analystes → <em>fournir des données utilisables</em>.</li>
+      <li>(e) Stockage adapté aux lectures par intervalle de temps → <em>stocker selon les
+        workloads</em>.</li>
+      <li>(f) Savoir de quel fichier vient chaque ligne → <em>traçabilité</em> (lignage), quatrième
+        mission.</li>
+    </ul>
+    <p>Une même équipe fait souvent plusieurs missions ; l'intérêt de la liste est de vérifier
+      qu'aucune n'est oubliée — la (f) est la plus souvent négligée.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.3 — Les sept contraintes</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) IRM à côté des dossiers textuels → <em>variété</em> (nouveau format).</li>
+      <li>(b) +40 To par an → <em>volume</em>.</li>
+      <li>(c) Occupation des lits à la minute → <em>vitesse</em> (fraîcheur exigée).</li>
+      <li>(d) Trois hôpitaux, deux clouds, un laboratoire → <em>distribution</em>.</li>
+      <li>(e) Facturation, pilotage et recherche sur la même base → <em>complexité</em> (plusieurs
+        workloads concurrents).</li>
+      <li>(f) Traçage de toute consultation → <em>gouvernance</em> (conformité, traçabilité).</li>
+      <li>(g) Patients de tous âges pour le modèle → <em>IA</em> (représentativité).</li>
+    </ul>
+    <p>Les sept contraintes augmentent en même temps : c'est pourquoi, selon la loi de N7,
+      l'architecture du groupe doit découpler stockage, traitements et usages au lieu de tout
+      confier à une seule base.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.4 — La grille de l'architecte</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) Positions lues en continu → « Comment les déplacer ? » (batch / stream / CDC).</li>
+      <li>(b) Validations dans un lake → « Où les conserver ? » (storage).</li>
+      <li>(c) Retards calculés dans un flux → « Où les transformer ? » (processing).</li>
+      <li>(d) Modèle de prédiction → « Qui va les consommer ? » (BI / ML / IA / applications).</li>
+      <li>(e) Écran à jour à 30 s → « Quel niveau de fraîcheur ? » (latence / SLA).</li>
+      <li>(f) Abonnements par l'API de la billetterie → « Où arrivent les données ? » (sources /
+        ingestion).</li>
+      <li>(g) Historique nominatif réservé au service fraude → « Qui peut y accéder ? » (sécurité /
+        gouvernance).</li>
+      <li>(h) Alerte si aucune position pendant 5 min → « Comment vérifier leur état ? » (qualité /
+        observabilité : signal de fraîcheur).</li>
+    </ul>
+    <p>Chaque décision répond à une seule question ; une architecture est complète quand les huit
+      questions ont une réponse.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.5 — L'architecture traditionnelle</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Site d'inscription, paiement, notes → <em>une base MySQL</em> →
+      rapport hebdomadaire (lecture SQL directe). C'est la chaîne App → BD → Reporting de N9.</p>
+    <p><strong>(b)</strong> Le lundi à 9 h, deux workloads opposés se disputent la même base : les
+      inscriptions (OLTP : beaucoup de petites écritures rapides) et le rapport de réussite (lecture
+      de toutes les notes, agrégations, tris). Le rapport consomme processeur, mémoire et disque, et
+      peut poser des verrous : les transactions des étudiants attendent. Le problème n'est pas la
+      puissance de la base, mais le couplage de deux usages sur une même ressource.</p>
+    <p><strong>(c)</strong> Les journaux de vidéos regardées sont volumineux (un événement par
+      lecture, pause, avance) et semi-structurés (JSON, champs variables selon le lecteur). Ils
+      n'entrent pas dans le schéma relationnel fixe, gonfleraient la base transactionnelle, et leur
+      analyse aggraverait la contention du (b). Cette limite amène les générations suivantes
+      (warehouse, puis lake) — voir l'exercice 16.21.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.6 — Warehouse, lake, lakehouse</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) <em>Vrai.</em> Le warehouse applique le schéma à l'écriture (schema-on-write) : les
+        données sont nettoyées et modélisées par l'ETL avant d'être chargées.</li>
+      <li>(b) <em>Faux.</em> Le lake accepte tous les formats, structurés compris (CSV, tables
+        exportées, Parquet) ; sa particularité est de les garder bruts, schéma à la lecture.</li>
+      <li>(c) <em>Vrai.</em> Sans catalogue ni responsable, personne ne sait ce que contiennent les
+        fichiers ni s'ils sont fiables : c'est le data swamp (N11).</li>
+      <li>(d) <em>Vrai.</em> Le lakehouse garde le stockage ouvert et peu coûteux du lake et y ajoute
+        transactions, gestion de schéma et versions, ce qui permet des tables fiables (N12).</li>
+      <li>(e) <em>Faux.</em> Le warehouse est fait pour des données structurées interrogées en SQL ;
+        l'audio, non structuré et volumineux, va dans le lake (stockage objet).</li>
+      <li>(f) <em>Faux.</em> L'intérêt du lakehouse est justement de servir la BI directement sur
+        les tables du lake, sans seconde copie dans un warehouse.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.7 — Centralisé, distribué, scale-up, scale-out</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) Serveur 16 → 64 cœurs : architecture <em>centralisée</em>, <em>scale-up</em> (une
+        machine plus puissante).</li>
+      <li>(b) Six nœuds ajoutés au cluster : <em>distribuée</em>, <em>scale-out</em> (plus de
+        machines), et réversible après la fin du mois.</li>
+      <li>(c) Dossiers gardés dans chaque hôpital et interrogés ensemble : <em>distribuée</em> ;
+        il ne s'agit pas ici de passage à l'échelle mais de répartition géographique des données.</li>
+      <li>(d) Double mémoire sur la base unique : <em>centralisée</em>, <em>scale-up</em>.</li>
+    </ul>
+    <p><strong>(e)</strong> Limites du scale-up (N15) : un plafond physique (on ne trouve pas de
+      machine infiniment grosse), un coût qui croît plus vite que la puissance, un point unique de
+      panne, et souvent un arrêt pour changer de machine. Une seule suffit pour la réponse.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.8 — OLTP ou OLAP ?</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) Enregistrer une validation : <em>OLTP</em> — écriture d'une ligne, en temps réel, par
+        l'application.</li>
+      <li>(b) Remplissage moyen par ligne et tranche horaire sur deux ans : <em>OLAP</em> — lecture
+        de millions de lignes, agrégation, pour un analyste.</li>
+      <li>(c) Renouveler l'abonnement d'un client : <em>OLTP</em> — mise à jour d'un enregistrement
+        identifié par sa clé.</li>
+      <li>(d) Ventes d'abonnements par agence et trimestre : <em>OLAP</em> — agrégation sur deux
+        dimensions (agence, temps).</li>
+      <li>(e) Solde de la carte : <em>OLTP</em> — lecture d'une ligne, réponse immédiate au voyageur.
+        Une lecture peut donc être OLTP : ce qui compte est le nombre de lignes et l'utilisateur.</li>
+      <li>(f) Réclamations par motif et par mois depuis 2022 : <em>OLAP</em> — historique long,
+        agrégation.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.9 — Batch ou stream ?</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) Facturation mensuelle : <em>batch</em> — l'échéance est mensuelle, on veut traiter
+        un lot complet, contrôlé et rejouable.</li>
+      <li>(b) Temps d'attente à l'arrêt : <em>stream</em> — la valeur perd son sens en quelques
+        dizaines de secondes.</li>
+      <li>(c) Fréquentation de la veille : <em>batch</em> nocturne — la journée est close, rien ne
+        presse avant le matin.</li>
+      <li>(d) Arrêt anormal de plus de 3 min : <em>stream</em> — le régulateur doit réagir pendant
+        l'incident ; il faut garder un état (heure du dernier mouvement de chaque bus).</li>
+      <li>(e) Entraînement hebdomadaire : <em>batch</em> — sur un historique, à date fixe.</li>
+      <li>(f) Carte clonée : <em>stream</em> — il faut comparer deux validations quasi simultanées,
+        et bloquer avant d'autres usages frauduleux.</li>
+    </ul>
+    <p>La règle : on choisit le stream quand la valeur de la réponse diminue vite avec le délai
+      (N21) ; sinon le batch, plus simple, suffit (N20).</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.10 — Signaux d'observabilité</div>
+  <div class="box-b">
+    <ul>
+      <li>(a) Fichier absent depuis 26 h → <em>fraîcheur</em> (la dernière arrivée dépasse le délai
+        attendu de 24 h).</li>
+      <li>(b) Colonne renommée → <em>schéma</em>.</li>
+      <li>(c) 18 000 au lieu de 410 000 → <em>volume</em> (−95,6 %).</li>
+      <li>(d) 40 % de trajets à 0 minute → <em>distribution</em> (les valeurs sont présentes mais
+        anormales ; ni le volume ni le schéma ne changent).</li>
+      <li>(e) Origine du KPI inconnue → <em>lignage</em>.</li>
+    </ul>
+    <p>Le cas (d) montre pourquoi un seul signal ne suffit pas : un pipeline peut livrer à l'heure,
+      le bon nombre de lignes, au bon format, et des valeurs fausses.</p>
+  </div>
+</div>
+
+<!-- ============================ MOYENS ============================ -->
+
+<h3 id="k-s17-m">17.B — Corrigés des exercices moyens</h3>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.11 — Coût du scale-up et du scale-out</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Au pic : 10 000 / 1 000 = 10 nœuds, plus 1 de réserve = <strong>11
+      nœuds</strong>. Hors pic : 3 000 / 1 000 = 3, plus 1 = <strong>4 nœuds</strong>.</p>
+    <p><strong>(b)</strong> 11 nœuds en permanence : 11 × 1 800 = <strong>19 800 DH/mois</strong>,
+      déjà moins cher que l'option A (30 000 DH).</p>
+    <p><strong>(c)</strong> Par jour : 4 h × 11 nœuds + 20 h × 4 nœuds = 44 + 80 = 124
+      nœuds-heures, soit 124 / 24 ≈ 5,17 nœuds en moyenne. Coût : 124 / 24 × 1 800 =
+      <strong>9 300 DH/mois</strong>, soit 3,2 fois moins que A.</p>
+    <p><strong>(d)</strong> Option A : un seul serveur, donc un point unique de panne ; s'il tombe,
+      plus aucun écran n'affiche le temps d'attente. Option B : la perte d'un nœud retire 1 000
+      req/s ; le nœud de réserve prend le relais et la capacité au pic reste de 10 000 req/s.</p>
+    <p><strong>Conclusion.</strong> Le scale-out gagne ici trois fois : coût (élasticité),
+      disponibilité (redondance) et plafond (on peut ajouter des nœuds si le pic grandit). Son
+      prix est la complexité : répartir la charge et coordonner les nœuds (N14, N15).</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.12 — Pourquoi séparer OLTP et OLAP</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> 2 500 000 × 90 = <strong>225 000 000 lignes</strong> lues chaque
+      matin sur la base transactionnelle.</p>
+    <p><strong>(b)</strong> Table agrégée : 150 agences × 90 jours = <strong>13 500 lignes</strong>.
+      Rapport : 225 000 000 / 13 500 ≈ <strong>16 667</strong>. Le rapport lit seize mille fois
+      moins de lignes dans l'entrepôt.</p>
+    <p><strong>(c)</strong> ETL : <em>Extract</em> — lire les opérations de la veille (ou les
+      changements par CDC) sans peser sur la base ; <em>Transform</em> — contrôler (montants,
+      codes agence), convertir les devises, agréger par agence et par jour ;
+      <em>Load</em> — ajouter la journée à la table de faits. Lancement la nuit, quand l'activité
+      des clients est minimale : le rapport du matin ne lit plus que l'entrepôt.</p>
+    <p><strong>(d)</strong> Risques supprimés : (1) virements et paiements ralentis ou rejetés par
+      dépassement de délai pendant le rapport ; (2) verrous posés par les lectures longues qui
+      bloquent des écritures. On peut aussi citer : un rapport mal écrit ne peut plus faire tomber
+      la base des guichets.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.13 — Fenêtre de batch</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Durée : 50 + 70 + 40 + 30 = 190 min = 3 h 10. Fin : 1 h 00 + 3 h 10 =
+      <strong>4 h 10</strong> ; marge : <strong>1 h 50</strong>.</p>
+    <p><strong>(b)</strong> Dans un an (× 1,4) : 190 × 1,4 = 266 min = 4 h 26 → fin
+      <strong>5 h 26</strong>, marge <strong>34 min</strong>. Dans deux ans (× 1,4² = × 1,96) :
+      190 × 1,96 = 372,4 min ≈ 6 h 12 → fin ≈ <strong>7 h 12</strong> : le tableau a
+      <strong>12 minutes de retard</strong>. La marge fond vite car la croissance est
+      multiplicative.</p>
+    <p><strong>(c)</strong> Solutions (deux suffisent) : traiter en <em>incrémental</em> (seulement
+      les données nouvelles, pas tout l'historique) ; <em>paralléliser</em> les étapes sur
+      plusieurs nœuds (scale-out) ; <em>étaler</em> le travail dans la journée en micro-batchs pour
+      qu'il ne reste qu'un petit lot la nuit ; ou commencer l'extraction plus tôt si la source le
+      permet. Retarder l'heure limite n'est pas une solution : c'est le besoin métier.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.14 — Le critère de choix</div>
+  <div class="box-b">
+    <p>Délais de chaque mode : batch 15 min + 3 min = <strong>18 min</strong> ; micro-batch 60 s +
+      20 s = <strong>80 s</strong> ; flux <strong>2 s</strong>.</p>
+    <table>
+      <tr><th>Besoin</th><th>Exigé</th><th>Batch 18 min</th><th>Micro 80 s</th><th>Flux 2 s</th><th>Retenu</th></tr>
+      <tr><td>(a) Retard aux voyageurs</td><td>120 s</td><td>non</td><td>oui</td><td>oui</td><td>micro-batch</td></tr>
+      <tr><td>(b) Carte de charge</td><td>30 min</td><td>oui</td><td>oui</td><td>oui</td><td>batch</td></tr>
+      <tr><td>(c) Carte clonée</td><td>10 s</td><td>non</td><td>non</td><td>oui</td><td>flux</td></tr>
+      <tr><td>(d) Rapport mensuel</td><td>1 jour</td><td>oui</td><td>oui</td><td>oui</td><td>batch nocturne</td></tr>
+    </table>
+    <p>On retient le mode <em>le plus simple</em> qui respecte l'inégalité : inutile de payer un
+      flux pour (b) et (d). Pour (a), le micro-batch suffit avec 40 s de marge ; s'il fallait
+      descendre sous 80 s, il faudrait passer au flux.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.15 — Fenêtres et retards</div>
+  <div class="box-b">
+    <p><strong>(a) Fenêtres fixes.</strong> [10 h 00 ; 10 h 10[ contient 10 h 00, 10 h 03,
+      10 h 07 : 3 validations. [10 h 10 ; 10 h 20[ contient 10 h 11, 10 h 12, 10 h 16 : 3.
+      <strong>Aucune alerte</strong>, alors que quatre validations ont eu lieu en 9 minutes : la
+      coupure de 10 h 10 les a séparées.</p>
+    <p><strong>(b) Fenêtre glissante.</strong> À 10 h 12, les 10 dernières minutes contiennent
+      10 h 03, 10 h 07, 10 h 11, 10 h 12 : <strong>4 → alerte à la validation de 10 h 12</strong>.
+      (À 10 h 16, la fenêtre contient encore 10 h 07, 10 h 11, 10 h 12, 10 h 16 : la règle reste
+      vraie, l'alerte ne doit pas être dupliquée.)</p>
+    <p><strong>(c) Événement en retard.</strong> En heure d'événement, 10 h 07 appartient à la
+      fenêtre [10 h 00 ; 10 h 10[, qui se ferme à 10 h 10 + 2 min de grâce = 10 h 12. Arrivée à
+      10 h 14, la validation est <strong>hors délai</strong> : elle n'entre pas dans le calcul (elle
+      est mise de côté pour correction ou audit). En heure d'arrivée, elle tomberait dans
+      [10 h 10 ; 10 h 20[, qui compterait alors 4 validations et déclencherait une alerte — juste
+      par hasard, pour une mauvaise raison. Leçon (N21) : seul l'horodatage de l'événement décrit ce
+      qui s'est passé ; le délai de grâce est un compromis entre complétude et rapidité de la
+      réponse.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.16 — Le prix des doublons</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Doublons : 12 % × 800 000 = 96 000. Clients réels : 800 000 − 96 000 =
+      <strong>704 000</strong>.</p>
+    <p><strong>(b)</strong> Brochures en double : 96 000 × 3,50 = <strong>336 000 DH</strong>.</p>
+    <p><strong>(c)</strong> Adresses invalides : 5 % × 704 000 = 35 200 ; 35 200 × 3,50 =
+      <strong>123 200 DH</strong>. Total gaspillé : <strong>459 200 DH</strong> pour une seule
+      campagne.</p>
+    <p><strong>(d)</strong> Les doublons relèvent de la cause « données <em>dupliquées ou
+      contradictoires</em> » ; contrôle : rapprochement des identités (même e-mail, même nom et date
+      de naissance) avant tout envoi, et unicité imposée à la saisie. Les adresses invalides
+      relèvent de données <em>non gouvernées</em> : aucune règle de qualité ni responsable ne
+      garantit que l'adresse est vérifiée ; contrôle : validation contre un référentiel postal à la
+      saisie et un steward chargé de la table clients. Le volume de 800 000 lignes ne donnait aucune
+      valeur en plus : c'est la leçon de N24.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.17 — Une même lacune, deux usages</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Vides : 30 % × 10 000 = 3 000 aux urgences, + 1 000 ailleurs = 4 000 ;
+      4 000 / 50 000 = <strong>8 %</strong>.</p>
+    <p><strong>(b)</strong> 8 % ≤ 10 % : pour un tableau de pilotage par grande catégorie, le champ
+      est <strong>apte</strong> (on peut afficher une catégorie « non renseigné »).</p>
+    <p><strong>(c)</strong> Séjours complets : urgences 10 000 − 3 000 = 7 000 ; autres
+      40 000 − 1 000 = 39 000 ; total 46 000. Part des urgences à l'entraînement :
+      7 000 / 46 000 ≈ <strong>15,2 %</strong>, contre 10 000 / 50 000 = <strong>20 %</strong>
+      dans la réalité. Le modèle voit un quart d'urgences en moins que ce qu'il rencontrera.</p>
+    <p><strong>(d)</strong> La même colonne est « bonne » pour la BI et « mauvaise » pour l'IA :
+      la BI regarde un taux global, l'IA dépend de la <em>représentativité</em>. Les vides n'étant
+      pas répartis au hasard, les supprimer biaise l'échantillon (N25). Remèdes : compléter le
+      motif aux urgences à la source, ou repondérer les séjours d'urgence à l'entraînement.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.18 — Automatiser le tri des réclamations</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> 12 000 × 45 s = 540 000 s = <strong>150 h</strong> par jour ;
+      150 / 7,5 = <strong>20 agents</strong>.</p>
+    <p><strong>(b)</strong> Restent 10 % × 12 000 = 1 200 réclamations ; 1 200 × 45 s = 54 000 s =
+      <strong>15 h</strong>, soit <strong>2 agents</strong>. Dix-huit agents peuvent passer au
+      traitement des réclamations elles-mêmes.</p>
+    <p><strong>(c)</strong> Le verbe est <em>classer</em> (affecter un motif) ; l'ensemble du
+      circuit relève aussi d'<em>automatiser</em> (le routage se fait sans intervention).</p>
+    <p><strong>(d)</strong> L'humain traite les cas incertains, contrôle un échantillon des cas
+      automatiques et corrige les erreurs, qui deviennent de nouveaux labels. Le seuil est une
+      décision métier car il arbitre entre deux coûts : un seuil bas fait plus de travail
+      automatique mais plus d'erreurs de routage (réclamations mal orientées, clients mécontents) ;
+      un seuil haut fait l'inverse. Seul le métier sait ce que coûte chaque erreur (N28).</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.19 — Niveaux de stockage</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> 5 Go × 1 095 = <strong>5 475 Go</strong>.</p>
+    <p><strong>(b)</strong> Tout en chaud : 5 475 × 0,40 = <strong>2 190 DH/mois</strong>.</p>
+    <p><strong>(c)</strong> Chaud : 90 × 5 = 450 Go × 0,40 = 180 DH ; froid : 5 475 − 450 =
+      5 025 Go × 0,08 = 402 DH ; total <strong>582 DH/mois</strong>.</p>
+    <p><strong>(d)</strong> 2 190 / 582 ≈ <strong>3,8 fois</strong> moins cher, soit 19 296 DH
+      économisés par an. Le critère est le <em>cycle de vie</em> (avec le coût) : la valeur d'usage
+      d'une validation baisse avec l'âge, son niveau de stockage doit suivre. Le prix est une
+      lecture plus lente des données anciennes, acceptable puisqu'elles sont rarement lues.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.20 — Copie complète ou CDC</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Taille de la table : 4 000 000 × 500 o = 2 000 000 000 o = 2 Go.
+      Copie toutes les heures : 2 × 24 = <strong>48 Go par jour</strong>.</p>
+    <p><strong>(b)</strong> CDC : 20 000 × 500 o = 10 000 000 o = <strong>10 Mo par jour</strong>.</p>
+    <p><strong>(c)</strong> 48 000 Mo / 10 Mo = <strong>4 800</strong>. Et la donnée arrive en
+      quelques secondes au lieu d'une heure.</p>
+    <p><strong>(d)</strong> La requête « modifiées depuis hier » : (1) ne voit pas les
+      <em>suppressions</em> — une ligne supprimée n'existe plus ; (2) ne voit que l'état final, pas
+      les modifications intermédiaires ; (3) dépend d'une colonne de date de mise à jour fiable,
+      que toutes les applications ne tiennent pas ; (4) relit la table source et la charge. Le CDC
+      lit le journal des transactions et restitue chaque insertion, mise à jour et suppression dans
+      l'ordre (N32).</p>
+  </div>
+</div>
+
+<!-- ============================ DIFFICILES ============================ -->
+
+<h3 id="k-s17-d">17.C — Corrigés des exercices difficiles</h3>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.21 — Faire évoluer une architecture par ses limites</div>
+  <div class="box-b">
+    <table class="long">
+      <tr><th>Étape</th><th>Génération</th><th>Besoin</th><th>Compromis accepté</th><th>Limite → étape suivante</th></tr>
+      <tr><td>1</td><td>Data warehouse (N10)</td><td>Comparer la réussite sur 5 ans sans ralentir les inscriptions</td><td>Schéma fixé avant chargement, ETL à maintenir, données d'hier</td><td>N'accepte pas le JSON des vidéos ni les scans ; il faut savoir à l'avance à quoi servira la donnée</td></tr>
+      <tr><td>2</td><td>Data lake (N11)</td><td>Garder tous les formats, bruts, à faible coût, pour des usages encore inconnus</td><td>Schéma à la lecture, peu de garanties de qualité</td><td>Sans catalogue ni gouvernance, il devient un data swamp : on ne retrouve rien</td></tr>
+      <tr><td>3</td><td>Lakehouse (N12)</td><td>Des tables fiables pour la BI sans quitter le lake</td><td>Discipline : formats de tables, catalogue, responsables, versions</td><td>Reste à gouverner et observer la chaîne entière (N26, N30)</td></tr>
+    </table>
+    <p>Chaque génération ne remplace pas la précédente par mode : elle répond à la limite que le
+      nouveau besoin a révélée (N8). À l'étape 3, l'école garde le stockage brut de l'étape 2 et
+      retrouve les garanties de l'étape 1.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.22 — Une banque dans trois pays</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Non : centraliser les données nominatives au siège ferait sortir des
+      données clients de leur pays, ce que la loi interdit. La contrainte n'est pas technique mais
+      réglementaire.</p>
+    <p><strong>(b)</strong> Architecture distribuée :</p>
+    <ul>
+      <li><em>Dans chaque pays</em> : la base transactionnelle, le stockage analytique local avec
+        les données nominatives, les traitements qui calculent les encours.</li>
+      <li><em>Vers le siège</em>, chaque nuit : seulement des <em>agrégats non nominatifs</em>
+        (encours par produit et par jour, nombre de clients actifs), au format convenu.</li>
+      <li><em>Au siège</em> : un entrepôt consolidé qui assemble les trois flux pour le tableau du
+        matin ; aucune donnée personnelle n'y arrive.</li>
+    </ul>
+    <p><strong>(c)</strong> Contraintes de N7 : <em>distribution</em> (trois pays, trois systèmes)
+      et <em>gouvernance</em> (conformité, souveraineté). La vitesse est modérée (un tableau par
+      jour) : un batch nocturne suffit.</p>
+    <p><strong>(d)</strong> Chaque filiale peut définir « client actif » à sa façon (une opération
+      en 30 jours, ou en 90 ?). Additionner des agrégats calculés différemment donne un chiffre
+      faux. Il faut un <em>référentiel commun de définitions</em> (glossaire métier, métadonnées),
+      des contrats de données entre filiales et siège, et un contrôle de cohérence à l'arrivée.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.23 — Séparer OLTP et OLAP pour un réseau de pharmacies</div>
+  <div class="box-b">
+    <p><strong>1.</strong> Tickets : 400 × 600 = <strong>240 000 par jour</strong> ; lignes :
+      240 000 × 3 = <strong>720 000 par jour</strong> ; sur 548 jours : 720 000 × 548 =
+      <strong>394 560 000 lignes</strong>.</p>
+    <p><strong>2.</strong> Au plus 2 500 × 12 × 18 = <strong>540 000 lignes</strong>. Rapport :
+      394 560 000 / 540 000 ≈ <strong>731</strong>. En pratique moins encore, car toutes les
+      molécules ne se vendent pas dans toutes les régions chaque mois.</p>
+    <p><strong>3. Schéma en étoile.</strong> Table de faits <em>vente</em> (grain : une ligne de
+      ticket) : quantité, montant, montant remboursé, indicateur de retour. Dimensions :
+      <em>médicament</em> (molécule, classe, laboratoire), <em>pharmacie</em> (ville, région),
+      <em>date</em> (jour, mois, trimestre, année) ; éventuellement <em>mode de paiement</em>.</p>
+    <p><strong>4. ETL.</strong> Sources : bases d'encaissement des 400 pharmacies, référentiel des
+      médicaments, référentiel des pharmacies. Transformations : contrôle des codes médicaments,
+      rattachement molécule et région, et <em>règle des retours</em> — un retour est chargé comme une
+      ligne de quantité négative, datée du jour du retour et rattachée au ticket d'origine, pour ne
+      pas compter deux fois la vente. Chargement : ajout de la journée à la table de faits, la nuit
+      après la fermeture.</p>
+    <p><strong>5.</strong> L'analyse balaierait près de 400 millions de lignes sur les bases qui
+      doivent répondre en moins d'une seconde à chaque encaissement : la contention ferait attendre
+      les clients au comptoir. Séparée, l'analyse lit un agrégat 731 fois plus petit, et
+      l'encaissement garde ses ressources (N19).</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.24 — Une même donnée, trois usages : le GPS des bus</div>
+  <div class="box-b">
+    <p><strong>1.</strong> 900 / 10 = <strong>90 messages/s</strong> ; × 86 400 s =
+      <strong>7 776 000 par jour</strong> ; × 150 o = 1 166 400 000 o ≈ <strong>1,17 Go par
+      jour</strong> ; × 365 ≈ <strong>425,7 Go par an</strong>.</p>
+    <p><strong>2.</strong></p>
+    <table>
+      <tr><th>Usage</th><th>Réaction exigée</th><th>Mode</th><th>Fenêtre / état</th></tr>
+      <tr><td>Temps d'attente</td><td>~ 30 s</td><td>Flux (batch 18 min et micro-batch 80 s trop lents)</td><td>Fenêtre glissante courte ; état : dernière position et vitesse de chaque bus</td></tr>
+      <tr><td>Ponctualité mensuelle</td><td>1 jour après la fin du mois</td><td>Batch</td><td>Fenêtre = le mois ; pas d'état permanent</td></tr>
+      <tr><td>Prédiction des retards</td><td>Entraînement hebdomadaire</td><td>Batch sur l'historique</td><td>Features calculées par période ; état = le modèle</td></tr>
+    </table>
+    <p><strong>3.</strong> L'affichage souffre : pendant 3 minutes, il n'a plus de position et
+      affiche un temps faux ; à la sortie, la rafale de positions anciennes ne sert plus à rien pour
+      lui. Le rapport mensuel n'est pas gêné : calculé plus tard sur l'<em>heure d'événement</em>, il
+      range chaque position à sa vraie place. C'est la distinction heure d'événement / heure
+      d'arrivée et le délai de grâce de N21.</p>
+    <p><strong>4.</strong> Le flux brut nourrit les deux autres usages (rapport et modèle), permet
+      de rejouer un calcul après correction d'un bug, sert de preuve en cas de litige et reste
+      disponible pour des usages futurs. C'est le cas IoV de N22 : même donnée, plusieurs usages,
+      plusieurs latences.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.25 — Partager des données de santé avec la recherche</div>
+  <div class="box-b">
+    <p><strong>(a) Les trois conditions (N23).</strong> <em>Disponibilité</em> : les dossiers sont
+      répartis entre hôpitaux et formats, sans point d'accès commun. <em>Confiance</em> : qualité
+      inconnue (doublons de patients entre hôpitaux), aucune règle de partage, sécurité à
+      organiser. <em>Usage</em> : il faut définir précisément « réhospitalisation » (dans quel
+      délai ? même motif ?). Les conditions se multiplient : il suffit qu'une seule manque pour que
+      la valeur soit nulle.</p>
+    <p><strong>(b) Causes de N24.</strong> Données <em>dupliquées</em> (un patient sous deux
+      identifiants semble ne jamais revenir : réhospitalisations sous-estimées) ; <em>sans
+      métadonnées</em> (codes de diagnostic différents selon l'hôpital) ; <em>non gouvernées</em>
+      (aucune base légale de partage) ; <em>non représentatives</em> si un hôpital manque ;
+      <em>indisponibles</em> si les archives anciennes ne sont pas numérisées.</p>
+    <p><strong>(c) Règles de gouvernance.</strong></p>
+    <ul>
+      <li><em>Owner</em> : la direction médicale du groupe décide du partage ; <em>steward</em> :
+        un responsable des données de santé tient définitions et qualité.</li>
+      <li>Version partagée : un extrait dédié, jamais la base de production.</li>
+      <li>Nom, adresse, numéros d'identité supprimés ; identifiant patient pseudonymisé
+        (le même patient garde le même code dans tous les hôpitaux) ; dates de naissance réduites à
+        l'année.</li>
+      <li>Accès limité aux chercheurs nommés, pour la durée du projet, avec avis du comité
+        d'éthique ; toute requête tracée ; destruction de l'extrait à la fin.</li>
+    </ul>
+    <p><strong>(d)</strong> Métadonnées : dictionnaire des champs, définitions (dont
+      « réhospitalisation »), codes utilisés, périmètre (hôpitaux, années), règles de
+      pseudonymisation, lignage (sources et transformations). Signaux : fraîcheur (date
+      d'extraction), volume (séjours par hôpital et par an), distribution (âges, motifs) pour que
+      le laboratoire détecte lui-même un trou ou un biais.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.26 — Des réclamations du reporting à l'IA générative</div>
+  <div class="box-b">
+    <p><strong>(a) Exigences cumulées (N29).</strong></p>
+    <ol>
+      <li><em>Reporting</em> : réclamations consolidées, un motif normalisé, des comptes exacts
+        par mois.</li>
+      <li><em>Analytics</em> : en plus, l'historique (comparer mars aux autres mois et aux années
+        précédentes), le contexte (ligne, date, incident, météo) et une qualité suffisante pour
+        relier les causes.</li>
+      <li><em>ML (tri)</em> : en plus, des features (texte, canal, ligne), des <em>labels</em>
+        fiables (motif corrigé par l'humain) et une représentativité de tous les motifs et canaux.</li>
+      <li><em>GenAI (assistant)</em> : en plus, un corpus de documents à jour, le contexte du client
+        et de sa réclamation, et la sécurité (ne pas exposer de données personnelles, ne citer que
+        des documents autorisés).</li>
+    </ol>
+    <p>Chaque usage garde les exigences du précédent et en ajoute : c'est le sens de
+      « exigences croissantes ».</p>
+    <p><strong>(b)</strong> Probabilité qu'un document lu soit à jour : 800 / 1 000 = 0,8. Pour
+      4 documents indépendants : 0,8⁴ = 0,4096. Au moins un obsolète :
+      1 − 0,4096 = <strong>0,5904 ≈ 59 %</strong>.</p>
+    <p><strong>(c)</strong> 3 000 × 0,5904 ≈ <strong>1 771 réponses par mois</strong> exposées à un
+      tarif ou une règle périmés. L'exigence négligée est la <em>qualité et la fraîcheur du
+      corpus</em> (contexte à jour) : il faut un responsable du corpus, une date de validité par
+      document et le retrait des versions obsolètes.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.27 — Concevoir les cinq couches de TransVille</div>
+  <div class="box-b">
+    <p><strong>1. Sources (N31).</strong></p>
+    <table>
+      <tr><th>Source</th><th>Format</th><th>Fréquence</th><th>Qualité attendue</th></tr>
+      <tr><td>Boîtiers GPS</td><td>Semi-structuré (JSON)</td><td>Continue, 90 msg/s</td><td>Trous (tunnels), retards</td></tr>
+      <tr><td>Valideurs</td><td>Semi-structuré (logs)</td><td>Continue, remontée par lots</td><td>Doublons (16.29)</td></tr>
+      <tr><td>Billetterie</td><td>Structuré (base relationnelle)</td><td>Changements au fil de l'eau</td><td>Bonne, contrôlée à la saisie</td></tr>
+      <tr><td>Site et application</td><td>Semi-structuré (événements)</td><td>Continue</td><td>Variable selon versions</td></tr>
+      <tr><td>Centre d'appels</td><td>Non structuré (texte, audio)</td><td>Continue</td><td>Motifs incomplets</td></tr>
+      <tr><td>Météo publique</td><td>Semi-structuré (API)</td><td>Horaire</td><td>Externe, à dater</td></tr>
+    </table>
+    <p><strong>2. Ingestion (N32).</strong> GPS : streaming (U1 exige ~30 s). Valideurs : streaming
+      ou micro-batch selon le réseau des bus, avec identifiant unique pour l'idempotence.
+      Billetterie : CDC (suppressions et résiliations comprises, sans charger la base). Site et
+      application : streaming d'événements. Centre d'appels : batch toutes les heures (texte et
+      audio). Météo : appel d'API planifié chaque heure. Partout : heure d'événement, heure
+      d'arrivée, source et lot pour la traçabilité.</p>
+    <p><strong>3. Storage (N33).</strong> <em>Lake/lakehouse</em> : tout le brut (positions,
+      validations, événements, audio, textes) en niveaux chaud/froid, plus les tables conformes et
+      prêtes à l'usage. <em>Base opérationnelle</em> à faible latence : dernière position et temps
+      d'attente pour U1. <em>Index de documents</em> (et vecteurs) pour le corpus de U4. Le
+      warehouse n'est pas obligatoire si le lakehouse sert la BI.</p>
+    <p><strong>4. Processing (N34).</strong> U1 : nettoyage des positions en flux, calcul de la
+      vitesse et du temps d'attente par arrêt. U2 : dédoublonnage des validations, rattachement
+      ligne et arrêt, agrégation par ligne et par heure, ponctualité calculée sur l'heure
+      d'événement. U3 : features (fréquentation passée, heure, jour, vacances, météo), sans fuite du
+      jour prédit. U4 : découpage et indexation des documents valides, transcription de l'audio.</p>
+    <p><strong>5. Consommateurs (N35) et transverse.</strong> U1 : application (écrans, appli) ;
+      U2 : BI ; U3 : ML ; U4 : GenAI. Gouvernance : (1) données nominatives des abonnés
+      pseudonymisées hors service fraude ; (2) un responsable et une date de validité pour chaque
+      document du corpus ; (3) lignage du KPI « ponctualité » jusqu'aux positions brutes ;
+      (4) alertes de fraîcheur sur le GPS et de volume sur les validations (16.10).</p>
+    <p><strong>Contrôle final.</strong> Six sources, quatre usages, un seul socle : 6 + 4 = 10
+      liaisons au lieu de 6 × 4 = 24.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.28 — Le coût des liaisons point à point</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Point à point : 9 × 5 = <strong>45 liaisons</strong>, 45 × 2 =
+      <strong>90 jours</strong> par an. Socle commun : 9 ingestions + 5 sorties =
+      <strong>14 liaisons</strong>, 14 × 2 = <strong>28 jours</strong>. Économie : 62 jours par an.</p>
+    <p><strong>(b)</strong> Point à point : la source modifiée est lue par les 5 consommateurs,
+      donc <strong>5 corrections</strong>. Socle : seule l'ingestion de cette source change
+      (<strong>1 correction</strong>) ; les tables conformes gardent leur forme et les
+      consommateurs ne voient rien.</p>
+    <p><strong>(c)</strong> 9 changements par an : 9 × 5 = <strong>45 corrections</strong> en point
+      à point, contre <strong>9</strong> avec le socle.</p>
+    <p><strong>(d)</strong> Le point à point reste acceptable quand il y a très peu de liaisons
+      (une source, un consommateur), pour un prototype de courte durée, ou pour un besoin isolé que
+      personne d'autre ne partagera. Dès que S × C grandit, S + C l'emporte (N30).</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.29 — L'ordre des traitements</div>
+  <div class="box-b">
+    <p><strong>(a)</strong> Doublons : 3 % × 2 000 000 = 60 000. Validations réelles :
+      <strong>1 940 000</strong>.</p>
+    <p><strong>(b)</strong> Surestimation : <strong>60 000 validations</strong>, soit
+      60 000 / 1 940 000 ≈ <strong>3,09 %</strong> du réel. Une fois agrégée, une ligne « ligne 12,
+      8 h : 1 342 validations » ne contient plus aucun doublon visible : on ne peut plus nettoyer.</p>
+    <p><strong>(c)</strong> 60 000 × 6 = <strong>360 000 DH</strong> de recette fictive par jour ;
+      × 365 = <strong>131 400 000 DH</strong> par an.</p>
+    <p><strong>(d) Ordre correct.</strong> (1) <em>Nettoyage</em> : supprimer les doublons sur
+      l'identifiant de validation, écarter les horodatages impossibles ; (2)
+      <em>transformation</em> : formats, fuseaux, codes de ligne ; (3) <em>enrichissement</em> :
+      ajouter ligne, arrêt, type de titre depuis les référentiels ; (4) <em>agrégation</em> :
+      fréquentation par ligne et par heure ; (5) <em>features</em> : variables pour le modèle.
+      Règle générale : une opération qui perd de l'information (agrégation) vient après toutes celles
+      qui ont besoin du détail (N34).</p>
+    <p><strong>(e)</strong> C'est une <em>fuite de données</em> : on n'a les validations du jour J
+      qu'à la fin du jour J, trop tard pour prédire ce jour. Le modèle paraît excellent en test et
+      échoue en production. Il faut utiliser les validations jusqu'à J−1.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 16.30 — Du data-driven à l'AI-driven : mesurer l'effet</div>
+  <div class="box-b">
+    <p><strong>(a) Boucle data-driven.</strong> <em>Dashboard</em> : ponctualité de la ligne 12 à
+      78 %. <em>Baisse</em> : la comparer à son historique et aux autres lignes, la localiser
+      (tronçon, heures). <em>Causes</em> plausibles et données de vérification : travaux ou
+      congestion sur un tronçon (positions GPS, vitesse par tronçon) ; temps d'arrêt trop long aux
+      arrêts chargés (positions + validations par arrêt) ; manque de bus en service (planning,
+      pannes). <em>Action</em> : sur la cause confirmée — ici une voie réservée sur 2 km — puis
+      mesure de l'effet.</p>
+    <p><strong>(b) Effet net.</strong> Ligne 12 : +8 points (78 → 86) ; autres lignes : +2 points
+      (80 → 82), dus à des causes communes (saison, fin des travaux, météo). Effet net :
+      8 − 2 = <strong>+6 points</strong>. Annoncer +8 attribuerait à l'action un gain que toutes les
+      lignes ont eu sans elle (N27).</p>
+    <p><strong>(c) Passage à l'AI-driven.</strong> La décision ne passe plus par un analyste
+      ligne par ligne : chaque soir, un modèle <em>prédit</em> la fréquentation des 40 lignes et un
+      calcul <em>recommande</em> les fréquences ; le planning est <em>automatisé</em> (N28). Le
+      consommateur est le <em>ML</em> (N35), qui lit les features du socle. L'humain fixe les
+      contraintes (budget, nombre de chauffeurs, fréquence minimale), valide les écarts importants,
+      traite les jours atypiques (grève, match, examens) et mesure l'effet comme en (b). Les
+      exigences sur les données augmentent : historique long, features fiables, représentativité
+      des jours atypiques (N29).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR — ce que vérifient les corrigés</div>
+  <div class="box-b">
+    <ul>
+      <li>Classer : nommer le critère avant la réponse (qui porte le schéma, combien de lignes, quel délai).</li>
+      <li>Calculer : poser l'opération, garder les unités, conclure par une décision.</li>
+      <li>Concevoir : partir des sources et des usages, justifier chaque couche par une contrainte.</li>
+      <li>Toujours finir par la gouvernance : responsable, accès, traçabilité, signaux.</li>
+    </ul>
+  </div>
+</div>

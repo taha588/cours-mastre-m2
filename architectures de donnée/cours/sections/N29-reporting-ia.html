@@ -1,0 +1,474 @@
+<h2 class="notion" id="n29">N29 — Du reporting à l'IA : des exigences croissantes</h2>
+
+<h3 id="n29-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Quatre usages de la donnée, du plus simple au plus avancé (support).</strong></p>
+
+    <table>
+      <thead>
+        <tr><th>Usage</th><th>Ce que la donnée doit apporter</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Reporting</strong></td><td>des <strong>données consolidées</strong></td></tr>
+        <tr><td><strong>Analytics</strong></td><td>de l'<strong>historique</strong> + de la
+          <strong>qualité</strong></td></tr>
+        <tr><td><strong>ML</strong></td><td>des <strong>features</strong> + des <strong>labels</strong> +
+          de la <strong>représentativité</strong></td></tr>
+        <tr><td><strong>GenAI</strong></td><td>un <strong>corpus</strong> + du <strong>contexte</strong> +
+          de la <strong>sécurité</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Point clé du support.</strong> Plus l'usage est avancé, plus les exigences sur la donnée
+      deviennent <strong>explicites</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n29-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le schéma du support range les usages de N27 et N28 sur une échelle. À gauche, le
+      <strong>reporting</strong> : un tableau de bord qui affiche des chiffres. À droite, la
+      <strong>GenAI</strong> : un assistant qui rédige des réponses. Sous chaque usage, le support écrit
+      ce que la donnée doit fournir. La liste s'allonge de gauche à droite.</p>
+
+    <p><strong>Reporting — données consolidées.</strong> Les ventes des 120 magasins, rassemblées en un
+      seul endroit, avec les mêmes définitions (même « chiffre d'affaires », même calendrier). C'est
+      le travail de l'entrepôt de données de N10.</p>
+
+    <p><strong>Analytics — historique + qualité.</strong> Pour expliquer une baisse (diagnostic, N27),
+      il faut comparer à l'année passée, donc garder un <em>historique</em> long et stable ; et
+      descendre jusqu'au détail, donc un détail <em>propre</em> (N25).</p>
+
+    <p><strong>ML — features + labels + représentativité.</strong> Les <em>features</em> sont les
+      variables d'entrée du modèle (ventes des 7 derniers jours, jour de la semaine, promotion en
+      cours). Les <em>labels</em> sont les bonnes réponses connues sur le passé (paiement réellement
+      frauduleux ou non, quantité réellement vendue). La <em>représentativité</em> demande que
+      l'historique ressemble aux cas que le modèle traitera (N25).</p>
+
+    <p><strong>GenAI — corpus + contexte + sécurité.</strong> Le <em>corpus</em> est l'ensemble des
+      documents dont l'assistant tire ses réponses (politique de retour, fiches produits). Le
+      <em>contexte</em> est l'information propre à la question, fournie au moment où elle est posée (la
+      commande du client qui réclame). La <em>sécurité</em> garantit que l'assistant ne révèle pas ce
+      que le demandeur n'a pas le droit de voir.</p>
+
+    <p><strong>« Explicites » est le mot central.</strong> Pour un tableau de bord, beaucoup
+      d'exigences restent <em>implicites</em> : un humain lit le chiffre et remarque s'il est absurde.
+      Un modèle ne remarque rien ; il faut donc écrire les exigences, les chiffrer et les vérifier
+      automatiquement.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Lire le schéma comme quatre mondes séparés.</strong> Les exigences
+        <strong>s'additionnent</strong> : un modèle de ML a aussi besoin de données consolidées, d'un
+        historique et de qualité. Chaque étape ajoute, aucune ne retire.</li>
+      <li><strong>Confondre « avancé » et « meilleur ».</strong> Le schéma ne dit pas que la GenAI vaut
+        mieux que le reporting. Il dit qu'elle coûte plus cher en données. On choisit l'usage selon la
+        décision à prendre (N27, N28).</li>
+      <li><strong>Croire que plus de données règle tout.</strong> Aucune des exigences du schéma n'est
+        un volume (N24) : ce sont des propriétés (consolidation, qualité, labels, représentativité,
+        sécurité).</li>
+      <li><strong>Oublier le délai des labels.</strong> Une fraude n'est confirmée que des semaines plus
+        tard : les mois récents n'ont pas encore leurs labels (exercice 12.2).</li>
+      <li><strong>Calculer les features autrement à l'entraînement et en production.</strong> Le modèle
+        apprend avec une définition et reçoit une autre : il se trompe sans que rien ne casse.</li>
+      <li><strong>Réduire la sécurité de la GenAI aux mots de passe.</strong> Le risque est que
+        l'assistant <em>répète</em> dans sa réponse un document ou une donnée personnelle que le
+        demandeur n'aurait pas pu ouvrir lui-même.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> كاينين أربعة استعمالات للمعطيات من الأبسط للأكثر تقدما.
+    <strong>Reporting</strong> كيحتاج <strong>معطيات مجمعة وموحدة</strong>. <strong>Analytics</strong>
+    كيحتاج <strong>تاريخ</strong> و<strong>جودة</strong>. <strong>ML</strong> كيحتاج
+    <strong>features</strong> (المتغيرات اللي كيدخلو للنموذج)، <strong>labels</strong> (الأجوبة الصحيحة
+    فالماضي) و<strong>تمثيلية</strong>. <strong>GenAI</strong> كيحتاج <strong>corpus</strong> (الوثائق)،
+    <strong>سياق</strong> و<strong>أمان</strong>. الفكرة الأساسية: كلما كان الاستعمال متقدم، كلما
+    المتطلبات على المعطيات خاصها تكون <strong>مكتوبة وواضحة</strong>، حيت النموذج ما كيلاحظش الغلط
+    بحال الإنسان. والمتطلبات كتزاد على بعضها، ما كتعوضش بعضها.</p>
+</div>
+
+<h3 id="n29-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'enseigne a lancé trois projets d'IA (N28) : la prévision du réassort, la détection de fraude,
+      l'assistant du service clients. Elle leur a donné les mêmes données que celles du tableau de
+      bord : les ventes consolidées de la veille, par magasin. Résultat : la prévision ne voit pas
+      l'article (le tableau de bord n'avait que des totaux) ; le modèle de fraude ne peut pas
+      apprendre (aucune colonne ne dit quel paiement était frauduleux) ; l'assistant cite une
+      politique de retour remplacée depuis six mois.</p>
+
+    <p>Les données n'étaient pas fausses : elles suffisaient au reporting. Mais chaque nouvel usage
+      exige quelque chose de plus, et personne ne l'avait écrit. La règle de N29 traite ce problème :
+      <strong>savoir, avant de lancer un usage, ce qu'il exigera de la donnée</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n29-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Évaluer un projet avant de le lancer.</strong> On compare ce que l'usage exige à ce que
+      l'architecture fournit ; l'écart est le travail à faire avant le modèle.</p>
+
+    <p><strong>Écrire les exigences.</strong> Transformer « des données de qualité » en conditions
+      chiffrées (fraîcheur, taux de valeurs manquantes, délai des labels, droits d'accès) qu'on peut
+      vérifier automatiquement (N26).</p>
+
+    <p><strong>Progresser par étapes.</strong> Une organisation qui n'a pas de reporting fiable ne
+      réussira pas son ML : on consolide d'abord, on monte ensuite.</p>
+
+    <p><strong>Justifier un investissement.</strong> Dire pourquoi l'IA demande de garder le détail,
+      d'archiver l'historique, de collecter des labels ou de gérer les droits sur les documents.</p>
+
+    <p><strong>Préparer N30 à N35.</strong> Les couches de l'architecture moderne (sources, ingestion,
+      stockage, traitement, analytique/IA, couche transverse) sont la réponse à ces exigences.</p>
+  </div>
+</div>
+
+<h3 id="n29-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Point de départ : qui détecte l'erreur ?</strong> Dans le reporting, un humain lit
+      chaque chiffre. Si le chiffre d'affaires du Nord est divisé par dix, il le voit. Le contrôle
+      existe, mais il n'est écrit nulle part : il est dans la tête du lecteur. Plus on avance vers
+      l'IA, moins un humain regarde chaque résultat (N28 : 25 000 réassorts par jour, 200 000
+      paiements). Le contrôle implicite disparaît ; il faut le remplacer par des exigences écrites et
+      testées.</p>
+
+    <p><strong>Deuxième raison : chaque usage pose une question plus exigeante.</strong></p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Usage</th><th>Question posée</th><th>Ce qu'il faut en plus</th><th>Pourquoi</th>
+          <th>Qui voit l'erreur ?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Reporting</strong></td><td>que s'est-il passé ?</td><td>données
+          consolidées</td><td>additionner des sources séparées avec les mêmes définitions</td>
+          <td>le lecteur du tableau de bord</td></tr>
+        <tr><td><strong>Analytics</strong></td><td>pourquoi ?</td><td>historique + qualité</td>
+          <td>comparer à une période passée et descendre au détail sans fausse piste</td>
+          <td>l'analyste, s'il compare</td></tr>
+        <tr><td><strong>ML</strong></td><td>que va-t-il se passer ? que faire ?</td><td>features +
+          labels + représentativité</td><td>le modèle apprend du passé et généralise à des cas
+          nouveaux</td><td>personne, sauf surveillance écrite</td></tr>
+        <tr><td><strong>GenAI</strong></td><td>rédige, réponds</td><td>corpus + contexte +
+          sécurité</td><td>le modèle reformule des documents et peut les divulguer</td><td>parfois le
+          client, trop tard</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Pourquoi les exigences s'additionnent.</strong> Une feature « ventes des 7 derniers
+      jours » se calcule sur des ventes consolidées (reporting) et sur un historique propre
+      (analytics). Un assistant qui répond sur une commande utilise des données consolidées (la
+      commande) comme contexte. Chaque marche s'appuie sur les précédentes.</p>
+
+    <p><strong>Ce que chaque exigence du ML ajoute.</strong> Les <em>features</em> doivent être calculées
+      de la même façon à l'entraînement et en production, et seulement avec ce qui était connu au
+      moment de la décision (sinon le modèle « voit l'avenir » à l'entraînement et échoue en
+      production). Les <em>labels</em> doivent être collectés, souvent avec un délai, parfois à la main.
+      La <em>représentativité</em> exige que chaque type de cas soit présent dans l'historique.</p>
+
+    <p><strong>Ce que chaque exigence de la GenAI ajoute.</strong> Le <em>corpus</em> est de la donnée
+      non structurée (N2) qu'il faut versionner : un document remplacé doit sortir du corpus. Le
+      <em>contexte</em> doit être retrouvé au moment de la question, en quelques secondes. La
+      <em>sécurité</em> doit filtrer les documents selon les droits du demandeur avant que le modèle
+      les lise : c'est la gouvernance de N26, appliquée à chaque requête.</p>
+
+    <p><strong>Conclusion.</strong> Le schéma du support relie N23-N26 (valeur, qualité, gouvernance) à
+      N27-N28 (usages) : plus l'usage est avancé, plus ces propriétés doivent être écrites, chiffrées et
+      contrôlées par l'architecture.</p>
+  </div>
+</div>
+
+<h3 id="n29-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Le cadrage d'un projet d'IA.</strong> Avant de choisir un algorithme, lister les
+      exigences de son niveau et vérifier qu'elles sont remplies.</p>
+
+    <p><strong>La conception de l'architecture.</strong> Décider ce qu'on stocke (détail ou agrégat),
+      combien de temps on garde l'historique, où l'on range les documents et les labels.</p>
+
+    <p><strong>Les contrats de données.</strong> Entre l'équipe qui produit une table et celle qui
+      l'utilise pour un modèle : fraîcheur, schéma, taux de valeurs manquantes, définitions.</p>
+
+    <p><strong>Le service clients et la base documentaire.</strong> Préparer le corpus de l'assistant :
+      documents à jour, datés, classés par niveau de confidentialité.</p>
+
+    <p><strong>L'audit d'une organisation.</strong> Situer où elle en est (reporting fiable ? historique
+      gardé ? labels collectés ?) avant de promettre un projet d'IA.</p>
+  </div>
+</div>
+
+<h3 id="n29-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Quand une donnée qui servait au reporting doit servir à un modèle.</strong> Ce qui
+      suffisait au tableau de bord ne suffit plus.</p>
+
+    <p><strong>Quand un projet passe d'un niveau au suivant</strong> : du tableau de bord au
+      diagnostic, du diagnostic à la prévision, de la prévision à l'assistant.</p>
+
+    <p><strong>Quand un modèle donne de bons résultats en test et de mauvais en production.</strong>
+      Signe typique d'une feature calculée différemment ou d'un historique non représentatif.</p>
+
+    <p><strong>Quand personne ne regarde plus chaque résultat.</strong> Le contrôle humain disparaît :
+      il faut l'écrire.</p>
+
+    <p><strong>Quand des documents ou des données personnelles entrent dans un assistant.</strong> Les
+      exigences de sécurité deviennent obligatoires.</p>
+
+    <p><strong>Quand un énoncé parle de features, de labels, de corpus ou de contexte.</strong> Il se
+      situe dans la partie droite du schéma.</p>
+  </div>
+</div>
+
+<h3 id="n29-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Situer l'usage.</strong> Reporting, analytics, ML ou GenAI ? La question posée
+      (que s'est-il passé ? pourquoi ? que va-t-il se passer ? rédige) le dit.</p>
+
+    <p><strong>Étape 2 — Lister les exigences cumulées.</strong> Celles de son niveau et de tous les
+      niveaux à sa gauche.</p>
+
+    <p><strong>Étape 3 — Rendre chaque exigence explicite.</strong> La traduire en condition chiffrée :
+      « historique de 3 ans au grain article × magasin × jour », « labels disponibles sous 60 jours »,
+      « aucun document de plus d'un an sans date de validité ».</p>
+
+    <p><strong>Étape 4 — Mesurer l'écart.</strong> Comparer chaque condition à l'existant ; chiffrer ce
+      qui manque.</p>
+
+    <p><strong>Étape 5 — Confier le contrôle à l'architecture.</strong> Tests automatiques et alertes
+      d'observabilité (N26) sur chaque condition, puisque aucun humain ne regardera chaque
+      résultat.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Du reporting à l'IA, les exigences sur la donnée <strong>croissent et s'additionnent</strong> :
+      <strong>Reporting</strong> → données consolidées ; <strong>Analytics</strong> → historique +
+      qualité ; <strong>ML</strong> → features + labels + représentativité ; <strong>GenAI</strong> →
+      corpus + contexte + sécurité. <strong>Point clé :</strong> plus l'usage est avancé, plus les
+      exigences deviennent <strong>explicites</strong>, car aucun humain ne contrôle plus chaque
+      résultat.</p>
+    <p class="ar" dir="rtl">من Reporting حتى الذكاء الاصطناعي، المتطلبات على المعطيات <strong>كتكبر
+      وكتزاد على بعضها</strong>: Reporting ← معطيات مجمعة؛ Analytics ← تاريخ + جودة؛ ML ← features +
+      labels + تمثيلية؛ GenAI ← corpus + سياق + أمان. <strong>الفكرة المفتاح:</strong> كلما كان
+      الاستعمال متقدم، كلما المتطلبات خاصها تكون <strong>مكتوبة وواضحة</strong>، حيت حتى إنسان ما بقا
+      كيراقب كل نتيجة.</p>
+  </div>
+</div>
+
+<h3 id="n29-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — à quel niveau appartient chaque exigence ?</div>
+  <div class="box-b">
+    <p>Pour chaque exigence, donnez le premier niveau du schéma (reporting, analytics, ML, GenAI) qui
+      l'impose et le mot du support correspondant. (a) « Le chiffre d'affaires des 120 magasins est
+      calculé avec la même définition partout. » (b) « On garde 3 ans de ventes pour comparer à la
+      même semaine de l'an passé. » (c) « Chaque paiement passé porte la mention fraude confirmée ou
+      non. » (d) « Les paiements par mobile sont présents dans l'historique en proportion de leur
+      part actuelle. » (e) « L'assistant reçoit la commande du client avant de répondre. » (f) « Un
+      conseiller du magasin 47 ne peut pas obtenir, via l'assistant, les réclamations des clients
+      d'un autre magasin. » (g) « Le nombre de paiements de la carte dans les 10 dernières minutes
+      est calculé de la même façon à l'entraînement et en production. »</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On cherche la question que l'exigence rend possible, puis le premier
+      usage qui pose cette question.</p>
+
+    <p><strong>(a) Reporting — données consolidées.</strong> Sans définition commune, le total des 120
+      magasins n'a pas de sens.</p>
+
+    <p><strong>(b) Analytics — historique.</strong> La comparaison à l'an passé sert à expliquer
+      (diagnostic).</p>
+
+    <p><strong>(c) ML — labels.</strong> C'est la bonne réponse connue sur le passé, dont le modèle
+      apprend.</p>
+
+    <p><strong>(d) ML — représentativité.</strong> Sinon le modèle n'a jamais vu le cas qu'il devra
+      traiter (N25).</p>
+
+    <p><strong>(e) GenAI — contexte.</strong> L'information propre à la question, fournie au moment où
+      elle est posée.</p>
+
+    <p><strong>(f) GenAI — sécurité.</strong> L'assistant ne doit pas divulguer ce que le demandeur
+      n'a pas le droit de voir.</p>
+
+    <p><strong>(g) ML — features.</strong> Une feature calculée différemment en production fausse le
+      modèle sans erreur visible. On remarque que (g) suppose aussi (a) et (b) : les exigences
+      s'additionnent.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — les labels du modèle de fraude</div>
+  <div class="box-b">
+    <p>L'enseigne veut entraîner le modèle de fraude de N28 (200 000 paiements par jour, 0,1 % de
+      fraudes, mois de 30 jours) sur les 12 derniers mois. Une fraude n'est confirmée qu'au moment de
+      la contestation par la banque, jusqu'à 60 jours après le paiement. (a) Combien de paiements et
+      de fraudes par mois ? (b) Sur combien de mois les labels sont-ils complets ? Combien de fraudes
+      étiquetées peut-on utiliser ? (c) Si l'on garde les 12 mois en comptant comme « normal » tout
+      paiement non contesté, quelle part des fraudes est mal étiquetée ? (d) Dans les 10 mois
+      complets, les paiements mobiles représentaient 5 % ; ils en représentent 30 % aujourd'hui.
+      Combien de fraudes mobiles le modèle a-t-il vues ? Conclure.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Volumes.</strong> 200 000 × 30 = <strong>6 000 000 paiements par mois</strong> ;
+      0,1 % × 6 000 000 = <strong>6 000 fraudes par mois</strong>.</p>
+
+    <p><strong>(b) Labels complets.</strong> Les 2 derniers mois (60 jours) n'ont pas fini d'être
+      contestés : les labels ne sont complets que sur <strong>12 − 2 = 10 mois</strong>, soit
+      10 × 6 000 = <strong>60 000 fraudes étiquetées</strong> (sur 60 millions de paiements).</p>
+
+    <p><strong>(c) Labels faux.</strong> En gardant les 2 derniers mois, leurs 2 × 6 000 = 12 000
+      fraudes (au plus, si aucune n'est encore contestée) sont comptées comme normales. Fraudes
+      réelles sur 12 mois : 72 000 ; mal étiquetées : 12 000 / 72 000 ≈ <strong>16,7 %</strong>. Le
+      modèle apprendrait qu'un sixième des fraudes sont normales, précisément les plus récentes,
+      celles qui ressemblent le plus aux fraudes de demain.</p>
+
+    <p><strong>(d) Représentativité.</strong> Paiements mobiles : 5 % × 60 000 000 = 3 000 000 ;
+      fraudes mobiles (même taux de 0,1 %) : <strong>3 000</strong>, contre 57 000 par carte. Le modèle
+      a peu d'exemples d'un canal qui fait aujourd'hui 30 % du trafic. Exigences explicites à écrire :
+      « labels arrêtés à J − 60 », « au moins N fraudes par canal », « part de chaque canal dans
+      l'historique suivie et comparée au trafic réel ». Aucune n'était nécessaire pour le tableau de
+      bord des ventes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — le corpus de l'assistant du service clients</div>
+  <div class="box-b">
+    <p>L'assistant génératif de N28 répond aux 3 000 réclamations mensuelles. Son corpus contient
+      1 200 documents (politiques, fiches produits, procédures), dont 180 sont obsolètes. Pour chaque
+      réclamation, il retrouve 3 documents ; on suppose que chacun a la même chance d'être obsolète,
+      indépendamment des autres. (a) Quelle part des documents est obsolète ? (b) Quelle est la
+      probabilité qu'une réponse s'appuie sur au moins un document obsolète ? Combien de réponses par
+      mois ? (c) Quelle exigence explicite supprime ce risque ? (d) Donnez une exigence de
+      <em>contexte</em> et une de <em>sécurité</em> pour cet assistant.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Part obsolète.</strong> 180 / 1 200 = <strong>15 %</strong>.</p>
+
+    <p><strong>(b) Probabilité.</strong> Probabilité qu'un document soit à jour : 0,85. Que les 3 le
+      soient : 0,85³ = 0,614. Au moins un obsolète : 1 − 0,614 = <strong>0,386, soit 38,6 %</strong>.
+      Par mois : 0,386 × 3 000 ≈ <strong>1 158 réponses</strong> qui risquent de citer une règle
+      périmée. Avec 15 % seulement de documents obsolètes, plus d'une réponse sur trois est exposée :
+      le défaut est amplifié par le nombre de documents lus.</p>
+
+    <p><strong>(c) Exigence explicite.</strong> « Chaque document du corpus porte une date de validité
+      et une version ; un document remplacé ou expiré est exclu de la recherche. » C'est une
+      métadonnée (N26) contrôlée automatiquement. Une fois appliquée, la probabilité tombe à 0 pour
+      les documents marqués.</p>
+
+    <p><strong>(d) Contexte et sécurité.</strong> <em>Contexte</em> : « l'assistant reçoit la commande
+      citée (date, articles, statut de livraison) avant de rédiger » ; sans elle, il invente un statut
+      plausible. <em>Sécurité</em> : « les documents et réclamations sont filtrés selon les droits du
+      conseiller avant d'être lus par le modèle ; aucun numéro de carte ni donnée personnelle d'un
+      autre client n'entre dans la réponse ». Pour un tableau de bord des réclamations par catégorie,
+      aucune de ces trois exigences n'existait.</p>
+  </div>
+</div>
+
+<h3 id="n29-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Reproduisez le schéma du support : les quatre usages et leurs exigences.</li>
+      <li>Expliquez le point clé : pourquoi les exigences deviennent-elles « explicites » ?</li>
+      <li>Montrez sur un exemple que les exigences s'additionnent d'un niveau au suivant.</li>
+      <li>Définissez feature et label, et donnez un exemple de chacun pour la prévision du
+        réassort.</li>
+      <li>Définissez corpus, contexte et sécurité pour un assistant génératif.</li>
+      <li>Expliquez pourquoi un modèle peut réussir en test et échouer en production si ses features
+        sont mal définies.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n29-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Placez chaque usage sur le schéma (reporting, analytics, ML, GenAI) et citez une exigence :
+      (a) tableau mensuel des ventes par région ; (b) explication de la baisse du Nord par la rupture
+      du petit électroménager ; (c) prévision des ventes par article ; (d) résumé automatique des
+      avis clients ; (e) score de risque de départ de chaque client fidélité ; (f) comparaison des
+      ventes de Ramadan sur trois ans.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Le tableau de bord se contente des ventes par magasin et par jour. La prévision du réassort
+      demande le grain article × magasin × jour (25 000 articles, 120 magasins). (a) Calculez le
+      nombre de lignes pour 3 ans d'historique à chacun des deux grains. (b) Quel facteur les sépare ?
+      (c) Qu'en déduisez-vous sur le choix du stockage et sur la règle « garder le brut » de N25 ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Rédigez le « contrat de données » du modèle de prévision du réassort : au moins une condition
+      chiffrée pour chaque exigence cumulée (consolidation, historique, qualité, features, labels,
+      représentativité). Pour chaque condition, dites quelle partie de l'architecture devra la
+      garantir : la collecte des sources, l'ingestion, le stockage, le traitement, la couche
+      analytique ou la surveillance transverse.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N30</div>
+  <div class="box-b">
+    <p>L'exercice 14.3 range chaque exigence dans une partie de l'architecture. C'est exactement ce que
+      fait l'<strong>architecture moderne de données</strong> : cinq couches (sources, ingestion,
+      stockage, traitement, analytique/IA) et une couche transverse (gouvernance, sécurité,
+      observabilité) qui répondent, chacune, à une partie des exigences du reporting à l'IA. C'est
+      l'objet de N30.</p>
+  </div>
+</div>

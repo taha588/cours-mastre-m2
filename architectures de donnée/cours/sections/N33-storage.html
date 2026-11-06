@@ -1,0 +1,458 @@
+<h2 class="notion" id="n33">N33 — Couche 3, le stockage : où conserver les données ?</h2>
+
+<h3 id="n33-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Schéma du support (p. 47).</strong> La troisième couche conserve la donnée une fois
+      entrée. Le support distingue trois familles de stockage :</p>
+    <table class="long">
+      <thead>
+        <tr><th>Famille</th><th>Rôle (support)</th><th>Exemples du support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Operational DB</strong></td><td>données nécessaires au fonctionnement des
+          applications</td><td>bases relationnelles (MySQL, PostgreSQL, Oracle), bases NoSQL</td></tr>
+        <tr><td><strong>Warehouse</strong></td><td>données préparées pour l'analytics / BI</td>
+          <td>BigQuery, Snowflake, Redshift, Synapse</td></tr>
+        <tr><td><strong>Lake / Lakehouse</strong></td><td>grande variété et échelle ; plusieurs
+          usages</td><td>Data Lake (S3, ADLS, GCS), Lakehouse (Databricks, Iceberg, Delta)</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Question posée par le support.</strong> Quel stockage répond au
+      <strong>workload</strong>, au <strong>coût</strong>, à la <strong>latence</strong> et au
+      <strong>cycle de vie</strong> ?</p>
+  </div>
+</div>
+
+<h3 id="n33-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le <strong>stockage</strong> est l'endroit où la donnée <em>vit</em> entre son arrivée (N32)
+      et ses usages (N34, N35). Le support ne désigne pas un stockage « moderne » qui remplacerait
+      les autres : il en cite trois et demande de <strong>choisir</strong>, donnée par donnée.</p>
+
+    <p><strong>Les trois familles ont déjà été rencontrées.</strong> La base opérationnelle est celle
+      de l'OLTP (N16) ; l'entrepôt a été étudié en N10, le lac en N11, le lakehouse en N12. N33 ne
+      refait pas leur histoire : il les range dans la couche Storage et donne le
+      <strong>critère de choix</strong> entre elles.</p>
+
+    <p><strong>Les quatre critères de la question.</strong> Le <em>workload</em>, c'est la forme
+      du travail demandé : lire ou modifier une ligne précise, ou parcourir des millions de lignes
+      pour les agréger, ou encore lire des fichiers variés pour entraîner un modèle. Le
+      <em>coût</em>, c'est le prix de conservation par gigaoctet et le prix du calcul qui lit la
+      donnée. La <em>latence</em>, c'est le délai de réponse attendu par l'utilisateur de la donnée.
+      Le <em>cycle de vie</em>, c'est la durée de conservation et l'évolution de l'usage dans le
+      temps : une donnée très lue le premier mois, consultée rarement ensuite, à effacer après
+      cinq ans.</p>
+
+    <p><strong>Aucune famille ne gagne sur les quatre critères.</strong> La base opérationnelle
+      répond en millisecondes mais coûte cher par gigaoctet et souffre des grosses lectures ;
+      l'entrepôt agrège vite des données préparées mais ne garde ni images ni PDF ; le lac conserve
+      tout à bas prix mais, seul, ne garantit ni schéma ni transactions. Une architecture réelle
+      utilise donc <strong>plusieurs</strong> stockages, chacun pour le workload qu'il sert.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Chercher « le meilleur stockage ».</strong> La question du support est relative :
+        meilleur <em>pour</em> un workload, un budget, une latence et une durée donnés. Le même outil
+        est excellent pour une donnée et mauvais pour une autre.</li>
+      <li><strong>Lancer l'analytique sur la base opérationnelle.</strong> C'est le problème qui a
+        justifié la séparation OLTP / OLAP (N19) : une requête de trois ans d'historique ralentit
+        les caisses.</li>
+      <li><strong>Croire que le lakehouse supprime tout le reste.</strong> Il réunit lac et entrepôt
+        pour l'analytique, mais l'application de caisse a toujours besoin de sa base
+        opérationnelle.</li>
+      <li><strong>Prendre le lac pour une décharge.</strong> Sans métadonnées ni propriétaire, le
+        lac devient le <em>data swamp</em> de N11 : le stockage bon marché ne dispense pas de la
+        gouvernance (N26).</li>
+      <li><strong>Oublier le cycle de vie.</strong> Garder toutes les années dans le stockage le plus
+        rapide multiplie la facture ; supprimer trop tôt empêche l'audit ou le réentraînement. La
+        durée de conservation se décide dès l'entrée.</li>
+      <li><strong>Confondre stockage et traitement.</strong> Le warehouse et le lakehouse calculent
+        aussi, mais la couche Storage répond à « où la donnée est-elle conservée ? » ; la
+        préparation pour un usage relève de N34.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> طبقة <strong>Storage</strong> هي فين كتعيش المعطيات من
+    بعد ما دخلات. الدعامة كتذكر ثلاث عائلات: <strong>Operational DB</strong> (المعطيات اللي
+    خاصة باش تخدم التطبيقات: MySQL، PostgreSQL، Oracle، NoSQL)، <strong>Warehouse</strong>
+    (معطيات موجدة للتحليل و BI: BigQuery، Snowflake، Redshift، Synapse) و
+    <strong>Lake / Lakehouse</strong> (تنوع كبير وحجم كبير لعدة استعمالات: S3، ADLS، GCS،
+    Databricks، Iceberg، Delta). السؤال: <strong>أشمن تخزين كيجاوب على نوع الخدمة (workload)،
+    التكلفة، زمن الاستجابة (latence) ودورة حياة المعطيات؟</strong> ماكاينش تخزين واحد كيربح فالأربعة،
+    لهذا كنستعملو بزاف ديال التخزينات، كل واحد للخدمة ديالو.</p>
+</div>
+
+<h3 id="n33-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Pour aller vite, l'enseigne avait tout mis dans l'entrepôt : tickets, mesures des capteurs,
+      historique CDC des stocks, et même les PDF des fournisseurs encodés en texte. Deux ans plus
+      tard, la facture du stockage a quadruplé, les scans des factures n'ont jamais été lus par
+      personne, et l'équipe IA ne peut pas entraîner son modèle de prévision : il lui faut les
+      mesures brutes minute par minute, que l'entrepôt avait agrégées par heure pour économiser
+      de la place.</p>
+
+    <p>Le problème traité par N33 : <strong>placer chaque donnée dans le stockage qui convient à son
+      usage, à son budget, à son délai de réponse et à sa durée de vie</strong>, au lieu d'un
+      stockage unique qui paie cher ce qui est rarement lu et perd ce dont l'IA aura besoin.</p>
+  </div>
+</div>
+
+<h3 id="n33-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Choisir un stockage par usage.</strong> Base opérationnelle pour faire tourner les
+      applications, entrepôt pour la BI, lac ou lakehouse pour la variété, l'historique brut et
+      l'IA.</p>
+
+    <p><strong>Tenir la latence promise.</strong> Une page produit qui doit répondre en
+      200 millisecondes ne lit pas son stock dans un entrepôt analytique.</p>
+
+    <p><strong>Maîtriser la facture.</strong> Placer la donnée chaude sur un stockage rapide et la
+      donnée froide sur un stockage objet ou d'archive, beaucoup moins cher.</p>
+
+    <p><strong>Organiser le cycle de vie.</strong> Durée de conservation, passage automatique de
+      chaud à froid, suppression à l'échéance légale.</p>
+
+    <p><strong>Garder le brut.</strong> Conserver dans le lac la donnée telle qu'elle est entrée,
+      pour pouvoir rejouer un traitement ou entraîner un modèle (N25, N32).</p>
+  </div>
+</div>
+
+<h3 id="n33-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : les workloads s'opposent.</strong> N16 et N17 l'ont montré :
+      l'OLTP lit et modifie peu de lignes, très souvent, avec des transactions ; l'OLAP lit
+      énormément de lignes, peu de colonnes, sans les modifier. Un stockage organisé par lignes sert
+      le premier, un stockage organisé par colonnes sert le second. Le lac ajoute un troisième
+      workload : lire des fichiers variés en grand volume (images, journaux, historiques bruts),
+      notamment pour l'IA (N29).</p>
+
+    <p><strong>Deuxième raison : chaque famille fait un compromis différent.</strong></p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Critère</th><th>Operational DB</th><th>Warehouse</th><th>Lake / Lakehouse</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Workload</strong></td><td>lectures et écritures ligne par ligne,
+          transactions</td><td>requêtes analytiques sur données modélisées</td><td>gros volumes
+          variés, plusieurs moteurs (SQL, ML, streaming)</td></tr>
+        <tr><td><strong>Latence</strong></td><td>millisecondes pour une ligne</td><td>secondes pour
+          agréger des millions de lignes</td><td>secondes à minutes ; le lakehouse se rapproche de
+          l'entrepôt</td></tr>
+        <tr><td><strong>Coût</strong></td><td>élevé par Go (disques rapides, réplicas)</td>
+          <td>intermédiaire ; calcul facturé à l'usage</td><td>faible par Go (stockage objet)</td></tr>
+        <tr><td><strong>Cycle de vie</strong></td><td>état courant, historique court</td>
+          <td>historique préparé sur plusieurs années</td><td>brut conservé longtemps, niveaux chaud /
+          froid / archive</td></tr>
+        <tr><td><strong>Schéma</strong></td><td>strict, imposé à l'écriture</td><td>modélisé
+          (faits, dimensions)</td><td>à la lecture (lac) ; tables transactionnelles sur fichiers
+          ouverts (lakehouse)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Troisième raison : le coût dépend de la fréquence d'accès.</strong> Une donnée est
+      lue souvent quand elle est récente, rarement ensuite. Payer le prix du stockage rapide pour
+      des années de données froides est un gaspillage ; d'où les <em>niveaux</em> de stockage et
+      les règles qui déplacent la donnée selon son âge. C'est le sens de « cycle de vie » dans la
+      question du support.</p>
+
+    <p><strong>Quatrième raison : séparer stockage et calcul.</strong> Dans le cloud, les fichiers
+      du lac (S3, ADLS, GCS) sont conservés à bas prix, et le calcul n'est payé que lorsqu'on les
+      lit. Avec des formats de tables ouverts (Iceberg, Delta), plusieurs moteurs lisent les mêmes
+      fichiers avec des garanties transactionnelles : c'est ce qui rend le lakehouse possible (N12)
+      et lui permet de servir « plusieurs usages », comme le dit le support.</p>
+  </div>
+</div>
+
+<h3 id="n33-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Les applications de l'enseigne.</strong> Caisses, site e-commerce, ERP, CRM sur des
+      bases opérationnelles relationnelles ou NoSQL.</p>
+
+    <p><strong>Le reporting et les tableaux de bord.</strong> Ventes, marges, stocks préparés dans
+      l'entrepôt pour la BI (N10, N27).</p>
+
+    <p><strong>La zone brute du lac.</strong> Tout ce que l'ingestion dépose : lots de caisse,
+      mesures des capteurs, historique CDC, PDF, journaux (N11, N32).</p>
+
+    <p><strong>Les données de l'IA.</strong> Historiques longs, features et labels, corpus de
+      documents pour un assistant génératif, sur le lac ou le lakehouse (N28, N29).</p>
+
+    <p><strong>L'archivage réglementaire.</strong> Pièces comptables et relevés sanitaires conservés
+      plusieurs années sur un niveau d'archive peu coûteux.</p>
+  </div>
+</div>
+
+<h3 id="n33-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Après le choix du mode d'ingestion.</strong> Chaque source a son mode (N32) ; il
+      reste à dire où elle atterrit et où vivent ses versions préparées : troisième étape de la
+      démarche de N30.</p>
+
+    <p><strong>Quand une application ralentit à cause des rapports.</strong> Signal que
+      l'analytique tourne sur la base opérationnelle (N19).</p>
+
+    <p><strong>Quand la facture du stockage grimpe.</strong> Signal que des données froides
+      occupent un stockage rapide, ou que le cycle de vie n'a jamais été fixé.</p>
+
+    <p><strong>Quand un nouvel usage ne trouve pas sa donnée.</strong> L'IA demande le brut,
+      l'entrepôt n'a que des agrégats : il manquait un lac.</p>
+
+    <p><strong>Quand un énoncé demande « où conserver ces données ? ».</strong> On répond par la
+      famille de stockage et par les quatre critères du support.</p>
+  </div>
+</div>
+
+<h3 id="n33-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Partir de la donnée et de ses usages.</strong> Fiche source (N31), mode
+      d'entrée (N32), consommateurs connus.</p>
+
+    <p><strong>Étape 2 — Qualifier le workload.</strong> Ligne par ligne avec transactions ?
+      Agrégats sur données modélisées ? Fichiers variés en grand volume ?</p>
+
+    <p><strong>Étape 3 — Noter la latence attendue.</strong> Millisecondes (application), secondes
+      (tableau de bord), minutes ou heures (entraînement, audit).</p>
+
+    <p><strong>Étape 4 — Estimer le volume et le coût.</strong> Volume par jour × durée de
+      conservation × prix par Go du niveau envisagé.</p>
+
+    <p><strong>Étape 5 — Fixer le cycle de vie.</strong> Durée chaude, passage au froid, archive,
+      suppression ; obligation légale éventuelle.</p>
+
+    <p><strong>Étape 6 — Choisir la famille.</strong> Operational DB, Warehouse ou Lake /
+      Lakehouse ; souvent la même donnée vit dans deux d'entre elles (brut dans le lac, version
+      préparée dans l'entrepôt), reliées par le lignage (N26).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La couche <strong>Storage</strong> conserve la donnée dans trois familles :
+      <strong>Operational DB</strong> (fonctionnement des applications : MySQL, PostgreSQL, Oracle,
+      NoSQL), <strong>Warehouse</strong> (données préparées pour la BI : BigQuery, Snowflake,
+      Redshift, Synapse) et <strong>Lake / Lakehouse</strong> (variété, échelle, plusieurs usages :
+      S3, ADLS, GCS, Databricks, Iceberg, Delta). Le choix se fait selon quatre critères :
+      <strong>workload, coût, latence, cycle de vie</strong>. Aucune famille ne les satisfait tous ;
+      une architecture en combine plusieurs.</p>
+    <p class="ar" dir="rtl">طبقة <strong>Storage</strong> كتحفظ المعطيات فثلاث عائلات:
+      <strong>Operational DB</strong> (باش تخدم التطبيقات)، <strong>Warehouse</strong> (معطيات
+      موجدة لـ BI) و <strong>Lake / Lakehouse</strong> (تنوع، حجم، وعدة استعمالات). الاختيار كيكون
+      بأربعة معايير: <strong>workload، التكلفة، latence، ودورة الحياة</strong>. حتى عائلة ماكتربح
+      فالأربعة، داكشي علاش المعمارية كتجمع بزاف منهم.</p>
+  </div>
+</div>
+
+<h3 id="n33-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — une famille de stockage par donnée</div>
+  <div class="box-b">
+    <p>Pour chaque donnée de l'enseigne, choisissez Operational DB, Warehouse ou Lake / Lakehouse et
+      justifiez par le workload et la latence : (a) le panier en cours d'un client sur le site ;
+      (b) les ventes par magasin et par semaine du tableau de bord régional ; (c) les mesures brutes
+      des capteurs, minute par minute, sur deux ans ; (d) les PDF des contrats fournisseurs ;
+      (e) le stock courant d'une référence, lu par la page produit ; (f) l'historique CDC des
+      mouvements de stock, utilisé pour entraîner le modèle de réassort.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On qualifie le workload (ligne / agrégat / fichiers variés), puis
+      on vérifie la latence.</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Donnée</th><th>Workload</th><th>Latence</th><th>Stockage</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) panier</td><td>écriture ligne par ligne, transaction</td><td>ms</td>
+          <td>Operational DB</td></tr>
+        <tr><td>(b) ventes / semaine</td><td>agrégats sur données préparées</td><td>secondes</td>
+          <td>Warehouse</td></tr>
+        <tr><td>(c) capteurs bruts</td><td>gros volume, lu rarement</td><td>minutes</td>
+          <td>Lake</td></tr>
+        <tr><td>(d) PDF contrats</td><td>fichiers non structurés</td><td>minutes</td>
+          <td>Lake</td></tr>
+        <tr><td>(e) stock courant</td><td>lecture d'une ligne</td><td>ms</td>
+          <td>Operational DB</td></tr>
+        <tr><td>(f) historique CDC</td><td>historique long, lu par un moteur ML</td><td>minutes</td>
+          <td>Lakehouse</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarques.</strong> (b) et (f) pourraient vivre tous deux dans un lakehouse si
+      l'enseigne en dispose : c'est le sens de « plusieurs usages ». (e) existe aussi dans le lac,
+      via le CDC, mais la page produit lit la base opérationnelle : la même donnée a deux
+      stockages, l'un pour l'application, l'autre pour l'historique.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le coût du cycle de vie</div>
+  <div class="box-b">
+    <p>Les tickets de caisse représentent 1,2 Go par jour (N31) et doivent être conservés 5 ans
+      (1 825 jours). Prix mensuels : stockage chaud de l'entrepôt 0,25 DH / Go, stockage objet du lac
+      0,10 DH / Go, niveau d'archive 0,01 DH / Go. (a) Coût mensuel si les 5 ans restent dans
+      l'entrepôt. (b) Coût mensuel avec la politique : 90 jours dans l'entrepôt, puis le lac
+      jusqu'à 2 ans (730 jours), puis l'archive jusqu'à 5 ans. (c) Rapport entre les deux. (d) Quel
+      inconvénient la politique (b) introduit-elle ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Tout en chaud.</strong> Volume : 1 825 × 1,2 = <strong>2 190 Go</strong>. Coût :
+      2 190 × 0,25 = <strong>547,50 DH par mois</strong>.</p>
+
+    <p><strong>(b) Politique par niveaux.</strong></p>
+    <ul>
+      <li>entrepôt : 90 j × 1,2 = 108 Go × 0,25 = <strong>27,00 DH</strong> ;</li>
+      <li>lac : (730 − 90) = 640 j × 1,2 = 768 Go × 0,10 = <strong>76,80 DH</strong> ;</li>
+      <li>archive : (1 825 − 730) = 1 095 j × 1,2 = 1 314 Go × 0,01 = <strong>13,14 DH</strong>.</li>
+    </ul>
+    <p>Total : 27,00 + 76,80 + 13,14 = <strong>116,94 DH par mois</strong> (108 + 768 + 1 314 =
+      2 190 Go : on garde bien tout).</p>
+
+    <p><strong>(c) Rapport.</strong> 547,50 / 116,94 ≈ <strong>4,7</strong> : la même donnée,
+      conservée aussi longtemps, coûte près de cinq fois moins.</p>
+
+    <p><strong>(d) Inconvénient.</strong> La latence augmente avec l'âge : une requête sur la
+      semaine dernière répond en secondes, une requête sur l'an dernier lit le lac (plus lent), et
+      une donnée archivée doit souvent être restaurée avant lecture, parfois en plusieurs heures. Le
+      cycle de vie se fixe donc avec les usages : si l'audit consulte régulièrement l'an N−3,
+      l'archive n'est pas le bon niveau pour cette période.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — un seul stockage pour trois workloads ?</div>
+  <div class="box-b">
+    <p>Un consultant propose de tout mettre dans la base PostgreSQL de la caisse. Trois usages :
+      (1) la page produit lit le stock courant, réponse exigée en moins de 200 ms, 3 000 lectures
+      par seconde aux heures de pointe ; (2) le rapport régional agrège 300 millions de lignes de
+      ventes sur 3 ans ; (3) l'équipe IA lit 2 ans de mesures brutes et 40 000 photos de
+      rayons. Évaluez la proposition critère par critère et proposez une répartition.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Usage (1).</strong> Workload ligne par ligne, latence en millisecondes : c'est
+      exactement ce que sert la base opérationnelle. <em>Critère tenu.</em></p>
+
+    <p><strong>Usage (2).</strong> Parcourir 300 millions de lignes dans une base organisée par
+      lignes est lent et consomme les ressources des caisses : pendant le rapport, les lectures de
+      l'usage (1) ralentissent (N19). <em>Workload et latence non tenus.</em> → Entrepôt (stockage
+      en colonnes), alimenté depuis le lac ou par CDC.</p>
+
+    <p><strong>Usage (3).</strong> Des photos et des mesures brutes sur deux ans dans une base
+      transactionnelle coûtent cher par Go, et la base n'est pas faite pour stocker des fichiers ni
+      pour être lue en entier par un moteur d'apprentissage. <em>Coût et cycle de vie non
+      tenus.</em> → Lac (ou lakehouse) en stockage objet.</p>
+
+    <p><strong>Répartition.</strong> PostgreSQL garde l'état courant pour les applications ;
+      l'ingestion copie ses changements (CDC) dans le lac ; l'entrepôt ou le lakehouse sert la BI ;
+      le lac conserve le brut et les fichiers pour l'IA. Trois stockages, une donnée reliée par le
+      lignage : c'est la réponse « plusieurs familles » de la règle.</p>
+  </div>
+</div>
+
+<h3 id="n33-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les trois familles de stockage du support avec leur rôle et deux exemples
+        chacune.</li>
+      <li>Énoncez la question du support et définissez chacun des quatre critères.</li>
+      <li>Expliquez pourquoi un stockage par lignes sert l'OLTP et un stockage par colonnes
+        l'OLAP.</li>
+      <li>Expliquez ce qu'apporte la séparation du stockage et du calcul dans le cloud.</li>
+      <li>Donnez deux raisons de conserver le brut dans le lac même quand l'entrepôt contient la
+        version préparée.</li>
+      <li>Expliquez pourquoi une politique de cycle de vie fait baisser le coût mais peut augmenter
+        la latence.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n33-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Rangez chaque outil dans sa famille du support : (a) Snowflake ; (b) PostgreSQL ;
+      (c) Amazon S3 ; (d) Delta ; (e) une base NoSQL de sessions web ; (f) Redshift ; (g) ADLS ;
+      (h) Iceberg ; (i) Oracle ; (j) BigQuery.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Les capteurs des chambres froides produisent 138 Mo par jour (N31) ; l'audit sanitaire impose
+      2 ans de conservation des mesures brutes, et le tableau de bord n'affiche que les 30 derniers
+      jours, agrégés par heure. (a) Volume brut à conserver. (b) Proposez un stockage pour le brut
+      et un pour l'agrégat, avec leur cycle de vie. (c) Que se passe-t-il pour l'audit si l'on ne
+      garde que l'agrégat horaire ?</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>L'enseigne hésite entre deux plans : (A) un lac pour le brut + un entrepôt pour la BI ;
+      (B) un lakehouse unique pour le brut, la BI et l'IA. Pour chacun : (a) combien de copies de la
+      même vente existent-elles ? (b) qui garantit la cohérence entre ces copies ? (c) comparez-les
+      sur les quatre critères du support. (d) Dans les deux cas, quelles opérations faut-il encore
+      appliquer aux mesures en retard du magasin 47 (N32, exercice 14.3) avant qu'elles servent au
+      tableau de bord ?</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N34</div>
+  <div class="box-b">
+    <p>La donnée est conservée au bon endroit, brute dans le lac, avec son cycle de vie. Mais une
+      donnée brute n'est pas encore prête : doublons à retirer, retards à réintégrer, agrégats à
+      calculer, features à construire. Rendre la donnée adaptée à un usage précis, c'est la couche
+      Processing, objet de N34.</p>
+  </div>
+</div>

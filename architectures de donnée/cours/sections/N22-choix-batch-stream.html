@@ -1,0 +1,497 @@
+<h2 class="notion" id="n22">N22 — Batch ou stream : le critère de choix, et le cas IoV</h2>
+
+<h3 id="n22-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Le tableau du support (« Batch vs Streaming — comment choisir ? »).</strong></p>
+    <table>
+      <thead>
+        <tr><th>Critère</th><th>Batch</th><th>Streaming</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Latence</strong></td><td>minutes / heures / jours</td><td>secondes / millisecondes selon système</td></tr>
+        <tr><td><strong>Volume</strong></td><td>très grands lots</td><td>flux continu</td></tr>
+        <tr><td><strong>Exemple</strong></td><td>rapport quotidien</td><td>alerte fraude</td></tr>
+        <tr><td><strong>Complexité</strong></td><td>souvent plus simple</td><td>gestion événements / état</td></tr>
+        <tr><td><strong>Critère clé</strong></td><td>fenêtre de traitement</td><td>temps de réaction</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>La règle de choix.</strong> On ne choisit pas entre batch et streaming selon la donnée,
+      ni selon la modernité de l'outil, mais <strong>selon l'usage</strong> : on compare le
+      <strong>temps de réaction exigé par la décision</strong> à la latence que chaque mode peut offrir.
+      Si la décision tient dans une <strong>fenêtre de traitement</strong>, le batch suffit ; si elle
+      exige un <strong>temps de réaction</strong> plus court que toute fenêtre raisonnable, il faut le
+      streaming.</p>
+
+    <p><strong>Le cas IoV (Internet of Vehicles) — « même donnée, deux usages ».</strong> Une même
+      <em>position GPS</em> part sur deux chemins : en <strong>streaming</strong> pour détecter une
+      <strong>déviation / un danger</strong>, en <strong>batch</strong> pour constituer
+      l'<strong>historique des trajets</strong> ; les deux chemins alimentent la
+      <strong>décision / l'analyse</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n22-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>N20 et N21 ont décrit chacun des deux modes pour lui-même. Le tableau du support les met
+      <em>en regard</em>, ligne par ligne. Il faut le lire comme une grille de diagnostic, et non comme
+      un palmarès : aucune ligne ne dit « le streaming est meilleur ».</p>
+
+    <p><strong>Ligne « Latence ».</strong> C'est la conséquence directe des deux définitions. Le batch
+      accumule puis traite : sa latence est au moins la durée de sa période, d'où « minutes / heures /
+      jours ». Le stream traite à l'arrivée : sa latence se réduit au transport et au traitement d'un
+      événement, d'où « secondes / millisecondes ». La précision « <em>selon système</em> » compte : un
+      stream mal dimensionné (N21, piège du pic) peut dériver vers la minute.</p>
+
+    <p><strong>Ligne « Volume ».</strong> Les deux modes peuvent traiter des volumes énormes ; ce qui
+      change, c'est la <em>forme</em> du volume. Le batch le voit comme un <strong>stock</strong> fermé
+      (« très grands lots ») ; le stream le voit comme un <strong>débit</strong> (« flux continu »). La
+      question n'est donc pas « combien de données ? » mais « faut-il les traiter comme un stock ou
+      comme un débit ? ».</p>
+
+    <p><strong>Ligne « Exemple ».</strong> Le rapport quotidien et l'alerte fraude ne diffèrent pas par
+      leurs données — ce sont les mêmes transactions — mais par le <strong>moment où leur résultat sert
+      encore</strong>. Le rapport sert le lendemain matin ; l'alerte ne sert que pendant le paiement.</p>
+
+    <p><strong>Ligne « Complexité ».</strong> Le batch est « <em>souvent</em> plus simple » : un lot
+      fermé est complet, ordonné, rejouable (N20). Le stream doit gérer ce que N21 a énuméré :
+      <strong>événements</strong> désordonnés, en double, en retard, et un <strong>état</strong> à
+      conserver. Ce surcoût est le prix d'entrée du streaming ; il ne se justifie que si la latence
+      gagnée rapporte plus.</p>
+
+    <p><strong>Ligne « Critère clé ».</strong> C'est la ligne qui décide. Pour le batch, la question
+      est : <em>« de combien de temps dispose-t-on pour traiter ? »</em> — c'est la <strong>fenêtre de
+      traitement</strong> (la nuit, de 23 h 30 à 6 h 30, dans l'enseigne de N20). Pour le stream, la
+      question est : <em>« en combien de temps faut-il réagir ? »</em> — c'est le <strong>temps de
+      réaction</strong>. On peut condenser la règle en une inégalité :</p>
+    <ul>
+      <li>si <strong>temps de réaction exigé ≥ période du batch + durée du traitement</strong>, le batch
+        convient, et il est plus simple et moins cher ;</li>
+      <li>sinon, le batch arrive <em>trop tard par construction</em>, quelle que soit sa puissance : il
+        faut le streaming.</li>
+    </ul>
+    <p>Le coût entre ensuite en jeu pour départager les cas limites : le streaming ne vaut que si
+      <strong>le coût du retard évité dépasse le surcoût</strong> d'un système permanent et plus
+      complexe (l'esquisse de N21, §8, devient ici le critère).</p>
+
+    <p><strong>Le cas IoV : la règle s'applique à l'usage, pas à la donnée.</strong> La page 33 du
+      support montre qu'il n'y a pas de « donnée batch » ni de « donnée stream ». Une position GPS est
+      <em>la même</em> donnée sur les deux chemins. Sur le chemin du haut, l'usage est « ce véhicule
+      dévie-t-il de sa route, est-il en danger <em>maintenant</em> ? » : temps de réaction en
+      secondes, donc streaming. Sur le chemin du bas, l'usage est « quels trajets ont été faits, où
+      perd-on du temps, quelles routes optimiser ? » : aucune urgence, besoin de l'historique complet,
+      donc batch. Les deux chemins se rejoignent dans la <strong>décision / analyse</strong> : l'alerte
+      fait agir tout de suite, l'historique fait comprendre et améliorer. Conséquence majeure : <strong>une
+      architecture réelle combine souvent les deux modes</strong> sur les mêmes sources.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Choisir par la donnée.</strong> « Les données GPS, c'est du streaming » est faux : le
+        même GPS nourrit aussi un batch. On classe les <em>usages</em>, jamais les sources.</li>
+      <li><strong>Choisir par le volume.</strong> Un gros volume n'impose pas le batch, un petit volume
+        n'impose pas le stream. La ligne « Volume » décrit une forme (stock ou débit), pas un seuil.</li>
+      <li><strong>Choisir par la mode.</strong> « Temps réel » sonne moderne ; mais un indicateur lu à la
+        réunion du lundi ne gagne rien à être recalculé chaque seconde (N20, phrase d'ouverture de la
+        partie).</li>
+      <li><strong>Confondre fraîcheur souhaitée et temps de réaction exigé.</strong> « Ce serait bien de
+        l'avoir en direct » n'est pas une exigence ; « au-delà de 30 secondes, le paiement est déjà
+        accepté » en est une. Seule la seconde compte dans l'inégalité.</li>
+      <li><strong>Oublier le micro-batch.</strong> Entre la nuit et la milliseconde, un batch toutes les
+        5 ou 15 minutes suffit parfois. C'est encore un batch (latence ≥ période), à choisir s'il
+        satisfait l'inégalité.</li>
+      <li><strong>Croire qu'il faut choisir un seul mode pour toute l'entreprise.</strong> Le cas IoV
+        montre le contraire : deux chemins sur la même donnée, chacun pour son usage.</li>
+      <li><strong>Deux chemins, deux chiffres.</strong> Combiner les modes crée un risque d'écart entre le
+        résultat « en direct » et le résultat consolidé (N21, ex. 14.3). Il faut dire lequel fait foi.</li>
+      <li><strong>Négliger la complexité dans le calcul.</strong> Le surcoût du stream n'est pas que du
+        matériel : c'est aussi la gestion des doublons, du désordre et de l'état, à concevoir et à
+        surveiller en permanence.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> جدول الدعم كيقارن بين <strong>batch</strong> و<strong>streaming</strong>
+    على خمس معايير: <strong>التأخير</strong> (دقايق/ساعات/أيام مقابل ثواني/ميلي ثانية)، <strong>الحجم</strong>
+    (دفعات كبيرة بزاف مقابل تدفق مستمر)، <strong>المثال</strong> (تقرير يومي مقابل إنذار احتيال)،
+    <strong>التعقيد</strong> (غالباً أبسط مقابل تسيير الأحداث والحالة)، و<strong>المعيار الأساسي</strong>
+    (نافذة المعالجة مقابل زمن رد الفعل). القاعدة: ما كنختاروش حسب المعطيات ولا حسب «الموضة»، كنختارو
+    <strong>حسب الاستعمال</strong>: إلا كان <strong>زمن رد الفعل المطلوب ≥ مدة الدفعة + وقت المعالجة</strong>
+    فـbatch كافي وأرخص؛ وإلا خاص streaming. ومن بعد كنقارنو <strong>كلفة التأخير</strong> مع الكلفة الزايدة
+    ديال نظام شاعل ديما. ومثال <strong>IoV</strong> (إنترنت المركبات) كيبين أن <strong>نفس المعطى، استعمالين</strong>:
+    موقع GPS كيمشي فـstreaming باش نكشفو الانحراف/الخطر، وفـbatch باش نبنيو تاريخ الرحلات، والجوج
+    كيغذيو القرار والتحليل. يعني بنية حقيقية غالباً كتجمع بين الجوج.</p>
+</div>
+
+<h3 id="n22-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Après N20 et N21, l'architecte connaît deux modes de traitement, chacun avec ses qualités et ses
+      coûts. Il lui manque un <strong>moyen de trancher</strong> devant un besoin concret. Sans critère,
+      les décisions se prennent par habitude (« on a toujours fait des batchs ») ou par mode (« tout doit
+      être en temps réel ») — et les deux erreurs coûtent : un batch là où la décision ne peut pas
+      attendre laisse passer la fraude ou la panne ; un stream là où personne ne lit le résultat avant
+      lundi paie une machine permanente et une complexité inutiles.</p>
+    <p>La règle remplace ce débat par une comparaison chiffrée — <strong>temps de réaction exigé contre
+      latence offerte, coût du retard contre surcoût</strong> — et le cas IoV lève la fausse alternative :
+      on n'a pas à choisir <em>un</em> mode pour <em>une</em> donnée, on choisit un mode
+      <strong>par usage</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n22-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Trancher un besoin</strong> entre batch, micro-batch et stream par une inégalité
+        simple, et non par une préférence.</li>
+      <li><strong>Remplir la grille du support</strong> (latence, volume, exemple, complexité, critère
+        clé) pour un cas nouveau.</li>
+      <li><strong>Justifier un choix devant un décideur</strong> en comparant coût du retard et surcoût du
+        streaming.</li>
+      <li><strong>Séparer les usages d'une même source</strong>, comme dans le cas IoV, et dessiner les
+        deux chemins.</li>
+      <li><strong>Préparer les couches de l'architecture moderne</strong> : l'ingestion (N32) et le
+        traitement (N34) devront accueillir les deux modes à la fois.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n22-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Pourquoi la latence est le premier critère.</strong> Les deux définitions (N20, N21)
+      diffèrent sur un seul point de fond : le batch <em>attend</em> la fin d'une période, le stream
+      n'attend pas. Toutes les autres différences du tableau en découlent. Attendre donne la
+      complétude, l'ordre, la simplicité (ligne « Complexité ») et l'amortissement des coûts ; ne pas
+      attendre donne la réactivité. Il est donc logique que le critère de choix porte sur la seule
+      chose qui distingue vraiment les deux modes : <strong>peut-on se permettre d'attendre ?</strong></p>
+
+    <p><strong>Pourquoi on compare au temps de réaction et non à « vite ».</strong> « Vite » n'a pas de
+      sens absolu. Ce qui en a, c'est le délai au-delà duquel l'action devient impossible ou sans
+      intérêt : la durée d'une autorisation de paiement, les 20 minutes de tolérance de la chambre
+      froide (N21, ex. 12.1), le temps avant qu'un véhicule n'atteigne le danger. Ce délai est fixé
+      par le <em>métier</em>, pas par la technique : c'est lui qui rend la décision objective.</p>
+
+    <p><strong>Pourquoi le coût intervient en second.</strong> Si l'inégalité est largement satisfaite
+      par le batch, le stream n'apporte rien : la question du coût ne se pose même pas. Si le batch
+      arrive trop tard, le stream devient nécessaire — mais il reste à vérifier que <strong>le gain vaut
+      la dépense</strong>. Supposons une perte évitée de 60 000 MAD par incident de chambre froide, et 30
+      incidents par an sur 120 magasins : 1 800 000 MAD de pertes évitables, à comparer au coût annuel
+      d'un traitement continu. Le calcul est souvent écrasant dans un sens ou dans l'autre.</p>
+
+    <p><strong>Pourquoi « même donnée, deux usages ».</strong> Une donnée n'a pas de vitesse propre :
+      c'est la question qu'on lui pose qui en a une. Le GPS d'un véhicule répond à « où est-il <em>en
+      ce moment</em> ? » — question sans période — et à « quels trajets a-t-il faits <em>ce mois-ci</em>
+      ? » — question définie sur un ensemble fermé (N20, §8). Retirer l'un des deux chemins
+      ferait perdre un usage : sans stream, la déviation est découverte après coup ; sans batch, on
+      réagit à chaque incident sans jamais comprendre pourquoi ils se répètent. Les deux chemins se
+      rejoignent dans la décision parce que <strong>réagir et comprendre sont complémentaires</strong>,
+      comme OLTP et OLAP l'étaient en partie III.</p>
+  </div>
+</div>
+
+<h3 id="n22-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Les véhicules connectés (IoV).</strong> Alerte de déviation, de vitesse excessive ou de
+        collision en stream ; historique des trajets, consommation, usure, optimisation de tournées en
+        batch.</li>
+      <li><strong>La banque et le paiement.</strong> Autorisation et fraude en stream ; relevés,
+        rapprochements, déclarations réglementaires en batch.</li>
+      <li><strong>La distribution.</strong> Ruptures en rayon et file en caisse en stream ; chiffre
+        d'affaires consolidé, réassort planifié en batch (enseigne de N20-N21).</li>
+      <li><strong>L'industrie.</strong> Arrêt d'urgence d'une machine en stream ; maintenance prédictive
+        entraînée sur des mois d'historique en batch.</li>
+      <li><strong>Le web.</strong> Recommandation pendant la visite en stream ; analyse des parcours et
+        tests de nouvelles pages en batch.</li>
+      <li><strong>Toute revue d'architecture</strong> où un besoin arrive avec la mention « en temps
+        réel » : c'est l'occasion de vérifier l'inégalité avant d'engager le coût.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n22-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« On veut tout en temps réel. »</strong> Demande globale, sans délai chiffré : il faut
+        décomposer par usage et appliquer le critère à chacun.</li>
+      <li><strong>« Notre batch de nuit ne suffit plus. »</strong> Vérifier si une période plus courte
+        (micro-batch) satisfait l'inégalité avant de passer au stream.</li>
+      <li><strong>« Les mêmes capteurs servent à l'exploitation et aux études. »</strong> Signal du cas
+        IoV : deux usages, deux chemins.</li>
+      <li><strong>« Combien coûte une heure de retard ? »</strong> La question est posée, ou devrait
+        l'être : c'est la seconde moitié du critère.</li>
+      <li><strong>Signal d'alerte — « le stream coûte cher et personne ne regarde ses
+        résultats ».</strong> L'inégalité n'avait pas été vérifiée : un batch suffisait.</li>
+      <li><strong>Signal d'alerte — « on découvre les incidents au rapport du matin ».</strong> Le
+        temps de réaction exigé est plus court que la période du batch : il manque un chemin stream.</li>
+      <li><strong>Signal d'alerte — « le chiffre en direct ne correspond pas au rapport ».</strong> Deux
+        chemins coexistent sans règle de référence : désigner celui qui fait foi.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n22-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lister les usages, pas les sources.</strong> Pour chaque source (GPS, caisses,
+      capteurs…), écrivez toutes les questions qu'on lui pose et la décision que chacune déclenche. Une
+      source peut avoir plusieurs usages : chacun sera traité séparément.</p>
+
+    <p><strong>Étape 2 — Chiffrer le temps de réaction exigé.</strong> Pour chaque usage : au-delà de
+      quel délai le résultat ne sert plus ? Exigez un chiffre (« 10 secondes », « avant 8 h »), jamais un
+      adjectif (« rapide »).</p>
+
+    <p><strong>Étape 3 — Appliquer l'inégalité.</strong> Calculez la latence d'un batch possible
+      (période + durée de traitement, N20). Si elle est inférieure ou égale au temps de réaction : batch
+      (ou micro-batch si une période courte suffit). Sinon : stream.</p>
+
+    <p><strong>Étape 4 — Vérifier le coût dans les cas stream.</strong> Estimez le coût du retard évité
+      sur un an et comparez-le au surcoût du stream (système permanent, gestion des événements et de
+      l'état). S'il ne se justifie pas, renégociez l'exigence avec le métier.</p>
+
+    <p><strong>Étape 5 — Dessiner les chemins et désigner la référence.</strong> Pour une source à
+      plusieurs usages, dessinez un chemin par mode, comme le schéma IoV, et précisez quel résultat fait
+      foi en cas d'écart — en général le batch, complet et rejouable.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>On choisit <strong>par usage</strong> : si le <strong>temps de réaction exigé</strong> est au moins
+      égal à la <strong>période du batch + son traitement</strong>, le batch suffit et coûte moins ; sinon
+      il faut le stream, à condition que le <strong>coût du retard évité</strong> dépasse son surcoût.
+      Le cas IoV le montre : <strong>même donnée, deux usages</strong> — la position GPS part en stream
+      pour l'alerte et en batch pour l'historique, et les deux nourrissent la décision.</p>
+    <p class="ar" dir="rtl">كنختارو <strong>حسب الاستعمال</strong>: إلا كان <strong>زمن رد الفعل المطلوب</strong>
+      على الأقل يساوي <strong>مدة الدفعة + المعالجة</strong>، فـbatch كافي وأرخص؛ وإلا خاص stream، بشرط
+      <strong>كلفة التأخير</strong> تكون كبر من الكلفة الزايدة ديالو. ومثال IoV كيبين: <strong>نفس المعطى،
+      استعمالين</strong> — موقع GPS كيمشي فـstream للإنذار وفـbatch للتاريخ، والجوج كيغذيو القرار.</p>
+  </div>
+</div>
+
+<h3 id="n22-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — appliquer l'inégalité à quatre besoins</div>
+  <div class="box-b">
+    <p>Le batch nocturne de l'enseigne a une période de 24 h et dure 7 h (fenêtre 23 h 30 → 6 h 30,
+      N20). Pour chaque besoin, appliquez le critère : (a) le rapport des ventes de la veille, lu à
+      8 h ; (b) le refus d'un paiement frauduleux, à décider pendant l'autorisation (moins de 2
+      secondes) ; (c) le réassort des rayons, commandé chaque jour à 10 h ; (d) l'affichage du nombre
+      de clients en attente en caisse, pour ouvrir une caisse supplémentaire dans les 5 minutes.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>La latence du batch existant.</strong> Une vente de 23 h 29 attend au plus la fermeture
+      du lot à 23 h 30 ; une vente de 23 h 31 attend jusqu'au lot suivant. Le pire cas est une latence
+      de <strong>24 h + 7 h = 31 h</strong> ; mais pour un résultat <em>daté de la veille</em>, ce qui
+      compte est l'heure de publication : 6 h 30.</p>
+
+    <p><strong>(a) Rapport de la veille, lu à 8 h.</strong> Le résultat porte sur une journée fermée et
+      doit être prêt à 8 h ; il l'est à 6 h 30. Inégalité satisfaite : <strong>batch</strong>. Un stream
+      n'ajouterait rien, le rapport n'étant lu qu'une fois.</p>
+
+    <p><strong>(b) Fraude pendant l'autorisation.</strong> Temps de réaction : moins de 2 s. Même un
+      micro-batch d'une minute dépasse ce délai. Inégalité violée pour tout batch :
+      <strong>stream</strong>, événement par événement (et fenêtre glissante pour les motifs, N21
+      ex. 12.2).</p>
+
+    <p><strong>(c) Réassort à 10 h.</strong> Les données de la veille sont disponibles à 6 h 30, avant
+      10 h. <strong>Batch</strong>. Si l'on voulait inclure les ventes du matin même, un micro-batch à
+      9 h 30 suffirait : l'exigence se mesure en heures, pas en secondes.</p>
+
+    <p><strong>(d) Caisses en attente, réaction en 5 minutes.</strong> Temps de réaction : 5 min. Un
+      batch de nuit est exclu. Un micro-batch toutes les minutes donne une latence d'environ 1 min +
+      traitement, ce qui <em>peut</em> satisfaire l'inégalité ; un stream la satisfait à coup sûr. Les
+      deux sont recevables : on départagera par le coût (étape 4). Comme l'enseigne dispose déjà d'un
+      chemin stream pour les caisses (N21, ex. 14.3), l'ajout est peu coûteux : <strong>stream</strong>.</p>
+
+    <p><strong>La leçon.</strong> Quatre besoins sur les mêmes données de caisse, trois réponses
+      différentes. Le critère s'applique <strong>besoin par besoin</strong>, et le micro-batch est une
+      vraie option entre les deux extrêmes.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le cas IoV de l'enseigne</div>
+  <div class="box-b">
+    <p>Les 40 camions de livraison (N21, ex. 12.3) envoient leur position GPS toutes les 15 secondes.
+      Trois usages sont demandés : (1) alerter le régulateur si un camion quitte son itinéraire de plus
+      de 500 m ou s'arrête plus de 10 minutes hors d'un magasin (risque de vol ou d'accident) ;
+      (2) calculer chaque mois le temps moyen de livraison par magasin et par tranche horaire ;
+      (3) proposer chaque semaine de nouvelles tournées en fonction des embouteillages observés.
+      Appliquez la démarche, dessinez (en texte) les chemins, et calculez le volume que reçoit chacun.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étapes 1 et 2 — usages et temps de réaction.</strong> (1) Alerte : le régulateur doit
+      appeler le chauffeur ou les secours dans la minute ; temps de réaction ≈ <strong>1 minute</strong>.
+      (2) Statistique mensuelle : lue une fois par mois ; temps de réaction ≈ <strong>plusieurs
+      jours</strong>. (3) Nouvelles tournées : décidées chaque semaine ; temps de réaction ≈
+      <strong>quelques jours</strong>.</p>
+
+    <p><strong>Étape 3 — l'inégalité.</strong> (1) Aucun batch de période raisonnable ne réagit en une
+      minute : <strong>stream</strong>. La règle « s'arrête plus de 10 minutes » demande un
+      <em>état</em> par camion (heure du dernier mouvement) ; la règle « quitte l'itinéraire » se teste
+      position par position. (2) et (3) Un batch de nuit est très largement suffisant :
+      <strong>batch</strong>, sur l'historique complet.</p>
+
+    <p><strong>Étape 4 — le coût.</strong> Un vol de camion chargé coûte la marchandise et le véhicule ;
+      un accident sans secours rapide coûte bien davantage. Même rare, ce coût dépasse sans peine celui
+      d'un traitement continu sur 40 véhicules, dont le volume est modeste.</p>
+
+    <p><strong>Étape 5 — les chemins.</strong> Position GPS → <em>chemin stream</em> : contrôle de
+      l'itinéraire et de l'arrêt → alerte au régulateur. Position GPS → <em>chemin batch</em> : stockage
+      de l'historique → calcul mensuel des temps de livraison et calcul hebdomadaire des tournées. Les
+      deux mènent à la décision : l'une immédiate (appeler), l'autre structurelle (réorganiser). C'est
+      exactement le schéma de la page 33.</p>
+
+    <p><strong>Les volumes.</strong> 40 camions × 4 positions par minute = <strong>160 événements par
+      minute</strong>, soit moins de 3 par seconde, pour le chemin stream : un débit très faible. Sur une
+      journée de 12 h de tournée : 160 × 60 × 12 = <strong>115 200 positions</strong> ; sur un mois de 26
+      jours : environ <strong>3 millions</strong>, pour le chemin batch. Même donnée, deux formes : un
+      <em>débit</em> de 3 événements par seconde, un <em>stock</em> de 3 millions de lignes — c'est la
+      ligne « Volume » du tableau.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — coût du retard contre surcoût</div>
+  <div class="box-b">
+    <p>Le service informatique chiffre un traitement streaming des chambres froides des 120 magasins à
+      <strong>350 000 MAD par an</strong> (machines permanentes, développement, surveillance). Avec le
+      batch actuel, l'enseigne a perdu l'an dernier <strong>18 chambres</strong> à 60 000 MAD chacune.
+      On estime que le stream aurait sauvé 80 % de ces chambres. (a) Le stream est-il rentable ? (b) Et
+      si l'enseigne n'avait perdu que 5 chambres ? (c) Quelle alternative moins chère examiner dans ce
+      second cas, et à quelle condition est-elle valable ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Avec 18 chambres perdues.</strong> Pertes annuelles : 18 × 60 000 =
+      <strong>1 080 000 MAD</strong>. Pertes évitées : 80 % × 1 080 000 = <strong>864 000 MAD</strong>.
+      Surcoût : 350 000 MAD. Gain net : 864 000 − 350 000 = <strong>514 000 MAD par an</strong>. Le
+      stream est rentable : chaque dirham dépensé en évite environ 2,5.</p>
+
+    <p><strong>(b) Avec 5 chambres perdues.</strong> Pertes : 5 × 60 000 = 300 000 MAD ; pertes
+      évitées : 80 % × 300 000 = <strong>240 000 MAD</strong>. Surcoût : 350 000 MAD. Bilan :
+      240 000 − 350 000 = <strong>− 110 000 MAD</strong>. Le stream coûte plus qu'il ne rapporte : même
+      si l'inégalité de latence l'exige techniquement, l'étape 4 dit de <strong>chercher une autre
+      solution</strong> ou de renégocier l'exigence.</p>
+
+    <p><strong>(c) L'alternative : le micro-batch.</strong> La tolérance est de 20 minutes au-dessus de
+      8 °C (N21, ex. 12.1) et l'intervention prend 6 minutes. Il reste 14 minutes pour détecter. Un
+      micro-batch toutes les 5 minutes, d'une durée de 1 minute, donne une latence maximale de
+      <strong>6 minutes</strong> : 6 + 6 = 12 minutes &lt; 20. L'inégalité est satisfaite, avec un
+      système plus simple qui ne tourne pas en continu. Condition : que le traitement tienne vraiment
+      en 1 minute aux heures de pointe, et que l'intervention ne dépasse pas les 6 minutes prévues —
+      sinon la marge disparaît.</p>
+
+    <p><strong>La leçon.</strong> L'inégalité de latence dit ce qui est <em>possible</em> ; le calcul de
+      coût dit ce qui est <em>raisonnable</em>. Les deux moitiés du critère sont nécessaires, et entre le
+      batch de nuit et le stream il existe toute une gamme de périodes à examiner.</p>
+  </div>
+</div>
+
+<h3 id="n22-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Reproduisez de mémoire le tableau « Batch vs Streaming » du support et expliquez chacune de ses
+        cinq lignes en une phrase.</li>
+      <li>Énoncez l'inégalité de choix et expliquez pourquoi elle porte sur le temps de réaction plutôt
+        que sur la quantité de données.</li>
+      <li>Expliquez pourquoi « les données GPS sont des données streaming » est une phrase fausse, en vous
+        appuyant sur le schéma IoV.</li>
+      <li>Donnez un exemple où le micro-batch satisfait l'inégalité alors que le batch de nuit ne la
+        satisfait pas.</li>
+      <li>Pour une source de votre choix (capteurs médicaux, compteurs électriques, application mobile),
+        listez deux usages qui relèvent de chemins différents et dessinez le schéma correspondant.</li>
+      <li>Expliquez pourquoi, en cas d'écart entre chemin stream et chemin batch, c'est en général le batch
+        qui fait foi.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n22-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque besoin, donnez le temps de réaction exigé (ordre de grandeur) puis le mode — batch,
+      micro-batch ou stream : facture mensuelle d'électricité ; coupure automatique d'un compteur en
+      surcharge ; tableau de bord des ventes mis à jour pour la réunion de 14 h ; détection d'une chute
+      chez une personne âgée équipée d'un bracelet ; classement annuel des meilleurs vendeurs ; alerte
+      de vitesse excessive d'un véhicule de livraison.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Une société de location de voitures possède 2 000 véhicules connectés envoyant leur position et
+      leur niveau de carburant toutes les 30 secondes. (a) Calculez le débit d'événements par seconde et
+      le volume mensuel. (b) Identifiez trois usages de ces données, dont au moins un pour chaque mode,
+      et appliquez l'inégalité à chacun. (c) Dessinez le schéma « même donnée, plusieurs usages » sur le
+      modèle de la page 33.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le directeur de l'enseigne demande : « Passons <em>toute</em> notre informatique décisionnelle en
+      temps réel, c'est l'avenir. » Rédigez une réponse argumentée d'une page qui (a) reprend les cinq
+      lignes du tableau du support pour montrer ce que coûterait ce passage ; (b) classe au moins six
+      usages réels de l'enseigne (N20, N21 et cette notion) selon l'inégalité ; (c) chiffre, pour l'un
+      d'eux, le coût du retard contre le surcoût ; (d) propose une architecture à deux chemins et précise
+      quel résultat fait foi. Concluez par la phrase d'ouverture de la partie IV.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers la partie suivante</div>
+  <div class="box-b">
+    <p>La partie IV se referme sur une idée qui dépasse le choix batch / stream : <strong>une même donnée
+      peut servir plusieurs usages, et chacun lui donne une valeur différente</strong>. Le GPS d'un camion
+      vaut une vie sauvée sur un chemin, une tournée optimisée sur l'autre. C'est le point de départ de
+      la notion suivante : <strong>la donnée considérée comme un actif stratégique</strong> (N23).</p>
+  </div>
+</div>

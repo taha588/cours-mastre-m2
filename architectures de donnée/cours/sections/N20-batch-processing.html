@@ -1,0 +1,503 @@
+<h1 class="chapitre saut" id="partie4"><span class="num">Partie IV</span>Batch processing et stream processing</h1>
+
+<p>Le critère principal n'est pas « <strong>moderne contre ancien</strong> », mais la
+<strong>latence acceptable pour le cas d'usage</strong>.</p>
+
+<h2 class="notion" id="n20">N20 — Le batch processing : traiter par lots</h2>
+
+<h3 id="n20-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition.</strong> Le <strong>traitement batch</strong> (traitement par lots)
+      <strong>regroupe des données sur une période</strong>, <strong>puis exécute un traitement sur un
+      lot</strong>.</p>
+
+    <p><strong>Exemples :</strong> calcul quotidien des ventes • génération de factures •
+      consolidation nocturne • entraînement planifié d'un modèle.</p>
+
+    <p><strong>Le cycle en trois temps :</strong></p>
+    <ul>
+      <li><strong>Accumuler</strong> — collecter et stocker les données.</li>
+      <li><strong>Traiter</strong> — nettoyer, transformer et analyser.</li>
+      <li><strong>Résultat</strong> — des informations utiles et des décisions.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n20-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>La définition tient en une phrase, mais chacun de ses trois morceaux porte une conséquence
+      précise. Lisons-la lentement.</p>
+
+    <p><strong>« Regroupe des données sur une période ».</strong> Le batch commence par
+      <em>attendre</em>. Les ventes de la journée arrivent une à une, mais on ne les traite pas une à
+      une : on les laisse s'accumuler jusqu'à une <strong>frontière temporelle</strong> — minuit, la fin
+      du mois, la fin de la semaine. Cette frontière découpe le flux continu de l'activité en
+      <strong>morceaux fermés</strong> : « les ventes du 12 mars », « la consommation de février ».
+      C'est la première étape du schéma du support, <em>Accumuler</em>.</p>
+
+    <p><strong>« Puis ».</strong> Ce petit mot est le cœur de la notion. Le traitement ne démarre
+      qu'<em>après</em> la fermeture du lot. Il en découle une propriété qu'aucune machine ne peut
+      supprimer : <strong>le résultat a toujours au moins une période de retard</strong> sur l'événement
+      le plus ancien du lot. Une vente de 9 h n'apparaîtra dans le rapport quotidien que le lendemain
+      matin — non parce que le système est lent, mais parce qu'il a été <em>conçu</em> pour attendre
+      les ventes de 21 h. La latence d'un batch se décompose donc toujours ainsi : <strong>attente
+      d'accumulation + attente du démarrage + durée du traitement</strong>. Accélérer le traitement ne
+      réduit que le dernier terme.</p>
+
+    <p><strong>« Exécute un traitement sur un lot ».</strong> Le traitement voit
+      <strong>l'ensemble</strong> d'un coup. C'est exactement ce dont ont besoin les exemples du
+      support : un total quotidien n'a de sens que si <em>toutes</em> les ventes du jour sont là ; une
+      facture mensuelle doit contenir <em>toutes</em> les consommations du mois ; une consolidation doit
+      rapprocher <em>tous</em> les magasins ; un modèle s'entraîne sur <em>tout</em> l'historique
+      retenu. <strong>Le lot n'est pas un pis-aller : c'est l'unité naturelle de ces calculs</strong>,
+      parce que leur résultat n'existe qu'à partir d'un ensemble complet.</p>
+
+    <p>De ces trois morceaux découlent les quatre qualités qui font que le batch reste, aujourd'hui
+      encore, le mode de traitement le plus répandu.</p>
+    <ul>
+      <li><strong>La complétude.</strong> Le lot est fermé : on sait ce qu'il contient, on peut le
+        compter, le contrôler, le comparer à la veille avant de publier quoi que ce soit.</li>
+      <li><strong>L'efficacité.</strong> Lire un million de lignes d'un seul passage coûte bien moins
+        cher que d'en traiter un million une à une : le coût fixe de chaque exécution — démarrer,
+        lire, écrire — est payé une fois et amorti sur tout le lot.</li>
+      <li><strong>La rejouabilité.</strong> Puisque le lot d'entrée est conservé, on peut relancer le
+        traitement après une erreur, ou recalculer six mois après correction d'une règle. Un batch qui
+        échoue se relance ; un résultat faux se recalcule.</li>
+      <li><strong>Le choix du moment.</strong> On peut exécuter le traitement quand les ressources sont
+        libres — la nuit, hors des heures d'activité — ce qui est précisément ce que N19 recommandait
+        pour ne pas affamer l'opérationnel. C'est le sens de « consolidation <em>nocturne</em> ».</li>
+    </ul>
+
+    <p>La phrase d'ouverture de cette partie prend alors tout son sens. Le batch n'est pas
+      « l'ancienne façon de faire » que le streaming viendrait remplacer : <strong>c'est la bonne
+      façon de faire chaque fois que la décision qui utilise le résultat peut attendre la fin de la
+      période</strong>. Le directeur commercial qui lit le chiffre d'affaires de la veille à 8 h n'a
+      aucun usage d'un chiffre mis à jour à la seconde à 3 h du matin. La question n'est jamais
+      « batch ou moderne ? », mais « <em>combien de temps la décision peut-elle attendre ?</em> » —
+      et c'est cette question que N22 transformera en critère de choix.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Batch ne veut pas dire lent.</strong> Un lot peut être traité en quelques secondes ;
+        ce qui est long, c'est l'<em>attente d'accumulation</em>. La latence vient de la période, pas de
+        la machine.</li>
+      <li><strong>Batch ne veut pas dire ancien.</strong> L'entraînement planifié d'un modèle d'IA, cité
+        par le support, est un batch tout à fait contemporain.</li>
+      <li><strong>Batch ne veut pas dire nocturne.</strong> La période peut être d'une heure, de quinze
+        minutes ou d'un mois. La nuit n'est qu'un choix de moment, commode quand l'activité s'arrête.</li>
+      <li><strong>Un modèle entraîné en batch peut servir en temps réel.</strong> On entraîne chaque
+        dimanche, on prédit à chaque transaction : deux traitements différents, deux modes différents.</li>
+      <li><strong>Les données tardives existent.</strong> Une caisse hors ligne remonte ses ventes du
+        12 mars le 13 à midi, après la fermeture du lot. Il faut décider à l'avance : recalculer le lot,
+        ou rattacher ces ventes au lot suivant.</li>
+      <li><strong>Relancer un batch peut doubler les données.</strong> Si le traitement
+        <em>ajoute</em> des lignes au lieu de <em>remplacer</em> le résultat de la période, la relance
+        après une panne compte deux fois. Un batch doit être <strong>idempotent</strong> : l'exécuter
+        deux fois produit le même résultat qu'une seule.</li>
+      <li><strong>La fenêtre de batch se remplit.</strong> Le volume croît, la durée du traitement
+        aussi, la nuit non. Le jour où le traitement déborde sur l'ouverture des magasins, il entre en
+        concurrence avec l'opérationnel — le problème de N19 revient.</li>
+      <li><strong>« Nocturne » n'existe pas pour une activité mondiale.</strong> Quand il est 3 h à
+        Casablanca, il est 22 h à New York : il n'y a plus de période creuse évidente.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> <strong>المعالجة بالدفعات (batch)</strong> كتجمع المعطيات
+    <strong>على مدة معينة</strong>، <strong>ومن بعد</strong> كتنفذ معالجة على <strong>دفعة وحدة</strong>
+    (أمثلة: حساب المبيعات اليومية، إصدار الفواتير، التجميع الليلي، التدريب المبرمج ديال نموذج). الدورة
+    فيها ثلاث مراحل: <strong>جمع ← معالجة ← نتيجة</strong>. كل جزء من التعريف عندو نتيجة: «كتجمع على
+    مدة» يعني كتقطع النشاط المتواصل لدفعات مسدودة؛ «ومن بعد» يعني <strong>النتيجة ديما متأخرة على الأقل
+    بمدة وحدة</strong> — والتأخير = انتظار التجميع + انتظار الانطلاق + مدة المعالجة، والسرعة ديال الماكينة
+    ما كتنقص غير الجزء الأخير؛ «على دفعة» يعني المعالجة كتشوف <strong>المجموعة كاملة</strong>، وهادا هو
+    اللي خاصو المجموع اليومي ولا الفاتورة الشهرية. ومن هنا جاو أربع مزايا: <strong>الاكتمال</strong>،
+    <strong>الفعالية</strong>، <strong>إمكانية إعادة التشغيل</strong>، و<strong>اختيار الوقت</strong>
+    (فالليل، باش ما نضرّوش النظام التشغيلي). الخلاصة: batch <strong>ماشي طريقة قديمة</strong> — هو الطريقة
+    الصحيحة <strong>كل ما القرار يقدر يتسنى حتى تسالي المدة</strong>. والسؤال الحقيقي ديما: شحال يقدر
+    يتسنى القرار؟</p>
+</div>
+
+<h3 id="n20-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le batch traite un problème très concret : <strong>produire des résultats qui portent sur un
+      grand ensemble de données — totaux, factures, rapprochements, modèles — de façon complète,
+      économique et reproductible</strong>. Ces résultats ne peuvent pas être calculés événement par
+      événement sans perdre ce qui fait leur valeur : la certitude que rien ne manque.</p>
+    <p>Il traite en même temps un second problème, hérité de N19 : <strong>faire ces calculs lourds sans
+      gêner le métier</strong>. En choisissant le moment d'exécution — après la fermeture des magasins,
+      en dehors des pics — le batch transforme une concurrence pour les ressources en simple
+      succession dans le temps. L'alimentation nocturne de l'entrepôt (N10) et l'ETL de N18 en sont les
+      exemples que nous avons déjà rencontrés sans les nommer ainsi.</p>
+  </div>
+</div>
+
+<h3 id="n20-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Reconnaître un besoin batch</strong> : un résultat portant sur un ensemble, utilisé
+        après la fin d'une période.</li>
+      <li><strong>Calculer la latence réelle</strong> d'un résultat, terme par terme, et savoir lequel
+        on peut réduire.</li>
+      <li><strong>Dimensionner la fenêtre de batch</strong> et prévoir le moment où la croissance du
+        volume la fera déborder.</li>
+      <li><strong>Concevoir des traitements rejouables</strong> qui ne doublent ni ne perdent de données
+        en cas de relance.</li>
+      <li><strong>Gérer les données tardives</strong> par une règle décidée à l'avance, et non au cas
+        par cas.</li>
+      <li><strong>Préparer la comparaison avec le stream</strong> (N21) et le critère de choix (N22) en
+        sachant précisément ce que le batch garantit et ce qu'il ne peut pas offrir.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="n20-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p>Le traitement par lots est le premier mode de traitement de l'informatique d'entreprise. Les
+      premières machines lisaient des paquets de cartes perforées : on préparait le paquet dans la
+      journée, on le passait la nuit, on récupérait les listings au matin. Le mot <em>batch</em>
+      désigne littéralement cette <strong>fournée</strong>. Le mode a survécu à toutes les technologies
+      qui ont suivi parce que ses raisons d'être ne sont pas techniques : elles tiennent à la nature
+      des calculs et à l'économie de leur exécution.</p>
+
+    <p><strong>La raison économique.</strong> Toute exécution a un coût fixe : démarrer le traitement,
+      ouvrir les fichiers, charger les règles, écrire le résultat. Supposons ce coût fixe égal à
+      2 secondes et le coût par vente à 1 milliseconde. Traiter 1 000 000 de ventes <em>une par une</em>,
+      chacune avec son coût fixe, coûte environ 1 000 000 × 2 s, soit plus de 23 jours de calcul.
+      Les traiter <em>en un lot</em> coûte 2 s + 1 000 000 × 1 ms ≈ 1 000 s, soit moins de
+      17 minutes. Les chiffres sont volontairement simplifiés, mais le mécanisme est réel :
+      <strong>regrouper, c'est amortir</strong>. Le batch est la forme la plus économique de traitement
+      dès que le coût fixe n'est pas négligeable.</p>
+
+    <p><strong>La raison logique.</strong> Certains résultats sont <em>définis</em> sur un ensemble
+      fermé. « Le chiffre d'affaires du 12 mars » n'existe qu'une fois le 12 mars terminé ; « la facture
+      de février » n'a pas de sens au 15 février. Pour ces calculs, attendre la fin de la période n'est
+      pas une contrainte imposée par l'outil : c'est la définition même du résultat.</p>
+
+    <p><strong>Pourquoi les trois temps du schéma, et pas deux ?</strong> Retirons-les un à un.</p>
+    <ul>
+      <li>Sans <strong>Accumuler</strong> : il n'y a plus de lot, chaque événement est traité à son
+        arrivée — c'est du stream (N21), avec ses avantages mais sans la complétude.</li>
+      <li>Sans <strong>Traiter</strong> : les données brutes s'empilent sans devenir utilisables — c'est
+        le marécage de données de N11, une accumulation sans transformation.</li>
+      <li>Sans <strong>Résultat</strong> : le calcul s'exécute mais personne ne s'en sert — un coût sans
+        décision. Le support le rappelle en nommant la sortie « informations utiles <em>et
+        décisions</em> ».</li>
+    </ul>
+    <p>Chaque étape répond à une question distincte : <em>quoi</em> traiter (le lot fermé),
+      <em>comment</em> (la transformation), <em>pour qui</em> (la décision). Supprimer l'une des trois,
+      c'est perdre la raison d'être des deux autres.</p>
+  </div>
+</div>
+
+<h3 id="n20-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>Le reporting périodique.</strong> Ventes de la veille, tableau de bord hebdomadaire,
+        clôture mensuelle : le résultat est lu après la période, le batch est naturel.</li>
+      <li><strong>La facturation.</strong> Eau, électricité, télécoms, abonnements : la facture porte
+        par définition sur une période fermée.</li>
+      <li><strong>L'alimentation d'un entrepôt ou d'un lakehouse.</strong> Les chargements ETL ou ELT
+        de N10, N12 et N18 sont, dans leur grande majorité, des traitements par lots.</li>
+      <li><strong>La consolidation et le rapprochement.</strong> Comparer les ventes des caisses aux
+        encaissements bancaires, rapprocher les paiements des commandes : il faut les deux ensembles
+        complets.</li>
+      <li><strong>L'entraînement de modèles.</strong> Un modèle de prévision ou de recommandation se
+        réentraîne périodiquement sur un historique, même s'il est ensuite interrogé en continu.</li>
+      <li><strong>Les recalculs et les migrations.</strong> Corriger une règle de calcul et la réappliquer
+        à deux ans d'historique : seul un traitement par lots rejouable le permet.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n20-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <ol>
+      <li><strong>« Le rapport est lu chaque matin à 8 h. »</strong> La décision a une heure fixe : tout
+        ce qui est prêt avant suffit. Signal batch typique.</li>
+      <li><strong>« Le résultat doit inclure toutes les opérations de la période. »</strong> Besoin de
+        complétude : il faut un lot fermé.</li>
+      <li><strong>« Le calcul est lourd et ne doit pas gêner les caisses. »</strong> On choisit le
+        moment d'exécution : batch hors des heures d'activité.</li>
+      <li><strong>« Nous devons pouvoir recalculer après une correction. »</strong> Rejouabilité
+        exigée : on conserve le lot d'entrée et on rend le traitement idempotent.</li>
+      <li><strong>Signal d'alerte — « le traitement de nuit finit de plus en plus tard ».</strong> La
+        fenêtre de batch se remplit : il faut mesurer la tendance avant qu'elle ne déborde.</li>
+      <li><strong>Signal d'alerte — « après la relance, les chiffres ont doublé ».</strong> Le traitement
+        n'est pas idempotent : il ajoute au lieu de remplacer.</li>
+      <li><strong>Signal d'alerte — « il manque toujours les ventes de quelques magasins ».</strong>
+        Données tardives non prévues : la règle de rattrapage n'a pas été décidée.</li>
+      <li><strong>Signal inverse — « il faut bloquer la carte avant que le paiement soit
+        accepté ».</strong> La décision ne peut pas attendre la fin d'une période : ce n'est pas un
+        besoin batch, voir N21.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n20-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Fixer la latence acceptable, en partant de la décision.</strong> Qui utilise le
+      résultat, à quelle heure, pour décider quoi ? Écrivez une échéance chiffrée — « rapport disponible
+      à 7 h pour la réunion de 8 h ». Si la décision ne peut pas attendre la fin d'une période,
+      arrêtez-vous : ce n'est pas un batch.</p>
+
+    <p><strong>Étape 2 — Définir le lot.</strong> Quelle période ? Quelle frontière exacte — minuit
+      heure locale, ou heure de fermeture des magasins ? Et surtout : <strong>que fait-on des données
+      qui arrivent après la frontière ?</strong> Recalcul du lot, ou rattachement au lot suivant :
+      décidez-le maintenant et écrivez-le.</p>
+
+    <p><strong>Étape 3 — Calculer la fenêtre de batch.</strong> La fenêtre va du moment où toutes les
+      données du lot sont disponibles jusqu'à l'échéance de l'étape 1, moins une marge pour une relance
+      éventuelle. Comparez-la à la durée mesurée du traitement, puis projetez cette durée avec la
+      croissance du volume : <strong>vous obtenez la date à laquelle le batch débordera</strong>, et
+      donc le délai dont vous disposez pour agir.</p>
+
+    <p><strong>Étape 4 — Rendre le traitement rejouable.</strong> Conservez le lot d'entrée. Faites en
+      sorte que le résultat d'une période <em>remplace</em> le résultat précédent de la même période au
+      lieu de s'y ajouter : le traitement devient idempotent, et une relance après panne est sans
+      danger.</p>
+
+    <p><strong>Étape 5 — Orchestrer et contrôler.</strong> Fixez l'ordre des traitements dépendants —
+      on ne consolide pas avant que tous les magasins aient remonté —, ajoutez un <strong>contrôle de
+      complétude</strong> avant publication — nombre de magasins, total comparé à la veille — et une
+      alerte si l'échéance risque d'être manquée. <strong>Un batch qui échoue en silence est pire
+      qu'un batch qui échoue bruyamment</strong> : le premier publie un chiffre faux, le second n'en
+      publie aucun.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Le batch <strong>regroupe sur une période, puis traite le lot</strong> : accumuler → traiter →
+      résultat. Sa latence vaut au moins une période, quelle que soit la machine. En échange, il offre
+      <strong>complétude, efficacité, rejouabilité et choix du moment</strong>. Il est le bon choix
+      chaque fois que la décision peut attendre la fin de la période.</p>
+    <p class="ar" dir="rtl">الـbatch <strong>كيجمع على مدة، ومن بعد كيعالج الدفعة</strong>: جمع ← معالجة ←
+      نتيجة. التأخير ديالو على الأقل مدة وحدة، كيفما كانت الماكينة. وفالمقابل كيعطي <strong>الاكتمال،
+      الفعالية، إمكانية إعادة التشغيل واختيار الوقت</strong>. وهو الاختيار الصحيح كل ما القرار يقدر يتسنى
+      حتى تسالي المدة.</p>
+  </div>
+</div>
+
+<h3 id="n20-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — la nuit de l'enseigne est-elle assez longue ?</div>
+  <div class="box-b">
+    <p>Chez l'enseigne, les 120 magasins ferment à 22 h ; leurs ventes sont toutes remontées au siège à
+      23 h 30. La consolidation nocturne dure aujourd'hui 3 h 20 et le rapport doit être publié à 7 h,
+      avec une marge de 30 minutes réservée à une relance éventuelle. Le volume des ventes — et la durée
+      du traitement, qui lui est proportionnelle — croît de 15 % par an. Quelle est la latence du rapport
+      pour une vente de 10 h ? Dans combien d'années le batch débordera-t-il ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — La latence réelle, terme par terme.</strong> Une vente de 10 h attend la
+      fermeture du lot et la remontée complète, à 23 h 30 : <strong>13 h 30 d'attente
+      d'accumulation</strong>. Le traitement démarre aussitôt et dure 3 h 20 ; le rapport est publié à
+      7 h. Latence totale : de 10 h à 7 h le lendemain, soit <strong>21 heures</strong>. Le traitement
+      lui-même n'en représente que 3 h 20, moins d'un sixième : même un traitement instantané laisserait
+      plus de 13 heures de latence. C'est la démonstration chiffrée de la section 5.</p>
+
+    <p><strong>Étape 2 — Ce n'est pas un défaut.</strong> La décision est prise à la réunion de 8 h. Le
+      chiffre de 7 h contient <em>toutes</em> les ventes de la veille : pour cet usage, 21 heures de
+      latence sont parfaitement acceptables.</p>
+
+    <p><strong>Étape 3 — La fenêtre de batch.</strong> Les données sont complètes à 23 h 30 ; la
+      publication est due à 7 h, moins 30 minutes de marge, donc le traitement doit finir à 6 h 30.
+      Fenêtre : de 23 h 30 à 6 h 30, soit <strong>7 heures = 420 minutes</strong>. Durée actuelle :
+      3 h 20 = <strong>200 minutes</strong>. Taux d'occupation : 200 / 420 ≈ 48 %.</p>
+
+    <p><strong>La projection.</strong> Après n années, la durée vaut 200 × 1,15<sup>n</sup> minutes. On
+      cherche n tel que 200 × 1,15<sup>n</sup> &gt; 420, c'est-à-dire 1,15<sup>n</sup> &gt; 2,1.
+      Vérifions année par année : 1,15<sup>5</sup> ≈ 2,01 (402 minutes, encore dans la fenêtre) ;
+      1,15<sup>6</sup> ≈ 2,31 (463 minutes, hors fenêtre). <strong>Le batch débordera au cours de la
+      sixième année.</strong> Dès la cinquième, la marge réelle n'est plus que de 18 minutes en plus des
+      30 réservées — une seule relance un peu longue ferait manquer l'échéance.</p>
+
+    <p><strong>La leçon.</strong> Un doublement en cinq ans paraît lointain ; ce calcul montre qu'il
+      faut décider <em>maintenant</em> de la solution — paralléliser par région, traiter de façon
+      incrémentale, ou avancer certaines étapes en cours de journée — car ces chantiers prennent
+      eux-mêmes un ou deux ans. <strong>La fenêtre de batch se gère comme un budget</strong>, avec un
+      suivi annuel de son taux d'occupation.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — le chiffre qui a doublé</div>
+  <div class="box-b">
+    <p>Le 13 mars au matin, le rapport indique un chiffre d'affaires de 2 940 000 MAD pour le 12 mars,
+      alors qu'une journée normale tourne autour de 1 800 000 MAD. L'enquête révèle que le traitement
+      nocturne a planté à 1 h 40, après avoir déjà inséré une partie des ventes dans la table des
+      résultats ; l'opérateur l'a relancé, et la relance est allée jusqu'au bout. Expliquez le chiffre,
+      retrouvez le vrai total et corrigez la conception.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Le diagnostic.</strong> La relance a retraité le lot <em>entier</em>, depuis le début, et
+      a ajouté ses lignes à celles que la première exécution avait déjà insérées avant de planter. Le
+      chiffre publié est donc la somme de deux contributions : <em>partiel de la 1<sup>re</sup>
+      exécution + total de la 2<sup>e</sup></em>. Le traitement n'est pas <strong>idempotent</strong> :
+      l'exécuter deux fois ne donne pas le même résultat qu'une seule.</p>
+
+    <p><strong>Le vrai total.</strong> Les journaux montrent que la première exécution avait inséré
+      1 100 000 MAD de ventes avant l'arrêt. Le vrai total est donc 2 940 000 − 1 100 000 =
+      <strong>1 840 000 MAD</strong>, cohérent avec une journée normale. Notons qu'un simple
+      <strong>contrôle de complétude</strong> — comparer au total de la veille et alerter au-delà de,
+      disons, ±30 % — aurait bloqué la publication : un écart de +63 % n'est pas une journée
+      exceptionnelle, c'est un symptôme.</p>
+
+    <p><strong>La correction de conception (étape 4).</strong> Le résultat d'une période doit
+      <em>remplacer</em> le résultat de cette période, jamais s'y ajouter. Concrètement : le traitement
+      calcule les ventes du 12 mars dans une zone de travail, puis, en une seule opération,
+      <strong>efface tout résultat existant pour le 12 mars et écrit le nouveau</strong>. Une relance
+      produit alors exactement le même état qu'une exécution réussie du premier coup, quel que soit le
+      moment où la première a planté.</p>
+
+    <p><strong>La correction d'exploitation (étape 5).</strong> Ajouter le contrôle de complétude avant
+      publication : nombre de magasins présents (120 attendus) et écart au total de la veille.
+      <strong>La relance était le bon réflexe</strong> ; c'est la conception qui la rendait dangereuse.
+      Un batch bien conçu est un batch que l'on peut relancer sans réfléchir.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — quatre besoins, un seul critère</div>
+  <div class="box-b">
+    <p>Pour chacun des quatre besoins de l'enseigne, dites si un traitement batch convient, en appliquant
+      l'étape 1 : (a) les factures mensuelles des clients professionnels ; (b) le réapprovisionnement des
+      magasins, dont les commandes partent chez les fournisseurs à 6 h ; (c) le blocage d'un paiement par
+      carte frauduleux ; (d) le réentraînement du modèle de prévision des ventes, utilisé chaque lundi
+      pour planifier la semaine.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>La méthode.</strong> Pour chaque besoin, on pose la question de l'étape 1 : <em>quelle
+      décision utilise le résultat, et quand ?</em> On compare ensuite cette échéance à la fin de la
+      période de collecte.</p>
+
+    <p><strong>(a) Factures mensuelles — batch.</strong> La facture est <em>définie</em> sur le mois
+      fermé : elle ne peut pas exister avant la fin du mois. Latence acceptable : quelques jours.
+      Le batch est imposé par la nature même du résultat, et la complétude est exigée — une facture à
+      laquelle manquent des achats est une facture fausse.</p>
+
+    <p><strong>(b) Réapprovisionnement — batch.</strong> La décision est prise à heure fixe, 6 h, à
+      partir des ventes et des stocks de la veille. Un lot quotidien fermé à la remontée de 23 h 30, traité
+      dans la nuit, suffit pleinement. Une mise à jour à la seconde n'apporterait rien : la commande ne
+      part qu'à 6 h.</p>
+
+    <p><strong>(c) Blocage de la fraude — pas de batch.</strong> La décision doit être prise
+      <em>pendant</em> l'autorisation du paiement, en moins d'une seconde. Attendre la fin d'une période,
+      même de cinq minutes, c'est laisser passer la fraude. Ce besoin relève du traitement continu de
+      N21. <strong>Remarque :</strong> le <em>modèle</em> qui détecte la fraude peut, lui, être entraîné
+      en batch chaque semaine — deux traitements, deux modes.</p>
+
+    <p><strong>(d) Réentraînement du modèle de prévision — batch.</strong> Il s'agit de l'exemple
+      « entraînement planifié d'un modèle » du support. La décision a lieu le lundi ; un réentraînement
+      hebdomadaire, le dimanche soir sur l'historique complet, convient. Le traitement est lourd :
+      l'exécuter quand les ressources sont libres est un avantage supplémentaire.</p>
+
+    <p><strong>La leçon.</strong> Trois besoins sur quatre relèvent du batch, et un seul exige un
+      traitement continu. Aucun n'a été tranché sur un critère technologique : <strong>c'est l'échéance
+      de la décision qui a décidé à chaque fois</strong> — la phrase d'ouverture de cette partie,
+      appliquée.</p>
+  </div>
+</div>
+
+<h3 id="n20-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Énoncez la définition du traitement batch et décrivez ses trois temps. Expliquez ce que
+        chacun des trois morceaux de la définition impose.</li>
+      <li>Décomposez la latence d'un batch en ses trois termes. Pourquoi un serveur dix fois plus rapide
+        ne transforme-t-il pas un batch quotidien en traitement temps réel ?</li>
+      <li>Expliquez, à l'aide d'un exemple chiffré, pourquoi traiter un lot coûte moins cher que traiter
+        les mêmes événements un par un.</li>
+      <li>Qu'est-ce qu'un traitement idempotent ? Décrivez un batch qui ne l'est pas, l'incident qu'il
+        provoque, et la correction.</li>
+      <li>Une banque ferme ses comptes à minuit, mais des opérations datées de la veille arrivent
+        jusqu'à 2 h. Proposez deux règles de traitement des données tardives et comparez-les.</li>
+      <li>Un collègue affirme que « le batch est dépassé, tout doit passer en temps réel ». Répondez
+        avec la phrase d'ouverture de la partie et deux exemples du support.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n20-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque besoin, dites si un traitement batch convient et justifiez en une phrase à partir de
+      l'échéance de la décision : établir les bulletins de paie ; afficher la position d'un livreur sur
+      la carte du client ; calculer le classement mensuel des agences ; refuser un retrait au
+      distributeur si le solde est insuffisant ; produire la déclaration fiscale trimestrielle ;
+      recalculer les scores de fidélité de tous les clients.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un distributeur d'eau facture 400 000 abonnés chaque mois. Les relevés des compteurs arrivent
+      jusqu'au 3 du mois suivant ; les factures doivent être envoyées le 5 à 8 h. Le traitement de
+      facturation dure 14 heures et le volume d'abonnés croît de 8 % par an. Appliquez les cinq étapes :
+      latence acceptable, définition du lot et règle pour les relevés tardifs, calcul de la fenêtre avec
+      une marge de 6 heures, projection de l'année de débordement, conception idempotente et contrôles
+      avant envoi.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>La direction de l'enseigne souhaite désormais disposer du chiffre d'affaires « à l'heure » pendant
+      la journée, sans abandonner le rapport consolidé de 7 h. Une équipe propose de simplement exécuter
+      la consolidation nocturne toutes les heures. Analysez cette proposition : calculez la latence
+      obtenue pour une vente de 10 h 05, examinez ce que devient la complétude d'un lot horaire alors que
+      certaines caisses remontent avec retard, et ce que l'exécution en journée fait peser sur
+      l'opérationnel (N19). Concluez en indiquant à partir de quelle latence exigée le raccourcissement
+      de la période cesse d'être une bonne réponse, et ce que cela annonce pour N21.</p>
+  </div>
+</div>

@@ -1,0 +1,448 @@
+<h2 class="notion" id="n32">N32 — Couche 2, l'ingestion : comment faire entrer les données ?</h2>
+
+<h3 id="n32-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Schéma du support (p. 46).</strong> La deuxième couche fait passer la donnée des
+      sources vers la plateforme. Le support distingue trois modes :</p>
+    <table class="long">
+      <thead>
+        <tr><th>Mode</th><th>Principe (support)</th><th>Exemples du support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Batch</strong></td><td>importer périodiquement des lots de données</td>
+          <td>fichier quotidien, export ERP</td></tr>
+        <tr><td><strong>Streaming</strong></td><td>recevoir et traiter des événements continus</td>
+          <td>données temps réel (IoT, véhicules, transactions)</td></tr>
+        <tr><td><strong>CDC / APIs</strong></td><td>capturer les changements ou appeler des services</td>
+          <td>réplication de base (CDC), APIs REST, services externes</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Objectif fixé par le support.</strong> Acheminer la donnée <strong>sans perdre son
+      contexte</strong> et <strong>sa traçabilité</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n32-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>L'<strong>ingestion</strong> est le passage de frontière : la donnée quitte le système qui
+      l'a produite (N31) et entre dans la plateforme où elle sera stockée (N33). Elle ne transforme
+      pas encore la donnée ; elle la <strong>transporte</strong> et la <strong>dépose</strong>.</p>
+
+    <p><strong>Les trois modes diffèrent par ce qui déclenche le transfert.</strong> En
+      <em>batch</em>, c'est l'horloge : à heure fixe, on prend tout un lot (le fichier du jour,
+      l'export de l'ERP). En <em>streaming</em>, c'est l'événement : chaque mesure, chaque paiement
+      part dès qu'il existe. En <em>CDC</em> (<em>Change Data Capture</em>), c'est la modification :
+      on lit le journal de la base source et l'on ne transporte que les lignes insérées, modifiées
+      ou supprimées. Avec une <em>API</em>, c'est une requête : la plateforme appelle le service
+      externe et reçoit sa réponse.</p>
+
+    <p><strong>Le batch et le streaming ont déjà été étudiés comme modes de traitement</strong>
+      (N20, N21, critère de choix en N22). N32 les reprend du seul point de vue du transport : un
+      lot ou un flux qui <em>entre</em>. Le mode nouveau est le CDC / API, qui ne transporte que ce
+      qui a changé ou ce qu'on a demandé.</p>
+
+    <p><strong>L'objectif est double.</strong> Le <em>contexte</em>, ce sont les informations sans
+      lesquelles la donnée ne veut plus rien dire : de quelle source elle vient, à quel moment
+      l'événement s'est produit, avec quel schéma elle a été écrite. La <em>traçabilité</em>, c'est
+      la possibilité de dire, pour chaque ligne, quand elle est entrée, par quel chargement, et de
+      rejouer ce chargement si besoin. Une ingestion qui livre la bonne valeur sans ces deux
+      éléments livre une donnée orpheline.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Confondre ingestion et traitement.</strong> Nettoyer, agréger, joindre relève de
+        N34. L'ingestion dépose la donnée telle qu'elle est arrivée ; « corriger en entrant » détruit
+        le brut qu'on voudrait rejouer (N25).</li>
+      <li><strong>Choisir le mode d'après la source seule.</strong> Les capteurs produisent en
+        continu, mais si personne ne consulte leurs mesures avant le lendemain, un batch suffit.
+        Le mode se choisit avec la fréquence de la source <em>et</em> la latence demandée (N22).</li>
+      <li><strong>Croire que l'extraction complète est toujours plus sûre.</strong> Recopier toute
+        une table chaque heure coûte cher et ne dit pas <em>quand</em> une ligne a changé ; le CDC
+        transporte moins et garde l'historique des modifications.</li>
+      <li><strong>Oublier les suppressions.</strong> Une extraction « lignes modifiées depuis hier »
+        par date de mise à jour ne voit pas une ligne supprimée ; le CDC, qui lit le journal, la
+        voit.</li>
+      <li><strong>Ignorer les doublons et les retards.</strong> Un flux peut livrer deux fois le
+        même événement après une panne, et un événement peut arriver après d'autres plus récents
+        (N21). Un identifiant d'événement et deux horodatages (événement, arrivée) sont
+        indispensables.</li>
+      <li><strong>Traiter une API comme une source illimitée.</strong> Un service externe impose
+        des quotas d'appels, une pagination et des pannes : l'ingestion doit prévoir les reprises.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> طبقة <strong>Ingestion</strong> هي اللي كتدخل المعطيات من
+    المصادر للمنصة. الدعامة كتذكر ثلاث طرق: <strong>Batch</strong> (استيراد دفعات بشكل دوري، بحال
+    ملف يومي أو export ديال ERP)، <strong>Streaming</strong> (استقبال أحداث مستمرة فالوقت الحقيقي:
+    IoT، العربات، المعاملات) و <strong>CDC / APIs</strong> (التقاط التغييرات فقاعدة البيانات أو
+    استدعاء خدمات خارجية). الهدف: <strong>نوصلو المعطيات بلا ما نضيعو السياق ديالها ولا قابلية
+    التتبع</strong>، يعني نعرفو منين جات، فوقاش وقعات، وبأي تحميل دخلات، ونقدرو نعاودو التحميل
+    إلا احتجنا.</p>
+</div>
+
+<h3 id="n32-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le tableau de bord des stocks de l'enseigne affiche un matin 3 200 références en rupture au
+      lieu de 400. L'équipe cherche une demi-journée : l'export de l'ERP avait été relancé à la main
+      après une panne, si bien que deux lots de la même nuit se sont empilés ; aucune ligne ne
+      disait de quel lot elle venait, ni à quelle heure le stock avait été mesuré. Impossible de
+      retirer le lot en double sans tout recharger.</p>
+
+    <p>Le problème traité par N32 : <strong>faire entrer chaque source avec le mode qui convient à
+      son rythme</strong>, en gardant pour chaque ligne <strong>son contexte et sa trace</strong>,
+      afin de pouvoir expliquer, corriger et rejouer un chargement.</p>
+  </div>
+</div>
+
+<h3 id="n32-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Choisir un mode par source.</strong> Batch pour les lots périodiques, streaming
+      pour les événements à exploiter vite, CDC pour répliquer une base qui change, API pour un
+      service externe.</p>
+
+    <p><strong>Réduire le volume transporté.</strong> Ne transporter que les changements (CDC) au
+      lieu de tables entières.</p>
+
+    <p><strong>Garantir que rien n'est perdu ni compté deux fois.</strong> Identifiants
+      d'événements, numéros de lot, reprises après panne.</p>
+
+    <p><strong>Rendre chaque ligne explicable.</strong> Source, horodatage de l'événement,
+      horodatage d'arrivée, version du schéma, identifiant de chargement : ce sont les
+      métadonnées techniques de N26, posées dès l'entrée.</p>
+
+    <p><strong>Permettre de rejouer.</strong> Garder le brut déposé tel quel pour pouvoir
+      recharger une période après une erreur de traitement.</p>
+  </div>
+</div>
+
+<h3 id="n32-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : la fréquence varie d'une source à l'autre.</strong> N31 a montré
+      que les sources n'ont pas la même fréquence ; un seul mode d'entrée ne peut donc pas convenir
+      à toutes. Les trois modes du support correspondent aux trois rythmes possibles.</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Rythme de la source</th><th>Déclencheur</th><th>Mode</th><th>Ce qui est
+          transporté</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>lots produits à heure fixe</td><td>l'horloge</td><td>Batch</td><td>tout le lot
+          (fichier, export)</td></tr>
+        <tr><td>événements continus</td><td>l'événement</td><td>Streaming</td><td>chaque
+          événement, un par un</td></tr>
+        <tr><td>base vivante, modifiée en permanence</td><td>la modification</td><td>CDC</td>
+          <td>insertions, mises à jour, suppressions</td></tr>
+        <tr><td>service externe consultable</td><td>la requête</td><td>API</td><td>la réponse à
+          un appel</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Deuxième raison : on ne peut pas dégrader la source.</strong> La caisse et l'ERP
+      sont des systèmes transactionnels (N16) : une extraction lourde aux heures d'ouverture les
+      ralentit. Le batch se place la nuit ; le CDC lit le journal des transactions, que la base
+      écrit de toute façon, sans interroger les tables.</p>
+
+    <p><strong>Troisième raison : une donnée sans contexte est inexploitable.</strong> N26 a posé
+      les métadonnées et le lignage comme conditions de la confiance. Ces informations n'existent
+      qu'au moment du transport : si l'ingestion ne note pas l'heure d'arrivée et le lot, personne
+      ne pourra les reconstituer plus tard.</p>
+
+    <p><strong>Quatrième raison : les pannes sont certaines.</strong> Réseau coupé, service
+      indisponible, chargement relancé : la question n'est pas d'éviter toute reprise, mais qu'une
+      reprise ne perde ni ne double rien. D'où l'identifiant unique par événement et par lot, qui
+      rend un rechargement <em>idempotent</em> : charger deux fois donne le même résultat qu'une
+      fois.</p>
+  </div>
+</div>
+
+<h3 id="n32-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Le chargement nocturne de l'entrepôt.</strong> Exports de caisse et d'ERP en batch
+      (N10, N20).</p>
+
+    <p><strong>La surveillance et la détection.</strong> Capteurs, véhicules, paiements en
+      streaming vers les traitements temps réel (N21).</p>
+
+    <p><strong>La réplication d'une base opérationnelle.</strong> Le stock de l'ERP, le CRM
+      répliqués par CDC dans le lac ou le lakehouse, presque à jour, sans charger la base.</p>
+
+    <p><strong>L'enrichissement par des services externes.</strong> Météo, suivi des transporteurs,
+      taux de change appelés par API.</p>
+
+    <p><strong>La zone d'atterrissage du lac.</strong> Dépôt brut, horodaté et étiqueté de tout ce
+      qui entre, avant tout traitement (N11, N33).</p>
+  </div>
+</div>
+
+<h3 id="n32-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Après l'inventaire des sources.</strong> Chaque fiche de N31 reçoit son mode
+      d'ingestion : c'est la deuxième étape de la démarche de N30.</p>
+
+    <p><strong>Quand une extraction pèse trop.</strong> Tables recopiées en entier, fenêtre de nuit
+      dépassée : signal pour passer au CDC.</p>
+
+    <p><strong>Quand un usage exige une réaction rapide.</strong> L'inégalité de N22 (temps de
+      réaction exigé ≥ période + traitement) n'est plus tenue par le batch : streaming ou
+      micro-batch.</p>
+
+    <p><strong>Quand on ne sait plus expliquer un chiffre.</strong> Lignes en double, valeurs
+      sans date, chargement impossible à retirer : il manque le contexte et la trace.</p>
+
+    <p><strong>Quand un énoncé demande « comment les données entrent-elles ? ».</strong> On répond
+      par le mode, le déclencheur et les métadonnées conservées.</p>
+  </div>
+</div>
+
+<h3 id="n32-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Partir de la fiche source.</strong> Famille, format, fréquence, qualité,
+      propriétaire (N31).</p>
+
+    <p><strong>Étape 2 — Noter la latence demandée.</strong> Le délai maximal accepté par le
+      consommateur le plus exigeant de cette source.</p>
+
+    <p><strong>Étape 3 — Choisir le mode.</strong> Lots + latence large → batch ; événements +
+      latence courte → streaming ; base vivante à répliquer → CDC ; service externe → API.</p>
+
+    <p><strong>Étape 4 — Fixer les métadonnées d'entrée.</strong> Source, identifiant de
+      l'événement ou de la ligne, horodatage de l'événement, horodatage d'arrivée, identifiant du
+      chargement, version du schéma.</p>
+
+    <p><strong>Étape 5 — Prévoir les pannes.</strong> Reprise, dédoublonnage par identifiant,
+      quotas et pagination pour les API, délai de grâce pour les retards (N21).</p>
+
+    <p><strong>Étape 6 — Déposer le brut.</strong> Écrire tel quel dans la zone d'atterrissage,
+      sans nettoyage, pour pouvoir rejouer ; le stockage et les traitements suivent (N33, N34).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La couche <strong>Ingestion</strong> fait entrer la donnée selon trois modes :
+      <strong>batch</strong> (lots périodiques : fichier quotidien, export ERP),
+      <strong>streaming</strong> (événements continus : IoT, véhicules, transactions) et
+      <strong>CDC / APIs</strong> (capture des changements d'une base, appel de services). Son
+      objectif : acheminer la donnée <strong>sans perdre son contexte ni sa traçabilité</strong> —
+      source, horodatages, lot, schéma — pour pouvoir expliquer et rejouer chaque chargement.</p>
+    <p class="ar" dir="rtl">طبقة <strong>Ingestion</strong> كتدخل المعطيات بثلاث طرق:
+      <strong>Batch</strong> (دفعات دورية)، <strong>Streaming</strong> (أحداث مستمرة) و
+      <strong>CDC / APIs</strong> (التقاط التغييرات أو استدعاء خدمات). الهدف ديالها: نوصلو المعطيات
+      <strong>بلا ما نضيعو السياق ولا التتبع</strong> — المصدر، التوقيت، الدفعة، والشكل — باش نقدرو
+      نفسرو ونعاودو أي تحميل.</p>
+  </div>
+</div>
+
+<h3 id="n32-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — un mode d'ingestion par source</div>
+  <div class="box-b">
+    <p>Pour chaque source de l'enseigne, choisissez batch, streaming, CDC ou API et justifiez par la
+      fréquence de la source et la latence demandée : (a) les tickets de caisse, consultés dans le
+      rapport de 6 h 30 ; (b) les capteurs des chambres froides, alerte attendue en moins de
+      5 minutes ; (c) la table des stocks de l'ERP, que le site e-commerce veut connaître à
+      quelques minutes près ; (d) la météo à 3 jours, rafraîchie toutes les heures ; (e) les
+      paiements, contrôlés contre la fraude avant validation ; (f) le fichier mensuel des prix
+      d'un fournisseur.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On croise le rythme de la source (lot, événement, modification,
+      service) avec la latence du consommateur le plus exigeant.</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Source</th><th>Rythme</th><th>Latence</th><th>Mode</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) tickets</td><td>lot du soir</td><td>le lendemain 6 h 30</td><td>Batch</td></tr>
+        <tr><td>(b) capteurs</td><td>1 mesure / minute</td><td>&lt; 5 min</td><td>Streaming</td></tr>
+        <tr><td>(c) stocks ERP</td><td>base modifiée sans cesse</td><td>quelques minutes</td>
+          <td>CDC</td></tr>
+        <tr><td>(d) météo</td><td>service externe</td><td>1 heure</td><td>API (appel planifié)</td></tr>
+        <tr><td>(e) paiements</td><td>événements</td><td>moins d'une seconde</td><td>Streaming</td></tr>
+        <tr><td>(f) prix fournisseur</td><td>1 fichier / mois</td><td>quelques jours</td>
+          <td>Batch</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarques.</strong> (c) Un export complet toutes les cinq minutes écraserait l'ERP ;
+      le CDC ne transporte que les mouvements de stock. (d) L'API est appelée à heure fixe : le
+      déclencheur est une requête planifiée, pas un événement. Les tickets (a) pourraient aussi
+      partir en streaming si un nouvel usage demandait le chiffre d'affaires en direct : le mode
+      suit l'usage, pas la source seule.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — extraction complète ou CDC</div>
+  <div class="box-b">
+    <p>La table des stocks de l'ERP compte 2 000 000 lignes (une par référence et par magasin) de
+      1 Ko chacune. Chaque jour, 50 000 lignes changent (ventes, réceptions, suppressions de
+      références) ; un événement CDC pèse 1,2 Ko (la ligne + l'opération + l'horodatage). Le site
+      veut les stocks rafraîchis toutes les heures. (a) Volume transporté par jour en extraction
+      complète horaire. (b) Volume par jour en CDC. (c) Rapport entre les deux. (d) Une
+      extraction « lignes dont la date de modification est récente » voit-elle les références
+      supprimées ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Extraction complète.</strong> Une copie : 2 000 000 × 1 Ko = 2 000 000 Ko =
+      <strong>2 Go</strong>. Toutes les heures : 24 × 2 Go = <strong>48 Go par jour</strong>.</p>
+
+    <p><strong>(b) CDC.</strong> Seuls les changements voyagent : 50 000 × 1,2 Ko = 60 000 Ko =
+      <strong>60 Mo par jour</strong>, quelle que soit la fréquence de rafraîchissement.</p>
+
+    <p><strong>(c) Rapport.</strong> 48 000 Mo / 60 Mo = <strong>800</strong> : l'extraction
+      complète transporte 800 fois plus, et 97,5 % de chaque copie (1 950 000 lignes sur
+      2 000 000) est identique à la précédente.</p>
+
+    <p><strong>(d) Suppressions.</strong> Non : une ligne supprimée n'existe plus dans la table, elle
+      n'a donc plus de date de modification à lire. Le CDC, qui lit le journal des transactions,
+      transporte l'opération « suppression » avec son horodatage. En prime, il garde
+      l'<strong>historique</strong> des mouvements (quel stock à quelle heure), ce que l'extraction
+      complète écrase à chaque copie : c'est le contexte que demande le support.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — doublons et traçabilité d'un flux</div>
+  <div class="box-b">
+    <p>Le flux des paiements livre 200 000 paiements par jour, d'un montant moyen de 350 DH. Après
+      un redémarrage du système de messages, 0,5 % des paiements sont livrés une seconde fois.
+      (a) Combien de doublons, et de combien le chiffre d'affaires est-il surestimé si on ne fait
+      rien ? (b) Quelle métadonnée permet de les retirer, et pourquoi le montant et l'heure ne
+      suffisent-ils pas ? (c) Listez les métadonnées que l'ingestion doit ajouter à chaque paiement
+      pour respecter l'objectif du support.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Doublons.</strong> 200 000 × 0,5 % = <strong>1 000 paiements</strong> livrés deux
+      fois. Surestimation : 1 000 × 350 = <strong>350 000 DH</strong> de chiffre d'affaires
+      fictif sur la journée.</p>
+
+    <p><strong>(b) Identifiant d'événement.</strong> Chaque paiement porte un identifiant unique
+      donné par la source ; l'ingestion n'écrit pas deux fois le même identifiant (écriture
+      idempotente). Le couple montant + heure ne suffit pas : deux clients différents peuvent
+      payer 350 DH à la même seconde, et l'on supprimerait un vrai paiement.</p>
+
+    <p><strong>(c) Métadonnées d'entrée.</strong></p>
+    <ul>
+      <li><strong>source</strong> : quel système de paiement (caisse, site, application) ;</li>
+      <li><strong>identifiant de l'événement</strong> : pour dédoublonner ;</li>
+      <li><strong>horodatage de l'événement</strong> : quand le client a payé ;</li>
+      <li><strong>horodatage d'arrivée</strong> : quand la plateforme l'a reçu (l'écart mesure le
+        retard, N21) ;</li>
+      <li><strong>position dans le flux ou identifiant de chargement</strong> : pour rejouer à
+        partir d'un point précis ;</li>
+      <li><strong>version du schéma</strong> : pour lire correctement un message écrit avant un
+        changement de format.</li>
+    </ul>
+    <p>Les quatre premières donnent le <em>contexte</em>, les deux dernières la
+      <em>traçabilité</em>.</p>
+  </div>
+</div>
+
+<h3 id="n32-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les trois modes d'ingestion du support avec leurs exemples.</li>
+      <li>Énoncez l'objectif de la couche Ingestion et définissez « contexte » et
+        « traçabilité ».</li>
+      <li>Donnez le déclencheur de chacun des modes batch, streaming, CDC et API.</li>
+      <li>Expliquez pourquoi le CDC charge moins la base source qu'une extraction complète.</li>
+      <li>Expliquez ce qu'est une ingestion idempotente et pourquoi elle est nécessaire.</li>
+      <li>Expliquez pourquoi l'ingestion ne doit pas nettoyer la donnée qu'elle dépose.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n32-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque situation à un mode : (a) le fichier des promotions déposé chaque lundi ;
+      (b) la position GPS des camions envoyée toutes les 10 secondes ; (c) la réplication du CRM
+      dans le lakehouse ; (d) le cours du dirham récupéré auprès d'un service bancaire ; (e) les
+      clics sur le site e-commerce ; (f) l'export comptable de fin de mois.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>L'API de suivi d'un transporteur renvoie 100 livraisons par page et autorise 250 appels par
+      heure. L'enseigne a 30 000 livraisons en cours et veut leur statut à jour toutes les heures.
+      (a) Combien d'appels faut-il par heure ? (b) Le quota est-il tenu ? (c) Proposez deux
+      solutions (côté demande et côté mode d'ingestion) et dites ce qu'il faut tracer pour
+      reprendre après un refus du service.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>Le magasin 47 perd son réseau pendant 2 heures ; ses 4 chambres froides continuent de
+      mesurer chaque minute et renvoient tout au retour du réseau. (a) Combien de mesures arrivent
+      en retard ? (b) Avec un délai de grâce de 10 minutes (N21), que deviennent-elles dans le
+      calcul des alertes ? (c) Comment l'ingestion doit-elle les déposer pour qu'elles restent
+      utilisables par l'audit sanitaire du lendemain ? (d) Dans quelle couche seront-elles
+      conservées, et sous quelle forme ?</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N33</div>
+  <div class="box-b">
+    <p>La donnée est entrée avec son contexte et sa trace ; il faut maintenant décider où elle
+      vit. Le lot de caisse structuré, le flux des capteurs, les PDF fournisseurs et l'historique
+      CDC des stocks n'appellent pas le même support : entrepôt, lac ou lakehouse. C'est la
+      question de la couche Storage, objet de N33.</p>
+  </div>
+</div>

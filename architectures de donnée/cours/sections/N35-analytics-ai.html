@@ -1,0 +1,463 @@
+<h2 class="notion" id="n35">N35 — Couche 5, Analytics / AI : qui consomme les données ?</h2>
+
+<h3 id="n35-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Question du support (p. 49).</strong> <em>Analytics / AI</em> : qui consomme les
+      données ?</p>
+    <p><strong>Schéma du support.</strong> Quatre familles de consommateurs :</p>
+    <table class="long">
+      <thead>
+        <tr><th>Consommateur</th><th>Usages cités par le support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>BI</strong></td><td>dashboards, KPI, reporting</td></tr>
+        <tr><td><strong>Analytics</strong></td><td>exploration, statistiques, prévisions</td></tr>
+        <tr><td><strong>ML</strong></td><td>classification, régression, recommandation</td></tr>
+        <tr><td><strong>GenAI</strong></td><td>RAG, assistants, génération</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Principe du support.</strong> Plusieurs consommateurs peuvent partager un même socle
+      de données gouverné.</p>
+  </div>
+</div>
+
+<h3 id="n35-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>La cinquième couche est celle où la donnée <strong>sert enfin à quelque chose</strong>. Les
+      quatre couches précédentes (N31-N34) ont produit des versions préparées ; la couche
+      Analytics / AI est l'ensemble de ceux qui les lisent pour en tirer une décision, une
+      prédiction ou une réponse. La question du support n'est plus « que fait-on ? » (N34) mais
+      « <strong>qui</strong> s'en sert ? ».</p>
+
+    <p><strong>Les quatre familles se distinguent par ce qu'elles produisent.</strong> La
+      <em>BI</em> produit des chiffres connus, suivis dans le temps (le chiffre d'affaires de la
+      semaine, le taux de rupture) : elle répond à « combien ? ». L'<em>Analytics</em> produit une
+      compréhension : un analyste explore, teste une hypothèse, établit une prévision pour une
+      décision ponctuelle ; elle répond à « pourquoi ? » et « que va-t-il se passer ? ». Le
+      <em>ML</em> produit une sortie automatique, répétée à grande échelle : une classe (fraude ou
+      non), une valeur (quantité à commander), une liste (produits à recommander). La
+      <em>GenAI</em> produit du texte : elle retrouve des documents (RAG), répond à un utilisateur
+      (assistant) ou rédige (génération).</p>
+
+    <p><strong>Le principe tient en trois mots.</strong> <em>Plusieurs</em> : les quatre familles
+      coexistent dans l'entreprise, aucune ne remplace l'autre (N28 : l'IA « s'ajoute » au
+      data-driven). <em>Même socle</em> : elles lisent la même donnée conforme, préparée une fois
+      (N34), et non chacune sa copie. <em>Gouverné</em> : ce socle porte les définitions, les
+      droits d'accès et le lignage (N26) qui rendent ce partage sans danger.</p>
+
+    <p><strong>Ce qui ne se partage pas, c'est la dernière version.</strong> Le socle (brut +
+      conforme) est commun ; la version prête à l'usage est propre à chaque consommateur : agrégats
+      pour la BI, tables détaillées pour l'analyste, features pour le modèle, corpus indexé pour
+      l'assistant. C'est le niveau « prêt à l'usage » de N34.</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Confondre prévision (Analytics) et régression (ML).</strong> Les deux prédisent
+        une valeur. La prévision d'un analyste éclaire une décision humaine ponctuelle (budget de
+        l'an prochain) ; le modèle de régression tourne en production et décide seul, chaque soir,
+        pour 25 000 couples magasin × référence (N28).</li>
+      <li><strong>Confondre classification et régression.</strong> Classer, c'est choisir une
+        catégorie (fraude / pas fraude) ; régresser, c'est estimer un nombre (12 unités à
+        commander).</li>
+      <li><strong>Lire le socle partagé, mais pas les mêmes définitions.</strong> Si la BI compte
+        le chiffre d'affaires avec les retours et l'analyste sans, partager les tables ne suffit
+        pas : deux chiffres circulent. Le socle gouverné partage aussi les définitions.</li>
+      <li><strong>Partager sans contrôler l'accès.</strong> Un assistant GenAI branché sur tout le
+        socle peut citer le coût d'achat ou une donnée client à un utilisateur qui n'y a pas droit.
+        « Gouverné » veut dire : chaque consommateur ne voit que ce qu'il doit voir.</li>
+      <li><strong>Croire que la GenAI n'a besoin que de texte.</strong> Un RAG lit des documents,
+        mais aussi leurs métadonnées (date, service, version) pour écarter l'obsolète (N29).</li>
+      <li><strong>Mettre le consommateur au début.</strong> La couche 5 se décrit en dernier dans
+        la chaîne, mais l'usage se décide en premier : c'est lui qui a fixé le stockage, la
+        latence et la préparation (démarche de N30).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> طبقة <strong>Analytics / AI</strong> كتجاوب على سؤال: «شكون
+    اللي كيستهلك المعطيات؟». الدعامة كتذكر أربع عائلات: <strong>BI</strong> (لوحات القيادة، KPI،
+    التقارير)، <strong>Analytics</strong> (الاستكشاف، الإحصائيات، التوقعات)، <strong>ML</strong>
+    (التصنيف، الانحدار، التوصية) و <strong>GenAI</strong> (RAG، المساعدات، التوليد). المبدأ:
+    <strong>بزاف ديال المستهلكين يقدرو يتقاسمو نفس القاعدة ديال المعطيات المحكومة</strong>، يعني
+    نفس المعطيات المحضرة مرة وحدة، بنفس التعريفات، مع التحكم فالولوج والتتبع. اللي ماكيتقاسمش هو
+    النسخة الأخيرة: كل مستهلك عندو النسخة ديالو.</p>
+</div>
+
+<h3 id="n35-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Dans l'enseigne, chaque équipe s'est servie elle-même. Le contrôle de gestion extrait les
+      tickets dans son entrepôt, les analystes en gardent une copie dans leurs notebooks, l'équipe
+      IA en a une troisième pour le modèle de réassort, et le projet d'assistant des vendeurs vient
+      d'en demander une quatrième. Au comité de direction, deux chiffres d'affaires de la même
+      semaine diffèrent de 300 000 DH ; personne ne sait lequel est juste, ni quelle copie contient
+      encore les données de clients qui ont demandé leur suppression.</p>
+
+    <p>Le problème traité par N35 : <strong>servir des consommateurs très différents — humains et
+      machines, tableaux et textes — sans multiplier les copies, les définitions et les
+      risques</strong>, en les faisant tous lire un même socle gouverné.</p>
+  </div>
+</div>
+
+<h3 id="n35-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Nommer le consommateur d'un besoin.</strong> Devant une demande, dire s'il s'agit de
+      BI, d'Analytics, de ML ou de GenAI, et donc quelle version prête à l'usage construire.</p>
+
+    <p><strong>Avoir un seul chiffre.</strong> Mêmes tables conformes et mêmes définitions de
+      métriques : le tableau de bord et l'analyse donnent le même chiffre d'affaires.</p>
+
+    <p><strong>Réduire le coût.</strong> Une donnée conservée et préparée une fois, lue par quatre
+      consommateurs, au lieu de quatre copies et de quatre pipelines.</p>
+
+    <p><strong>Protéger.</strong> Les droits d'accès, le masquage et la suppression s'appliquent une
+      fois, dans le socle, et valent pour tous les consommateurs, y compris l'assistant GenAI.</p>
+
+    <p><strong>Ajouter un usage sans tout refaire.</strong> Un nouveau consommateur (un modèle de
+      prévision des retours, un assistant RH) se branche sur le socle existant : il ne demande que
+      sa version prête à l'usage.</p>
+  </div>
+</div>
+
+<h3 id="n35-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : l'architecture existe pour ses consommateurs.</strong> N23 l'a
+      posé : une donnée n'a de valeur que par son usage. Les couches 1 à 4 ne produisent rien de
+      visible ; c'est la couche 5 qui transforme la donnée en décision ou en action (chaîne donnée →
+      information → décision → effet). D'où une couche à part entière, et la dernière.</p>
+
+    <p><strong>Deuxième raison : les consommateurs ont des besoins différents.</strong> N29 a établi
+      que les exigences croissent du reporting à l'IA. La couche 5 les traduit en ce que chaque
+      consommateur lit et en la manière dont il le lit :</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Consommateur</th><th>Ce qu'il lit</th><th>Comment il y accède</th>
+          <th>Qui agit</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BI</td><td>agrégats, KPI (N34)</td><td>requêtes SQL d'un outil de tableau de
+          bord</td><td>un décideur humain</td></tr>
+        <tr><td>Analytics</td><td>tables conformes détaillées, historique</td><td>notebook,
+          requêtes libres</td><td>un analyste, puis un décideur</td></tr>
+        <tr><td>ML</td><td>features + labels pour l'entraînement, features fraîches pour la
+          prédiction</td><td>lot d'entraînement ; service de prédiction appelé par une
+          application</td><td>le modèle, sous un seuil fixé par l'humain</td></tr>
+        <tr><td>GenAI</td><td>corpus de documents découpés, avec métadonnées</td><td>recherche des
+          passages pertinents (RAG), puis génération</td><td>l'assistant, lu par un humain</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Troisième raison : partager coûte moins et se contredit moins.</strong> Avec
+      <em>n</em> consommateurs et chacun sa copie, on paie <em>n</em> fois le stockage, on maintient
+      <em>n</em> pipelines et on obtient jusqu'à <em>n</em> définitions d'une même métrique. Avec un
+      socle partagé, on paie une fois le brut et le conforme ; chaque consommateur n'ajoute que sa
+      petite version prête à l'usage. C'est le même raisonnement S × C contre S + C qu'en N30,
+      appliqué cette fois aux copies de données et aux définitions.</p>
+
+    <p><strong>Quatrième raison : partager n'est sûr que si c'est gouverné.</strong> Un socle commun
+      concentre la donnée ; sans règles, il concentre aussi les risques. La gouvernance (N26) en est
+      la condition : <em>définitions</em> communes des métriques, <em>droits d'accès</em> par rôle
+      et par consommateur (l'assistant des vendeurs ne lit pas les coûts d'achat),
+      <em>lignage</em> pour savoir quel tableau ou quel modèle dépend de quelle table,
+      <em>observabilité</em> pour avertir tous les consommateurs quand une source déraille. C'est
+      la couche transverse de N30 vue depuis le consommateur.</p>
+  </div>
+</div>
+
+<h3 id="n35-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Les tableaux de bord de pilotage.</strong> Ventes par région, ruptures, marge : BI
+      branchée sur les agrégats du socle (N27).</p>
+
+    <p><strong>Les études ponctuelles.</strong> Pourquoi le Nord baisse, quel effet a eu une
+      promotion, quel budget pour l'an prochain : Analytics sur les tables détaillées.</p>
+
+    <p><strong>Les décisions répétées à grande échelle.</strong> Fraude (classification), réassort
+      (régression), produits proposés sur le site (recommandation) : ML en production (N28).</p>
+
+    <p><strong>Les assistants et la recherche documentaire.</strong> Assistant des vendeurs sur les
+      fiches produits, assistant RH sur les procédures : GenAI avec RAG (N29).</p>
+
+    <p><strong>La conception d'une plateforme de données.</strong> Inventorier les consommateurs
+      d'abord, puis vérifier que le socle les sert tous sans copie.</p>
+  </div>
+</div>
+
+<h3 id="n35-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Au début et à la fin de toute conception.</strong> Au début, pour fixer l'usage qui
+      guide les couches 1 à 4 ; à la fin, pour vérifier que chaque consommateur reçoit sa version :
+      cinquième étape de la démarche de N30.</p>
+
+    <p><strong>Quand deux équipes présentent deux chiffres pour la même métrique.</strong> Signal
+      d'un socle non partagé ou de définitions non gouvernées.</p>
+
+    <p><strong>Quand une équipe demande « une extraction » de la donnée.</strong> Avant de créer une
+      copie, vérifier si la donnée existe déjà dans le socle et ce qu'il manque pour que l'équipe
+      la lise directement.</p>
+
+    <p><strong>Quand un usage d'IA s'ajoute.</strong> Nouveau modèle ou nouvel assistant :
+      identifier sa famille, sa version prête à l'usage et ses droits d'accès.</p>
+
+    <p><strong>Quand un énoncé demande « qui consomme ? » ou « pour qui ? ».</strong> C'est la
+      question même du support.</p>
+  </div>
+</div>
+
+<h3 id="n35-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Lister les consommateurs.</strong> Pour chaque besoin : qui lit, et pour
+      produire quoi (chiffre, compréhension, sortie automatique, texte) ?</p>
+
+    <p><strong>Étape 2 — Classer chaque consommateur.</strong> BI, Analytics, ML ou GenAI ; pour le
+      ML, préciser classification, régression ou recommandation.</p>
+
+    <p><strong>Étape 3 — Définir sa version prête à l'usage.</strong> Agrégats, tables détaillées,
+      features, corpus ; avec son grain et sa fraîcheur.</p>
+
+    <p><strong>Étape 4 — La brancher sur le socle commun.</strong> Vérifier qu'elle se calcule
+      depuis les tables conformes (N34), sans nouvelle copie du brut.</p>
+
+    <p><strong>Étape 5 — Gouverner l'accès.</strong> Définitions de métriques partagées, droits par
+      rôle, masquage des champs sensibles, lignage jusqu'au consommateur.</p>
+
+    <p><strong>Étape 6 — Relier la sortie à une action.</strong> Qui agit sur le chiffre, la
+      prédiction ou la réponse, et comment on mesure l'effet (N27).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La couche <strong>Analytics / AI</strong> répond à « <strong>qui consomme les
+      données ?</strong> » : la <strong>BI</strong> (dashboards, KPI, reporting),
+      l'<strong>Analytics</strong> (exploration, statistiques, prévisions), le <strong>ML</strong>
+      (classification, régression, recommandation) et la <strong>GenAI</strong> (RAG, assistants,
+      génération). Principe : ces consommateurs <strong>partagent un même socle de données
+      gouverné</strong> — mêmes tables conformes, mêmes définitions, accès contrôlés — et seule la
+      dernière version, prête à l'usage, est propre à chacun.</p>
+    <p class="ar" dir="rtl">طبقة <strong>Analytics / AI</strong> كتجاوب على «<strong>شكون كيستهلك
+      المعطيات؟</strong>»: <strong>BI</strong>، <strong>Analytics</strong>، <strong>ML</strong> و
+      <strong>GenAI</strong>. المبدأ: هاد المستهلكين كيتقاسمو <strong>نفس القاعدة المحكومة</strong>
+      — نفس الجداول، نفس التعريفات، وولوج متحكم فيه — وغير النسخة الأخيرة اللي خاصة بكل واحد.</p>
+  </div>
+</div>
+
+<h3 id="n35-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — qui consomme ?</div>
+  <div class="box-b">
+    <p>Pour chaque besoin de l'enseigne, nommez la famille de consommateur (BI, Analytics, ML,
+      GenAI) et l'usage précis du support : (a) afficher chaque lundi le taux de rupture par
+      magasin ; (b) bloquer en 750 ms un paiement suspect ; (c) comprendre pourquoi les ventes du
+      Nord ont baissé de 12 % ; (d) proposer 8 produits à chaque visiteur du site ; (e) répondre aux
+      questions des vendeurs à partir des fiches produits ; (f) estimer, pour le conseil
+      d'administration, le chiffre d'affaires de l'an prochain ; (g) calculer chaque soir la
+      quantité à commander pour 25 000 couples magasin × référence ; (h) rédiger automatiquement
+      les descriptions des nouveaux produits ; (i) suivre le panier moyen par région ; (j) mesurer
+      la corrélation entre température et ventes de boissons.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On se demande ce que produit le consommateur : un chiffre suivi
+      (BI), une compréhension ou une prévision ponctuelle (Analytics), une sortie automatique
+      répétée (ML), du texte (GenAI).</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Besoin</th><th>Famille</th><th>Usage du support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) rupture par magasin</td><td>BI</td><td>KPI, dashboard</td></tr>
+        <tr><td>(b) paiement suspect</td><td>ML</td><td>classification</td></tr>
+        <tr><td>(c) baisse du Nord</td><td>Analytics</td><td>exploration</td></tr>
+        <tr><td>(d) 8 produits proposés</td><td>ML</td><td>recommandation</td></tr>
+        <tr><td>(e) questions des vendeurs</td><td>GenAI</td><td>RAG, assistant</td></tr>
+        <tr><td>(f) CA de l'an prochain</td><td>Analytics</td><td>prévision</td></tr>
+        <tr><td>(g) quantité à commander</td><td>ML</td><td>régression</td></tr>
+        <tr><td>(h) descriptions produits</td><td>GenAI</td><td>génération</td></tr>
+        <tr><td>(i) panier moyen</td><td>BI</td><td>KPI, reporting</td></tr>
+        <tr><td>(j) température × boissons</td><td>Analytics</td><td>statistiques</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarque.</strong> (f) et (g) estiment tous deux un nombre futur. (f) est une
+      prévision unique, lue et discutée par des humains : Analytics. (g) est répétée 25 000 fois par
+      soir et appliquée sans relecture ligne à ligne : ML (régression). Le critère n'est pas la
+      technique, mais qui agit et à quelle échelle.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — copies ou socle partagé ?</div>
+  <div class="box-b">
+    <p>Les tickets représentent 2 190 Go sur 5 ans (N33), au tarif de 0,25 DH par Go et par mois.
+      Quatre consommateurs en ont besoin : BI, Analytics, ML, GenAI. (a) Coût mensuel si chacun
+      garde sa copie complète. (b) Coût mensuel avec un socle partagé de 2 190 Go plus les versions
+      prêtes à l'usage : agrégats 5 Go, features 220 Go, corpus 3 Go (l'analyste lit directement le
+      socle). (c) Économie mensuelle et annuelle. (d) Le chiffre d'affaires d'une semaine est de
+      10 000 000 DH avant retours ; les retours font 3 %. La BI compte les retours, l'Analytics non :
+      quel écart au comité de direction, et qu'est-ce qui l'aurait évité ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Quatre copies.</strong> 4 × 2 190 = <strong>8 760 Go</strong> ;
+      8 760 × 0,25 = <strong>2 190 DH par mois</strong>.</p>
+
+    <p><strong>(b) Socle partagé.</strong> 2 190 + 5 + 220 + 3 = <strong>2 418 Go</strong> ;
+      2 418 × 0,25 = <strong>604,50 DH par mois</strong>.</p>
+
+    <p><strong>(c) Économie.</strong> 2 190 − 604,50 = <strong>1 585,50 DH par mois</strong>, soit
+      1 585,50 × 12 = <strong>19 026 DH par an</strong>, pour une seule source. Le stockage n'est
+      d'ailleurs pas le plus gros gain : il faut aussi compter quatre pipelines d'extraction à
+      maintenir et quatre endroits où appliquer une suppression de données client.</p>
+
+    <p><strong>(d) Écart de définition.</strong> Retours : 3 % × 10 000 000 = 300 000 DH. La BI
+      affiche 10 000 000 − 300 000 = <strong>9 700 000 DH</strong>, l'Analytics
+      <strong>10 000 000 DH</strong> : écart de <strong>300 000 DH</strong>, le chiffre de la
+      section 6. Partager les tables ne l'aurait pas évité : il fallait partager aussi la
+      <em>définition</em> de la métrique « chiffre d'affaires net », écrite une fois dans le socle
+      et documentée dans le catalogue (N26). C'est le sens du mot « gouverné ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — un assistant GenAI sur un socle gouverné</div>
+  <div class="box-b">
+    <p>L'assistant des vendeurs utilise un RAG sur 2 000 fiches produits. 300 d'entre elles
+      contiennent le coût d'achat, information réservée aux acheteurs. Pour chaque question,
+      l'assistant récupère 4 fiches, que l'on supposera tirées indépendamment avec la même
+      probabilité. 1 500 vendeurs posent en moyenne 20 questions par jour. (a) Proportion de fiches
+      sensibles. (b) Probabilité qu'une réponse s'appuie sur au moins une fiche sensible.
+      (c) Nombre de réponses exposées par jour. (d) Deux mesures de gouvernance, l'une dans la
+      couche Processing, l'autre dans la couche 5, pour ramener ce nombre à zéro.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Consommateur.</strong> GenAI (RAG, assistant) ; il lit un corpus préparé
+      depuis le socle commun des fiches produits.</p>
+
+    <p><strong>(a) Proportion.</strong> 300 / 2 000 = <strong>15 %</strong> ; une fiche récupérée
+      est saine avec la probabilité 0,85.</p>
+
+    <p><strong>(b) Au moins une fiche sensible sur 4.</strong> On passe par l'événement contraire :
+      aucune fiche sensible = 0,85<sup>4</sup> = 0,7225 × 0,7225 ≈ 0,5220. D'où
+      1 − 0,5220 = <strong>0,478, soit 47,8 %</strong> des réponses.</p>
+
+    <p><strong>(c) Réponses exposées.</strong> 1 500 × 20 = 30 000 questions par jour ;
+      30 000 × 0,478 ≈ <strong>14 340 réponses par jour</strong> qui peuvent citer un coût d'achat.
+      Une proportion « petite » de documents sensibles (15 %) devient presque une réponse sur deux,
+      parce que chaque réponse lit plusieurs documents.</p>
+
+    <p><strong>(d) Mesures.</strong> Dans la couche Processing (N34) : construire la version
+      « corpus vendeurs » en <em>retirant le champ coût d'achat</em> des fiches ; le socle garde la
+      fiche complète pour les acheteurs, le corpus n'en contient que la partie autorisée. Dans la
+      couche 5 : <em>filtrer la recherche par rôle</em>, l'assistant ne récupérant que les documents
+      que l'utilisateur connecté a le droit de lire. Avec l'une ou l'autre, la probabilité tombe à
+      0 ; avec les deux, une erreur sur l'une est rattrapée par l'autre. Le socle reste unique,
+      l'accès est gouverné par consommateur : c'est exactement le principe du support.</p>
+  </div>
+</div>
+
+<h3 id="n35-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les quatre familles de consommateurs du support avec leurs trois usages.</li>
+      <li>Énoncez le principe du support et expliquez chacun des mots « plusieurs », « même socle »
+        et « gouverné ».</li>
+      <li>Expliquez la différence entre une prévision d'Analytics et une régression de ML.</li>
+      <li>Donnez un exemple de classification, de régression et de recommandation dans
+        l'enseigne.</li>
+      <li>Expliquez pourquoi partager les tables ne suffit pas à obtenir un seul chiffre.</li>
+      <li>Expliquez pourquoi la couche 5 est décrite en dernier mais décidée en premier.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n35-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Associez chaque besoin à sa famille et à son usage : (a) un assistant qui répond aux
+      questions des employés sur les congés ; (b) un tableau mensuel des ventes par rayon ;
+      (c) prédire si un client va résilier sa carte de fidélité ; (d) estimer la consommation
+      d'électricité d'un magasin selon sa surface ; (e) explorer les tickets pour repérer les
+      produits souvent achetés ensemble.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Pour les quatre consommateurs de l'enseigne (tableau de bord régional, analyste marketing,
+      modèle de fraude, assistant des vendeurs), dressez un tableau à cinq colonnes : version prête à
+      l'usage lue, grain, fraîcheur exigée, mode d'accès, champs à masquer. Indiquez ensuite quelles
+      tables conformes du socle sont lues par au moins deux consommateurs.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>L'enseigne veut un nouveau service : prévenir chaque client, par SMS, quand un produit de sa
+      liste de souhaits revient en stock dans son magasin habituel, avec un message rédigé
+      automatiquement. (a) Parcourez les cinq couches de N30 à N35 : sources, mode d'ingestion,
+      stockage, traitements, consommateurs. (b) Quels consommateurs de la couche 5 interviennent
+      (il y en a plus d'un) ? (c) Quelles règles de gouvernance s'appliquent (consentement SMS,
+      données personnelles, lignage) ? (d) Quels éléments du socle existant sont réutilisés, et
+      que faut-il réellement ajouter ?</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — fin de la partie VII et vers les problèmes du réel</div>
+  <div class="box-b">
+    <p>Les cinq couches sont posées : d'où viennent les données (N31), comment elles entrent
+      (N32), où elles vivent (N33), ce qu'on en fait (N34) et qui les consomme (N35), sous une même
+      gouvernance. Il reste à s'en servir sur des cas complets, où il faut tout décider à la fois :
+      c'est l'objet des problèmes du réel de la section 15.</p>
+  </div>
+</div>

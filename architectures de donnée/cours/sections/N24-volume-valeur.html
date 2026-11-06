@@ -1,0 +1,520 @@
+<h2 class="notion" id="n24">N24 — Volume ≠ valeur : les cinq causes</h2>
+
+<h3 id="n24-s4">4. La règle</h3>
+
+<div class="box b-quoi">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Question du support.</strong> Pourquoi « beaucoup de données » ne signifie-t-il pas
+      « beaucoup de valeur » ?</p>
+
+    <p><strong>Les cinq causes (support).</strong></p>
+    <table>
+      <thead>
+        <tr><th>Les données sont…</th><th>…alors elles peuvent</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>dupliquées ou contradictoires</strong></td><td>ralentir la décision</td></tr>
+        <tr><td><strong>sans métadonnées</strong></td><td>être difficiles à découvrir et à comprendre</td></tr>
+        <tr><td><strong>non gouvernées</strong></td><td>être difficiles à partager légalement et
+          correctement</td></tr>
+        <tr><td><strong>non représentatives</strong></td><td>dégrader un modèle d'IA</td></tr>
+        <tr><td><strong>indisponibles au moment nécessaire</strong></td><td>ne pas soutenir un workload
+          critique</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Principe (support).</strong> La valeur dépend du <strong>contexte</strong>, de la
+      <strong>qualité</strong>, de l'<strong>accès</strong> et de l'<strong>usage</strong>.</p>
+  </div>
+</div>
+
+<h3 id="n24-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>N23 a posé la définition : une donnée devient un actif quand elle contribue durablement à
+      comprendre, décider, optimiser ou innover, sous trois conditions réunies. N24 attaque l'idée
+      reçue qui court-circuite cette définition : <strong>« plus on a de données, plus on a de
+      valeur »</strong>. Le support répond par cinq causes, chacune étant une manière concrète dont
+      une donnée présente en grande quantité <em>échoue</em> à produire de la valeur.</p>
+
+    <p><strong>Lire chaque phrase en deux temps.</strong> Les cinq puces ont la même forme : un
+      <em>défaut de la donnée</em> (dupliquée, sans métadonnées, non gouvernée, non représentative,
+      indisponible) et un <em>effet sur l'organisation</em> (décision ralentie, donnée introuvable,
+      partage bloqué, modèle dégradé, workload non soutenu). Retenir les deux moitiés est
+      indispensable : le défaut dit où agir, l'effet dit ce que cela coûte.</p>
+
+    <ul>
+      <li><strong>Dupliquées ou contradictoires → décision ralentie.</strong> Quand le service
+        financier et le marketing présentent deux chiffres d'affaires différents pour le même mois, la
+        réunion ne décide rien : elle passe son temps à réconcilier les chiffres. Le doublon ne se voit
+        pas, la contradiction se paie en délais.</li>
+      <li><strong>Sans métadonnées → difficiles à découvrir et à comprendre.</strong> Une métadonnée
+        est une « donnée sur la donnée » : nom clair, définition, origine, date, propriétaire, unité.
+        Une colonne nommée <code>mt_net2</code> dans une table parmi dix mille ne sert à personne : on
+        ne la trouve pas, et si on la trouve on ne sait pas ce qu'elle mesure.</li>
+      <li><strong>Non gouvernées → difficiles à partager légalement et correctement.</strong> Deux
+        adverbes, deux risques : <em>légalement</em> (données personnelles, consentement, loi) et
+        <em>correctement</em> (la bonne version, aux bonnes personnes, avec les bons droits). Sans
+        règles connues, la prudence l'emporte et la donnée reste enfermée.</li>
+      <li><strong>Non représentatives → modèle d'IA dégradé.</strong> Un modèle apprend ce qu'on lui
+        montre. Entraîné sur les seuls magasins urbains, il prévoit mal les magasins ruraux, quel que
+        soit le nombre de lignes urbaines fournies.</li>
+      <li><strong>Indisponibles au moment nécessaire → workload critique non soutenu.</strong> Une
+        donnée exacte qui arrive après la décision a une valeur nulle pour cette décision. C'est le
+        lien direct avec la partie IV : latence et fenêtre de traitement (N20-N22).</li>
+    </ul>
+
+    <p><strong>Le principe en quatre mots.</strong> Le support conclut par quatre facteurs dont dépend
+      la valeur. On les retrouve dans les cinq causes :</p>
+    <ul>
+      <li><strong>contexte</strong> : la même donnée vaut différemment selon la question posée et la
+        population visée (cause 4, représentativité) ;</li>
+      <li><strong>qualité</strong> : exactitude, cohérence, absence de doublons (cause 1) ;</li>
+      <li><strong>accès</strong> : pouvoir la trouver, la comprendre, la partager et l'obtenir à temps
+        (causes 2, 3 et 5) ;</li>
+      <li><strong>usage</strong> : il faut une décision ou un workload au bout (présent dans l'effet de
+        chaque cause).</li>
+    </ul>
+
+    <p><strong>Le volume n'apparaît nulle part dans le principe.</strong> C'est le message de la
+      notion : le volume n'est pas un cinquième facteur de valeur. Il est au mieux neutre, et souvent
+      il <em>amplifie</em> les cinq causes (plus de sources, donc plus de doublons ; plus de tables,
+      donc plus de données introuvables).</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Croire que le support dit « le volume nuit ».</strong> Il dit que le volume ne
+        <em>suffit</em> pas. Plus de données représentatives, propres et documentées améliorent un
+        modèle ; c'est le volume <em>sans</em> les quatre facteurs qui ne vaut rien.</li>
+      <li><strong>Oublier le mot « peuvent ».</strong> Chaque puce dit « peuvent » : la cause crée un
+        risque, pas une fatalité. Un doublon isolé ne bloque aucune décision ; c'est sa fréquence et sa
+        place qui comptent.</li>
+      <li><strong>Confondre dupliqué et contradictoire.</strong> Un doublon exact gaspille et fausse
+        les comptages ; une contradiction (deux adresses pour le même client) oblige en plus à choisir
+        la bonne version. La seconde est plus coûteuse.</li>
+      <li><strong>Réduire les métadonnées à la documentation technique.</strong> Le type d'une
+        colonne ne suffit pas : il faut aussi le sens métier, l'origine, le propriétaire et la
+        fraîcheur. C'est ce qui permet de <em>comprendre</em>, pas seulement de lire.</li>
+      <li><strong>Croire qu'on corrige la non-représentativité en ajoutant des lignes.</strong>
+        Ajouter dix millions de tickets urbains ne représente pas mieux les magasins ruraux. Il faut
+        ajouter les bonnes lignes, pas plus de lignes.</li>
+      <li><strong>Réduire « indisponible » à « en panne ».</strong> Une donnée stockée et intacte est
+        indisponible si elle arrive après la décision, ou si celui qui en a besoin n'y a pas accès.</li>
+      <li><strong>Penser que les cinq causes s'excluent.</strong> Un même jeu de données peut cumuler
+        les cinq ; le diagnostic doit les tester toutes.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> بزاف ديال المعطيات ماشي معناها بزاف ديال القيمة. الدعم كيعطي
+    <strong>خمسة ديال الأسباب</strong>: المعطيات <strong>المكررة ولا المتناقضة</strong> كتبطّأ القرار؛
+    المعطيات <strong>بلا métadonnées</strong> (معطيات على المعطيات: التعريف، المصدر، المسؤول، التاريخ)
+    كيصعاب نلقاوها ونفهموها؛ المعطيات <strong>بلا حوكمة</strong> كيصعاب نتقاسموها بشكل قانوني وصحيح؛
+    المعطيات <strong>اللي ما كتمثلش</strong> الواقع كتخسّر نموذج الذكاء الاصطناعي؛ والمعطيات
+    <strong>اللي ما كتكونش متوفرة فالوقت</strong> ما كتقدرش تخدم workload حساس. والمبدأ: القيمة كتعتمد
+    على <strong>السياق</strong>، <strong>الجودة</strong>، <strong>الولوج</strong>
+    و<strong>الاستعمال</strong>. الحجم ما كاينش فهاد اللائحة: فالغالب كيكبّر هاد المشاكل عوض ما يحلها.</p>
+</div>
+
+<h3 id="n24-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>L'enseigne de 120 magasins a suivi le mouvement : tickets, fidélité, clics du site, GPS des
+      camions, capteurs des chambres froides, tout est désormais collecté. Le data lake dépasse les
+      80 To et la direction s'attend à des résultats en proportion. Ils ne viennent pas : le comité
+      mensuel s'enlise sur des chiffres qui ne concordent pas, les analystes passent leurs journées à
+      chercher la bonne table, le juriste refuse d'envoyer le fichier clients au prestataire de
+      marketing, le modèle de prévision se trompe sur les magasins ruraux et le réassort part avant
+      que les stocks de la nuit soient chargés.</p>
+
+    <p>La tentation est de répondre par <em>encore plus</em> : plus de sources, plus de stockage, un
+      outil plus puissant. La règle montre que ce serait aggraver le mal. Elle remplace la question
+      « combien de données avons-nous ? » par « qu'est-ce qui empêche nos données de produire de la
+      valeur ? », et elle donne cinq réponses possibles à vérifier.</p>
+  </div>
+</div>
+
+<h3 id="n24-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Un outil de diagnostic.</strong> Les cinq causes forment une liste de contrôle : face
+      à un projet de données décevant, on les passe une à une. Chacune pointe vers un remède différent
+      (dédoublonner, documenter, gouverner, rééquilibrer l'échantillon, réduire la latence).</p>
+
+    <p><strong>Un argument contre la collecte aveugle.</strong> Avant d'ajouter une source, on se
+      demande si elle aggravera l'une des cinq causes : nouvelle copie d'un référentiel existant ?
+      nouvelle table sans propriétaire ? nouvelles données personnelles sans base légale ?</p>
+
+    <p><strong>Une lecture des notions suivantes.</strong> Les cinq causes annoncent la suite de la
+      partie V : la qualité relative à l'usage (N25) traite les doublons et la représentativité ; la
+      gouvernance, les métadonnées et l'observabilité (N26) traitent les causes 2 et 3 et surveillent
+      la cinquième.</p>
+
+    <p><strong>Un pont vers l'IA.</strong> La cause 4 est la seule qui nomme l'IA. Elle prépare la
+      partie VI (organisation AI-driven, N28-N29) : un modèle d'IA est plus exigeant qu'un rapport,
+      car il généralise ce qu'il a vu.</p>
+  </div>
+</div>
+
+<h3 id="n24-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Point de départ : la chaîne de N23.</strong> La valeur suit la chaîne donnée →
+      information → décision → effet, et chaque maillon peut casser. Les cinq causes sont les cinq
+      manières concrètes de casser un maillon :</p>
+    <table>
+      <thead>
+        <tr><th>Cause</th><th>Maillon cassé</th><th>Condition de N23 touchée</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1. dupliquées / contradictoires</td><td>information → décision (on ne sait pas quel
+          chiffre croire)</td><td>confiance (qualité)</td></tr>
+        <tr><td>2. sans métadonnées</td><td>donnée → information (on ne la trouve pas, on ne la
+          comprend pas)</td><td>disponibilité et confiance</td></tr>
+        <tr><td>3. non gouvernées</td><td>donnée → information (on n'ose pas la transmettre)</td>
+          <td>confiance (gouvernance, sécurité) et disponibilité</td></tr>
+        <tr><td>4. non représentatives</td><td>décision → effet (la décision est mauvaise pour la
+          population oubliée)</td><td>confiance (qualité au regard de l'usage)</td></tr>
+        <tr><td>5. indisponibles à temps</td><td>donnée → décision (la décision est prise sans
+          elle)</td><td>disponibilité (dans le temps)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Pourquoi le volume ne répare aucun maillon.</strong> Prenons les causes une à une et
+      demandons ce que change le fait de doubler la quantité de données.</p>
+    <ul>
+      <li><strong>Doublons.</strong> Chaque nouvelle source qui décrit les mêmes clients ou les mêmes
+        produits ajoute une copie possible. Avec deux sources, il y a une paire à réconcilier ; avec
+        trois, trois paires ; avec quatre, six. Le travail de réconciliation croît plus vite que le
+        nombre de sources.</li>
+      <li><strong>Métadonnées.</strong> Le coût pour trouver une table augmente avec le nombre de
+        tables. Sans catalogue, doubler le lac double le temps de recherche.</li>
+      <li><strong>Gouvernance.</strong> Plus de données personnelles, c'est plus de risque juridique
+        si les règles manquent ; le réflexe de prudence bloque alors davantage de partages.</li>
+      <li><strong>Représentativité.</strong> Un échantillon plus grand réduit l'effet du hasard
+        (la <em>variance</em>), mais pas l'erreur systématique (le <em>biais</em>). Si 95 % des
+        tickets viennent des magasins urbains, dix fois plus de tickets gardent la même proportion et
+        le même biais.</li>
+      <li><strong>Disponibilité.</strong> Plus de volume, c'est plus de temps de chargement et de
+        traitement : la fenêtre de batch de N20 (23 h 30 → 6 h 30) déborde plus vite.</li>
+    </ul>
+
+    <p><strong>Conclusion de la justification.</strong> Le volume est un multiplicateur : appliqué à
+      une donnée qui réunit contexte, qualité, accès et usage, il multiplie la valeur ; appliqué à une
+      donnée défaillante, il multiplie les coûts. D'où le principe du support, qui cite quatre facteurs
+      et ignore le volume.</p>
+  </div>
+</div>
+
+<h3 id="n24-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Les référentiels partagés (clients, produits, magasins).</strong> C'est là que naissent
+      les doublons et les contradictions : chaque application garde sa copie. La cause 1 s'y vérifie
+      en premier.</p>
+
+    <p><strong>Les data lakes et les entrepôts de grande taille.</strong> Plus le nombre de tables est
+      grand, plus la cause 2 domine : sans catalogue ni définitions, le lac devient le data swamp de
+      N11.</p>
+
+    <p><strong>Les échanges avec l'extérieur et entre services.</strong> Envoi à un prestataire,
+      ouverture à un partenaire, partage entre filiales : la cause 3 (gouvernance) y décide de ce qui
+      est permis, notamment pour les données personnelles.</p>
+
+    <p><strong>Les projets d'IA et d'apprentissage automatique.</strong> Préparation des données
+      d'entraînement : c'est le terrain de la cause 4. On y vérifie que chaque population sur laquelle
+      le modèle sera utilisé est présente dans les données.</p>
+
+    <p><strong>Les workloads critiques.</strong> Réassort de nuit, détection de fraude, alerte des
+      chambres froides : la cause 5 s'y mesure en minutes. On y confronte l'heure d'arrivée de la
+      donnée à l'heure de la décision (N22).</p>
+  </div>
+</div>
+
+<h3 id="n24-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>« On a deux chiffres pour la même chose. »</strong> Signal de la cause 1. Avant de
+      choisir un chiffre, on cherche pourquoi deux sources divergent.</p>
+
+    <p><strong>« Je ne sais pas où est la donnée » ou « je ne sais pas ce que veut dire cette
+      colonne ».</strong> Signal de la cause 2 : il manque des métadonnées.</p>
+
+    <p><strong>« Le juridique bloque » ou « on ne sait pas qui a le droit ».</strong> Signal de la
+      cause 3 : les règles de partage n'existent pas ou ne sont pas connues.</p>
+
+    <p><strong>« Le modèle marche bien en test mais se trompe sur tel segment. »</strong> Signal de
+      la cause 4 : le segment est absent ou sous-représenté dans les données d'entraînement.</p>
+
+    <p><strong>« Les chiffres arrivent trop tard. »</strong> Signal de la cause 5 : la donnée existe
+      mais pas au moment de la décision.</p>
+
+    <p><strong>Quand un énoncé oppose volume et valeur</strong>, ou propose d'« ajouter des données »
+      pour résoudre un problème : c'est le moment de montrer, cause par cause, que le volume ne répare
+      pas le maillon cassé.</p>
+  </div>
+</div>
+
+<h3 id="n24-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer l'usage attendu.</strong> Quelle décision ou quel workload la donnée
+      doit-elle servir, à quel moment, pour quelle population ? Sans usage, on ne peut pas juger la
+      valeur (N23).</p>
+
+    <p><strong>Étape 2 — Passer les cinq causes, dans l'ordre du support.</strong> Pour chacune, une
+      question fermée :</p>
+    <ol>
+      <li>Existe-t-il des copies ou des versions contradictoires de cette donnée ?</li>
+      <li>Peut-on la trouver et comprendre son sens sans demander à son auteur ?</li>
+      <li>Sait-on qui peut la partager, avec qui, sur quelle base légale ?</li>
+      <li>Couvre-t-elle toute la population sur laquelle on décidera ?</li>
+      <li>Est-elle disponible avant le moment de la décision ?</li>
+    </ol>
+
+    <p><strong>Étape 3 — Relier chaque cause trouvée à son effet.</strong> Décision ralentie, donnée
+      introuvable, partage bloqué, modèle dégradé ou workload non soutenu : on chiffre si possible
+      (heures perdues, erreur de prévision, minutes de retard).</p>
+
+    <p><strong>Étape 4 — Rattacher au facteur du principe.</strong> Contexte, qualité, accès ou
+      usage : c'est le levier sur lequel agir.</p>
+
+    <p><strong>Étape 5 — Prescrire un remède ciblé, jamais « plus de données ».</strong>
+      Dédoublonner et désigner une source de référence (1) ; documenter et cataloguer (2) ; définir
+      propriétaire, droits et base légale (3) ; compléter les populations manquantes (4) ; avancer la
+      donnée ou passer au flux (5).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>Beaucoup de données ≠ beaucoup de valeur. Cinq causes l'expliquent : données
+      <strong>dupliquées ou contradictoires</strong> (décision ralentie), <strong>sans
+      métadonnées</strong> (introuvables, incomprises), <strong>non gouvernées</strong> (partage
+      illégal ou incorrect), <strong>non représentatives</strong> (modèle d'IA dégradé),
+      <strong>indisponibles au bon moment</strong> (workload critique non soutenu). La valeur dépend du
+      <strong>contexte</strong>, de la <strong>qualité</strong>, de l'<strong>accès</strong> et de
+      l'<strong>usage</strong> ; le volume ne fait que multiplier ce qui existe déjà.</p>
+    <p class="ar" dir="rtl">بزاف ديال المعطيات ≠ بزاف ديال القيمة. خمسة ديال الأسباب: معطيات
+      <strong>مكررة ولا متناقضة</strong>، <strong>بلا métadonnées</strong>، <strong>بلا حوكمة</strong>،
+      <strong>ما كتمثلش</strong> الواقع، ولا <strong>ما متوفراش فالوقت</strong>. القيمة كتعتمد على
+      <strong>السياق</strong>، <strong>الجودة</strong>، <strong>الولوج</strong>
+      و<strong>الاستعمال</strong>؛ والحجم غير كيضرب داكشي اللي كاين.</p>
+  </div>
+</div>
+
+<h3 id="n24-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — reconnaître la cause dans cinq situations</div>
+  <div class="box-b">
+    <p>Pour chaque situation de l'enseigne, indiquez la cause du support, son effet et le facteur du
+      principe concerné : (a) le modèle de prévision, entraîné sur les ventes de mars à décembre,
+      sous-estime fortement les ventes du mois de Ramadan ; (b) le comité mensuel passe 40 minutes à
+      expliquer pourquoi le chiffre d'affaires de la finance et celui du marketing diffèrent de 3 % ;
+      (c) un analyste met deux jours à trouver la table des retours produits, puis découvre que la
+      colonne <code>qte</code> est en cartons et non en unités ; (d) les stocks de la nuit sont
+      disponibles à 6 h 30 alors que les camions de réassort partent à 5 h ; (e) le fichier de
+      fidélité ne peut pas être transmis à l'agence de marketing car personne ne sait si les clients
+      ont consenti à ce partage.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On repère le défaut (première moitié des puces du support), puis
+      l'effet (seconde moitié), puis le facteur du principe.</p>
+
+    <p><strong>(a)</strong> Le mois de Ramadan est absent des données d'entraînement : données
+      <strong>non représentatives</strong> (cause 4) → <strong>modèle dégradé</strong>. Facteur :
+      <strong>contexte</strong> (la période de prévision n'est pas couverte). Ajouter des mois
+      ordinaires n'y changerait rien.</p>
+
+    <p><strong>(b)</strong> Deux versions du même indicateur : données <strong>contradictoires</strong>
+      (cause 1) → <strong>décision ralentie</strong> (40 minutes perdues sans décider). Facteur :
+      <strong>qualité</strong> (cohérence).</p>
+
+    <p><strong>(c)</strong> Table introuvable et unité inconnue : données <strong>sans
+      métadonnées</strong> (cause 2) → difficile à <strong>découvrir</strong> (deux jours) et à
+      <strong>comprendre</strong> (cartons ou unités). Facteur : <strong>accès</strong>. Le risque est
+      double : perdre du temps, puis se tromper d'un facteur 12 ou 24 si l'on ignore l'unité.</p>
+
+    <p><strong>(d)</strong> La donnée est exacte mais arrive 1 h 30 trop tard : <strong>indisponible
+      au moment nécessaire</strong> (cause 5) → le réassort, workload critique, n'est pas soutenu.
+      Facteur : <strong>accès</strong> (dans le temps). Remède du côté de N20-N22 : avancer le batch
+      ou passer les mouvements de stock en flux.</p>
+
+    <p><strong>(e)</strong> Pas de règle connue sur le consentement : données <strong>non
+      gouvernées</strong> (cause 3) → partage impossible <strong>légalement</strong>. Facteur :
+      <strong>accès</strong> (partage) et <strong>usage</strong> (la campagne n'aura pas lieu).</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — chiffrer l'effet des doublons</div>
+  <div class="box-b">
+    <p>Le fichier de fidélité compte 1 200 000 lignes. Un contrôle sur un échantillon montre que
+      18 % des lignes sont des doublons d'un autre client (même personne inscrite en magasin et sur le
+      site), et que, parmi les clients en double, 40 % ont deux adresses différentes. (a) Combien de
+      clients réels l'enseigne a-t-elle ? (b) Une campagne postale coûte 6 DH par envoi : combien
+      coûte l'envoi à tout le fichier, et combien est gaspillé en doublons ? (c) Combien de clients
+      ont des adresses contradictoires, et quel problème cela pose-t-il ? (d) Le marketing propose
+      d'acheter un fichier externe de 500 000 contacts « pour augmenter la valeur ». Qu'en dites-vous ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>(a) Clients réels.</strong> 18 % de 1 200 000 = 216 000 lignes en double. Chacune est la
+      seconde ligne d'un client déjà présent, donc les clients réels sont 1 200 000 − 216 000 =
+      <strong>984 000</strong>. Le « volume » affiché surestime la clientèle de 22 % (216 000 / 984 000).</p>
+
+    <p><strong>(b) Coût de la campagne.</strong> Envoi à tout le fichier : 1 200 000 × 6 =
+      <strong>7 200 000 DH</strong>. Envois en double : 216 000 × 6 = <strong>1 296 000 DH</strong>
+      gaspillés, sans compter l'image d'une enseigne qui écrit deux fois au même client.</p>
+
+    <p><strong>(c) Contradictions.</strong> 40 % des 216 000 clients en double = <strong>86 400
+      clients</strong> avec deux adresses. Avant d'envoyer quoi que ce soit, il faut décider laquelle
+      est la bonne : c'est exactement le « ralentit la décision » de la cause 1. Une partie des envois
+      partira à une ancienne adresse et sera perdue.</p>
+
+    <p><strong>(d) Fichier externe.</strong> Il augmente le volume mais aggrave les cinq causes :
+      nouveaux doublons avec les 984 000 clients existants (cause 1), origine et définition des champs
+      inconnues (cause 2), consentement des personnes incertain (cause 3), population peut-être sans
+      rapport avec la clientèle de l'enseigne (cause 4, contexte). La valeur ne viendra pas de là :
+      il faut d'abord dédoublonner et désigner une source de référence pour l'adresse.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — volume et représentativité</div>
+  <div class="box-b">
+    <p>Le modèle de prévision est entraîné sur 2 000 000 de tickets : 1 900 000 viennent des 90
+      magasins urbains, 100 000 des 30 magasins ruraux. En ville, le panier moyen est de 250 DH ; en
+      zone rurale, de 150 DH. (a) Quelle part des magasins et quelle part des tickets représentent les
+      magasins ruraux ? (b) Un modèle naïf qui prédit le panier moyen de l'ensemble des tickets se
+      trompe de combien sur un magasin rural ? (c) Le data engineer propose de passer à 20 000 000 de
+      tickets en ajoutant dix ans d'historique, dans les mêmes proportions. Le problème est-il
+      résolu ? (d) Que faut-il faire à la place ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>(a) Parts.</strong> Magasins ruraux : 30 / 120 = <strong>25 %</strong> des magasins.
+      Tickets ruraux : 100 000 / 2 000 000 = <strong>5 %</strong> des tickets. Les magasins ruraux
+      pèsent cinq fois moins dans les données que dans le réseau.</p>
+
+    <p><strong>(b) Erreur du modèle naïf.</strong> Panier moyen de l'ensemble des tickets :
+      (1 900 000 × 250 + 100 000 × 150) / 2 000 000 = (475 000 000 + 15 000 000) / 2 000 000 =
+      <strong>245 DH</strong>. Sur un magasin rural, l'erreur est 245 − 150 = 95 DH, soit
+      95 / 150 ≈ <strong>63 %</strong> de surestimation. Sur un magasin urbain, l'erreur n'est que de
+      5 DH (2 %). Le modèle paraît bon « en moyenne » et échoue sur un quart du réseau.</p>
+
+    <p><strong>(c) Dix fois plus de tickets.</strong> Avec les mêmes proportions (95 % / 5 %), le panier
+      moyen calculé reste 245 DH et l'erreur rurale reste 63 %. Le volume a réduit l'effet du hasard,
+      pas le <strong>biais</strong> : c'est la justification du §8. En plus, dix ans d'historique
+      ajoutent des comportements anciens peut-être dépassés (contexte) et allongent l'entraînement
+      (cause 5).</p>
+
+    <p><strong>(d) Le bon remède.</strong> Rendre les données représentatives de l'usage : traiter les
+      magasins ruraux comme un segment à part (un modèle ou une variable « zone »), ou donner à leurs
+      tickets un poids égal à leur part dans le réseau. Avec un poids de 25 % pour la zone rurale, le
+      panier moyen pondéré devient 0,75 × 250 + 0,25 × 150 = 225 DH, et surtout la variable « zone »
+      permet de prédire 150 DH là où il le faut. C'est le facteur <strong>contexte</strong> du
+      principe, que N25 développera sous le nom de qualité relative à l'usage.</p>
+  </div>
+</div>
+
+<h3 id="n24-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Citez les cinq causes du support en séparant, pour chacune, le défaut de la donnée et son
+        effet sur l'organisation.</li>
+      <li>Expliquez la différence entre une donnée dupliquée et une donnée contradictoire, et dites
+        laquelle coûte le plus cher.</li>
+      <li>Donnez cinq métadonnées utiles pour une colonne <code>montant</code> d'une table de
+        ventes.</li>
+      <li>Expliquez pourquoi ajouter des données ne corrige pas un biais de représentativité, en
+        distinguant biais et variance.</li>
+      <li>Montrez sur un exemple qu'une donnée exacte et complète peut être « indisponible » au sens
+        du support.</li>
+      <li>Rattachez chacune des cinq causes à l'un des quatre facteurs du principe (contexte, qualité,
+        accès, usage) et à l'une des trois conditions de N23.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n24-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour chaque phrase, nommez la cause du support : « Le tableau des ventes du siège et celui de
+      la région Nord ne donnent pas le même total » ; « On a trouvé un fichier <code>export_final_v3.csv</code>
+      mais personne ne sait d'où il vient » ; « L'alerte de température arrive le lendemain matin » ;
+      « Le modèle de détection de fraude n'a jamais vu de paiement par mobile » ; « On n'a pas le droit
+      d'envoyer les données des salariés au cabinet de conseil, mais personne ne sait qui peut
+      autoriser ».</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Un fichier produits existe dans trois applications (caisse, site, entrepôt) : 45 000 références
+      en caisse, 52 000 sur le site, 48 000 à l'entrepôt. Un rapprochement montre 40 000 références
+      communes aux trois. (a) Combien de paires de sources faut-il réconcilier ? Et s'il y avait cinq
+      applications ? (b) Quelles causes du support ce fichier présente-t-il probablement ?
+      (c) Proposez un remède en trois étapes et dites quel facteur du principe chacune améliore.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>La direction de l'enseigne veut doubler le data lake (de 80 à 160 To) pour « mieux exploiter
+      l'IA ». Rédigez un avis argumenté qui (a) applique la démarche du §11 à trois usages prioritaires
+      (réassort, offres ciblées, prévision de demande) ; (b) montre, cause par cause, ce que le
+      doublement changerait et ne changerait pas ; (c) chiffre au moins un effet à partir des
+      exercices 12.2 et 12.3 ; (d) propose un plan alternatif à budget égal. Concluez en annonçant
+      pourquoi la qualité doit être jugée par rapport à l'usage.</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers la notion suivante</div>
+  <div class="box-b">
+    <p>Deux des cinq causes — les doublons et la représentativité — parlent de <strong>qualité</strong>.
+      Mais l'exercice 12.3 l'a montré : les tickets urbains étaient parfaitement exacts, et pourtant
+      mauvais pour prévoir les magasins ruraux. La qualité n'est donc pas une propriété absolue de la
+      donnée : elle se juge <strong>par rapport à l'usage</strong>. C'est l'objet de N25.</p>
+  </div>
+</div>

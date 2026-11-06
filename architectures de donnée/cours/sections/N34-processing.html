@@ -1,0 +1,473 @@
+<h2 class="notion" id="n34">N34 — Couche 4, le traitement : que fait-on avec les données ?</h2>
+
+<h3 id="n34-s4">4. La règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">4. C'EST QUOI ? — l'énoncé</div>
+  <div class="box-b">
+    <p><strong>Définition du support (p. 48).</strong> <em>Processing</em> : rendre les données
+      adaptées à un usage précis.</p>
+    <p><strong>Schéma du support.</strong> Cinq familles d'opérations :</p>
+    <table class="long">
+      <thead>
+        <tr><th>Opération</th><th>Ce qu'elle vise (support)</th><th>Exemples du support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Nettoyage</strong></td><td>formats, valeurs invalides</td><td>suppression
+          des doublons, gestion des valeurs manquantes</td></tr>
+        <tr><td><strong>Transformation</strong></td><td>calculs, jointures</td><td>normalisation,
+          calculs métiers, jointures entre sources</td></tr>
+        <tr><td><strong>Enrichissement</strong></td><td>ajout de contexte</td><td>ajout de données
+          géographiques, données météo, référentiels</td></tr>
+        <tr><td><strong>Agrégation</strong></td><td>KPI, statistiques</td><td>agrégations
+          temporelles, KPI, tableaux de bord</td></tr>
+        <tr><td><strong>Features</strong></td><td>préparation ML</td><td>création de variables,
+          encodage, sélection de features</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 id="n34-s5">5. Explication de la règle</h3>
+
+<div class="box b-quoi long">
+  <div class="box-t">5. L'IDÉE DERRIÈRE LA RÈGLE</div>
+  <div class="box-b">
+    <p>Le <strong>traitement</strong> est la couche qui fait passer la donnée de l'état
+      « conservée » (N33) à l'état « utilisable ». La définition tient en deux mots-clés :
+      <em>adaptées</em> et <em>usage précis</em>. Une donnée n'est pas « propre » ou « prête » dans
+      l'absolu ; elle est prête <strong>pour</strong> un tableau de bord, <strong>pour</strong> un
+      modèle, <strong>pour</strong> un assistant. C'est la suite directe de N25 : la qualité est
+      relative à l'usage, donc la préparation l'est aussi.</p>
+
+    <p><strong>Les cinq opérations forment une progression.</strong> Le
+      <em>nettoyage</em> corrige ce qui est faux dans la donnée elle-même (format, doublon, valeur
+      manquante). La <em>transformation</em> la remet en forme et la combine avec les autres sources
+      de l'entreprise (unités communes, calculs métiers comme la marge, jointures ticket × produit).
+      L'<em>enrichissement</em> lui ajoute ce qu'elle ne contenait pas : le contexte extérieur ou de
+      référence (région du magasin, météo du jour, catégorie officielle du produit). Ensuite, les
+      chemins se séparent : l'<em>agrégation</em> résume pour l'humain (KPI, statistiques) et les
+      <em>features</em> codent pour la machine (variables, encodage, sélection).</p>
+
+    <p><strong>Une même donnée brute donne donc plusieurs versions préparées.</strong> Les tickets
+      nettoyés et enrichis alimentent à la fois le chiffre d'affaires hebdomadaire par région
+      (agrégation) et les variables du modèle de réassort (features). Chaque version a son
+      consommateur, que N35 décrira.</p>
+
+    <p><strong>Le traitement ne choisit pas l'horloge.</strong> Ces cinq opérations s'appliquent
+      aussi bien en batch qu'en streaming : on peut dédoublonner un lot nocturne ou un flux de
+      paiements. La question du mode a été tranchée en N20-N22 ; N34 répond à « que fait-on ? ».</p>
+  </div>
+</div>
+
+<div class="box b-piege long">
+  <div class="box-t">CAS PARTICULIERS ET PIÈGES</div>
+  <div class="box-b">
+    <ul>
+      <li><strong>Traiter « en général ».</strong> Un pipeline sans usage cible nettoie au hasard :
+        il supprime des lignes utiles à l'IA (N25 : les « anomalies » retirées étaient les fraudes)
+        ou garde des défauts gênants pour la BI.</li>
+      <li><strong>Écraser le brut.</strong> Toute opération perd de l'information. On écrit la
+        version préparée <em>à côté</em> du brut, jamais à sa place, pour pouvoir rejouer (N32,
+        N33).</li>
+      <li><strong>Agréger avant de nettoyer.</strong> Un doublon agrégé ne se voit plus : il gonfle
+        le KPI sans laisser de trace. L'ordre des opérations compte.</li>
+      <li><strong>Joindre sans vérifier les clés.</strong> Une jointure interne avec un référentiel
+        incomplet fait disparaître des lignes en silence (nouveau magasin absent du
+        référentiel).</li>
+      <li><strong>Fuite de données dans les features.</strong> Une variable calculée avec des
+        informations postérieures au moment de la prédiction donne un modèle excellent en test et
+        inutile en production.</li>
+      <li><strong>Confondre transformation et enrichissement.</strong> Joindre deux sources internes
+        est une transformation ; ajouter un contexte qui n'est pas dans l'événement (météo, région,
+        catégorie de référence) est un enrichissement.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ar" dir="rtl">
+  <p><strong>خلاصة بالعربية:</strong> طبقة <strong>Processing</strong> هي اللي كتخلي المعطيات
+    <strong>صالحة لاستعمال محدد</strong>. الدعامة كتذكر خمس عمليات: <strong>التنظيف</strong>
+    (الصيغ، القيم الغالطة، حذف التكرار، القيم الناقصة)، <strong>التحويل</strong> (الحسابات،
+    التوحيد، الحسابات المهنية، الربط بين المصادر)، <strong>الإغناء</strong> (زيادة السياق:
+    معطيات جغرافية، الطقس، المرجعيات)، <strong>التجميع</strong> (KPI، إحصائيات، لوحات القيادة) و
+    <strong>Features</strong> (تحضير التعلم الآلي: إنشاء المتغيرات، الترميز، الاختيار). المعطيات
+    ماكتكونش «واجدة» بشكل مطلق، كتكون واجدة <strong>لاستعمال معين</strong>، ولهذا نفس المعطى
+    الخام كيعطي بزاف ديال النسخ، وكنخليو الخام ديما محفوظ.</p>
+</div>
+
+<h3 id="n34-s6">6. Le problème que cette règle traite</h3>
+
+<div class="box b-note">
+  <div class="box-t">6. LE PROBLÈME TRAITÉ</div>
+  <div class="box-b">
+    <p>Le lac de l'enseigne contient tout ce que l'ingestion a déposé : tickets avec 0,5 % de
+      doublons (N32), mesures des capteurs dont certaines arrivent en retard, codes produits
+      différents entre l'ERP et le site, montants en dirhams ici et en centimes là. Le directeur
+      régional ouvre un tableau de bord branché directement sur ce brut : le chiffre d'affaires est
+      faux, deux magasins n'apparaissent dans aucune région, et l'équipe IA, de son côté, passe
+      80 % de son temps à recoder les mêmes corrections dans ses notebooks.</p>
+
+    <p>Le problème traité par N34 : <strong>transformer une donnée brute, juste conservée, en
+      versions fiables et directement utilisables par chaque consommateur</strong>, une seule fois,
+      dans une couche commune, au lieu que chacun corrige le brut à sa façon.</p>
+  </div>
+</div>
+
+<h3 id="n34-s7">7. À quoi elle va nous servir</h3>
+
+<div class="box b-note long">
+  <div class="box-t">7. L'UTILITÉ PRATIQUE</div>
+  <div class="box-b">
+    <p><strong>Rendre les chiffres justes.</strong> Dédoublonner et valider avant de calculer un
+      KPI : le chiffre affiché correspond à ce qui s'est réellement vendu.</p>
+
+    <p><strong>Rendre les sources comparables.</strong> Mêmes unités, mêmes codes, mêmes fuseaux
+      horaires : la vente du site et celle du magasin peuvent enfin s'additionner.</p>
+
+    <p><strong>Donner du sens.</strong> Une vente enrichie de la région, de la météo et de la
+      catégorie produit répond à « pourquoi ? », pas seulement à « combien ? » (N27).</p>
+
+    <p><strong>Servir l'humain et la machine.</strong> Agrégats pour les tableaux de bord, features
+      pour les modèles (N28, N29) : deux sorties d'une même préparation commune.</p>
+
+    <p><strong>Ne faire le travail qu'une fois.</strong> Une couche de traitement partagée, versionnée
+      et tracée par le lignage (N26) remplace les corrections dispersées dans chaque équipe.</p>
+  </div>
+</div>
+
+<h3 id="n34-s8">8. D'où vient cette règle</h3>
+
+<div class="box b-note long">
+  <div class="box-t">8. D'OÙ ELLE VIENT — la justification</div>
+  <div class="box-b">
+    <p><strong>Première raison : la donnée brute porte les défauts de sa source.</strong> N31 l'a
+      montré : chaque source a sa qualité (saisies incomplètes du CRM, capteurs hors réseau). N32 a
+      fait le choix de transporter sans corriger, pour garder la trace. Il faut donc un endroit où
+      corriger : c'est la couche Processing.</p>
+
+    <p><strong>Deuxième raison : chaque usage exige une forme différente.</strong> N29 a établi que
+      les exigences croissent du reporting à l'IA. Le tableau suivant relie chaque opération à ce
+      qu'elle apporte et à ce qu'elle fait perdre :</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Opération</th><th>Ce qu'elle apporte</th><th>Ce qu'elle fait perdre</th>
+          <th>Consommateur principal</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nettoyage</td><td>valeurs valides, sans doublon</td><td>les lignes rejetées
+          (parfois les cas rares)</td><td>tous</td></tr>
+        <tr><td>Transformation</td><td>sources comparables et reliées</td><td>le format d'origine,
+          les lignes sans correspondance (jointure interne)</td><td>tous</td></tr>
+        <tr><td>Enrichissement</td><td>contexte, explication</td><td>rien, mais crée une dépendance
+          à un référentiel à tenir à jour</td><td>BI et IA</td></tr>
+        <tr><td>Agrégation</td><td>lisibilité, rapidité</td><td>le détail (impossible de revenir au
+          ticket)</td><td>tableaux de bord, BI</td></tr>
+        <tr><td>Features</td><td>entrée numérique pour un modèle</td><td>la lisibilité humaine</td>
+          <td>ML</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Troisième raison : l'ordre découle des dépendances.</strong> On ne peut pas joindre
+      sur une clé mal formatée, donc on nettoie d'abord ; on ne peut pas enrichir par la région un
+      ticket qui n'est pas encore relié à son magasin, donc on transforme avant d'enrichir ; un
+      agrégat ou une feature ne se corrige plus après coup, donc ils viennent en dernier. D'où la
+      progression du schéma, et l'organisation courante en niveaux : <em>brut</em> (tel qu'ingéré),
+      <em>conforme</em> (nettoyé, transformé, enrichi, réutilisable par tous), <em>prêt à
+      l'usage</em> (agrégats ou features d'un consommateur précis).</p>
+
+    <p><strong>Quatrième raison : on garde le brut parce que l'usage change.</strong> Puisque la
+      préparation dépend de l'usage, un usage nouveau demande une préparation nouvelle. Seul le brut
+      conservé (N33) permet de la recalculer ; une couche de traitement qui écraserait sa source
+      fermerait la porte aux usages futurs — la leçon du grain en N10.</p>
+  </div>
+</div>
+
+<h3 id="n34-s9">9. Où l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">9. OÙ ? — les terrains d'emploi</div>
+  <div class="box-b">
+    <p><strong>Les pipelines ETL / ELT vers l'entrepôt.</strong> Nettoyage, conformité des codes,
+      calculs de marge, tables de faits et dimensions pour la BI (N10, N17).</p>
+
+    <p><strong>Les zones du lac et du lakehouse.</strong> Passage brut → conforme → prêt à l'usage
+      sur les mêmes fichiers, avec lignage (N12, N26).</p>
+
+    <p><strong>Le traitement de flux.</strong> Dédoublonnage des paiements, enrichissement par le
+      profil client, agrégats par fenêtre pour la détection de fraude (N21).</p>
+
+    <p><strong>La préparation des modèles.</strong> Construction des variables de réassort, de
+      fraude, de prévision de la demande ; encodage des magasins et des catégories (N28).</p>
+
+    <p><strong>La préparation des corpus d'IA générative.</strong> Retrait des documents obsolètes,
+      découpage, ajout des métadonnées de date et de service (N29).</p>
+  </div>
+</div>
+
+<h3 id="n34-s10">10. Quand l'utiliser</h3>
+
+<div class="box b-ou long">
+  <div class="box-t">10. QUAND ? — les signaux qui la désignent</div>
+  <div class="box-b">
+    <p><strong>Après le choix du stockage.</strong> La donnée est conservée brute (N33) ; il reste à
+      la préparer pour chacun de ses consommateurs : quatrième étape de la démarche de N30.</p>
+
+    <p><strong>Quand deux rapports donnent deux chiffres différents.</strong> Signal que chaque
+      équipe applique ses propres corrections : il manque une préparation commune.</p>
+
+    <p><strong>Quand une source ne se combine pas avec une autre.</strong> Codes, unités ou fuseaux
+      différents : transformation requise.</p>
+
+    <p><strong>Quand on demande « pourquoi ? » et non « combien ? ».</strong> Il faut un
+      contexte que la donnée ne porte pas : enrichissement.</p>
+
+    <p><strong>Quand un énoncé décrit un nouvel usage (tableau de bord, modèle).</strong> On
+      identifie la version prête à l'usage à construire et la chaîne d'opérations qui y mène.</p>
+  </div>
+</div>
+
+<h3 id="n34-s11">11. Comment l'utiliser</h3>
+
+<div class="box b-comment long">
+  <div class="box-t">11. COMMENT ? — la démarche pas à pas</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Nommer l'usage précis.</strong> Quel consommateur, quelle question, quel
+      grain (ticket, jour, magasin, référence) ?</p>
+
+    <p><strong>Étape 2 — Nettoyer.</strong> Formats, valeurs invalides, doublons, valeurs
+      manquantes ; compter et conserver les lignes rejetées.</p>
+
+    <p><strong>Étape 3 — Transformer.</strong> Normaliser unités et codes, calculer les grandeurs
+      métier, joindre les sources ; choisir jointure interne ou externe en connaissance de
+      cause.</p>
+
+    <p><strong>Étape 4 — Enrichir.</strong> Ajouter le contexte : géographie, météo, référentiels ;
+      vérifier que chaque clé trouve sa correspondance.</p>
+
+    <p><strong>Étape 5 — Produire la sortie de l'usage.</strong> Agrégats (KPI, statistiques) pour
+      l'humain, ou features (variables, encodage, sélection) pour le modèle, en n'utilisant que
+      l'information disponible au moment de la décision.</p>
+
+    <p><strong>Étape 6 — Écrire à côté du brut et tracer.</strong> Nouvelle version, lignage,
+      contrôles de volume et de fraîcheur (N26).</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR</div>
+  <div class="box-b">
+    <p>La couche <strong>Processing</strong> rend les données <strong>adaptées à un usage
+      précis</strong> par cinq opérations : <strong>nettoyage</strong> (formats, valeurs invalides),
+      <strong>transformation</strong> (calculs, jointures), <strong>enrichissement</strong> (ajout de
+      contexte), <strong>agrégation</strong> (KPI, statistiques) et <strong>features</strong>
+      (préparation ML). On les enchaîne dans cet ordre, on écrit chaque version à côté du brut, et
+      une même donnée brute donne une version par usage.</p>
+    <p class="ar" dir="rtl">طبقة <strong>Processing</strong> كتخلي المعطيات <strong>صالحة لاستعمال
+      محدد</strong> بخمس عمليات: <strong>التنظيف</strong>، <strong>التحويل</strong>،
+      <strong>الإغناء</strong>، <strong>التجميع</strong> و <strong>Features</strong>. كنديروهم بهاد
+      الترتيب، كنكتبو كل نسخة حدا الخام بلا ما نمسحوه، ونفس المعطى الخام كيعطي نسخة لكل
+      استعمال.</p>
+  </div>
+</div>
+
+<h3 id="n34-s12">12. Exercices d'application corrigés</h3>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.1 — ranger les opérations</div>
+  <div class="box-b">
+    <p>Classez chaque opération dans l'une des cinq familles du support : (a) convertir les montants
+      du site, exprimés en centimes, en dirhams ; (b) supprimer les tickets envoyés deux fois ;
+      (c) ajouter à chaque vente la température du jour dans la ville du magasin ; (d) calculer le
+      chiffre d'affaires par région et par semaine ; (e) remplacer le code magasin par trois
+      colonnes 0/1 (Nord, Centre, Sud) ; (f) relier chaque ligne de ticket à sa fiche produit de
+      l'ERP ; (g) rejeter les dates au format invalide ; (h) ajouter la catégorie officielle du
+      produit depuis le référentiel achats ; (i) calculer la marge = prix de vente − coût d'achat ;
+      (j) ne garder que les 20 variables les plus utiles au modèle de réassort.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.1</div>
+  <div class="box-b">
+    <p><strong>Méthode.</strong> On se demande : corrige-t-on un défaut (nettoyage) ? remet-on en
+      forme ou combine-t-on des sources internes (transformation) ? ajoute-t-on un contexte absent de
+      l'événement (enrichissement) ? résume-t-on (agrégation) ? code-t-on pour un modèle
+      (features) ?</p>
+
+    <table class="long">
+      <thead>
+        <tr><th>Opération</th><th>Famille</th><th>Justification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>(a) centimes → DH</td><td>Transformation</td><td>normalisation d'unité</td></tr>
+        <tr><td>(b) doublons</td><td>Nettoyage</td><td>défaut de la donnée</td></tr>
+        <tr><td>(c) température</td><td>Enrichissement</td><td>contexte météo extérieur</td></tr>
+        <tr><td>(d) CA région / semaine</td><td>Agrégation</td><td>KPI temporel</td></tr>
+        <tr><td>(e) colonnes 0/1</td><td>Features</td><td>encodage pour le modèle</td></tr>
+        <tr><td>(f) ticket × fiche produit</td><td>Transformation</td><td>jointure entre sources
+          internes</td></tr>
+        <tr><td>(g) dates invalides</td><td>Nettoyage</td><td>format invalide</td></tr>
+        <tr><td>(h) catégorie officielle</td><td>Enrichissement</td><td>référentiel</td></tr>
+        <tr><td>(i) marge</td><td>Transformation</td><td>calcul métier</td></tr>
+        <tr><td>(j) 20 variables</td><td>Features</td><td>sélection de features</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Remarque.</strong> (f) et (h) sont deux jointures, mais (f) relie deux sources
+      opérationnelles de l'entreprise (transformation) alors que (h) ajoute une information de
+      référence que la vente ne contient pas (enrichissement) : c'est la distinction du support.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.2 — l'ordre des opérations compte</div>
+  <div class="box-b">
+    <p>Un lot hebdomadaire contient 1 000 000 de lignes de tickets. Le nettoyage trouve 0,5 % de
+      doublons, puis 3 980 lignes au montant négatif ou sans code magasin. On joint ensuite avec le
+      référentiel des magasins pour ajouter la région ; deux magasins ouverts la semaine même n'y
+      figurent pas encore et représentent 8 920 lignes valides. (a) Nombre de lignes après
+      nettoyage. (b) Nombre de lignes après jointure interne, puis après jointure externe gauche ;
+      laquelle choisir pour le tableau de bord ? (c) Nombre de lignes de la table agrégée par
+      magasin et par jour pour 120 magasins. (d) Le panier moyen est de 300 DH : de combien le
+      chiffre d'affaires serait-il faussé si l'on avait agrégé avant de dédoublonner ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.2</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Usage.</strong> Tableau de bord régional, grain magasin × jour.</p>
+
+    <p><strong>Étape 2 — Nettoyage (a).</strong> Doublons : 0,5 % × 1 000 000 =
+      <strong>5 000</strong> lignes → 995 000. Valeurs invalides : 995 000 − 3 980 =
+      <strong>991 020 lignes</strong>. Les 8 980 lignes écartées sont conservées dans une table de
+      rejets, avec leur motif.</p>
+
+    <p><strong>Étapes 3-4 — Jointure et enrichissement (b).</strong> Jointure interne : les lignes
+      sans magasin correspondant disparaissent, 991 020 − 8 920 = <strong>982 100 lignes</strong>.
+      Jointure externe gauche : les <strong>991 020 lignes</strong> sont gardées, les 8 920 avec une
+      région « inconnue ». Pour le tableau de bord, on choisit la jointure externe : le chiffre
+      d'affaires total reste juste, la région « inconnue » est visible et déclenche la mise à jour
+      du référentiel. La jointure interne aurait fait disparaître deux magasins sans alerte.</p>
+
+    <p><strong>Étape 5 — Agrégation (c).</strong> 120 magasins × 7 jours = <strong>840
+      lignes</strong> (122 si l'on compte les deux nouveaux magasins : 122 × 7 = 854). On passe de
+      près d'un million de lignes à moins d'un millier : c'est le gain de lisibilité, et la perte du
+      détail.</p>
+
+    <p><strong>Ordre inversé (d).</strong> Agrégés avant dédoublonnage, les 5 000 doublons
+      ajoutent 5 000 × 300 = <strong>1 500 000 DH</strong> fictifs au chiffre d'affaires de la
+      semaine. Une fois agrégés, ils sont indétectables : aucune ligne du tableau ne porte la trace
+      du doublon. D'où la règle : nettoyer d'abord, agréger à la fin.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t">EXERCICE 12.3 — construire les features du réassort</div>
+  <div class="box-b">
+    <p>Le modèle de réassort (N28) prédit, chaque soir, les ventes du lendemain pour un couple
+      magasin × référence. L'équipe propose ces variables : (1) ventes moyennes des 7 derniers
+      jours ; (2) jour de la semaine encodé en colonnes 0/1 ; (3) mois encodé en colonnes 0/1 ;
+      (4) magasin encodé en colonnes 0/1 (120 magasins) ; (5) température prévue pour le lendemain ;
+      (6) indicateur de promotion prévue ; (7) ventes réelles du lendemain, « pour aider le
+      modèle ». (a) Classez la préparation de (1), (5) et (6) dans les familles du support.
+      (b) Combien de colonnes produisent les encodages (2), (3) et (4) ? (c) Quelle variable est
+      inacceptable et pourquoi ? (d) La moyenne (1) doit-elle inclure le jour prédit ?</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ 12.3</div>
+  <div class="box-b">
+    <p><strong>Étape 1 — Usage.</strong> Prédire une quantité, le soir J, pour le jour J+1 ; grain
+      magasin × référence × jour.</p>
+
+    <p><strong>(a) Familles.</strong> (1) suppose des ventes nettoyées (nettoyage), puis une
+      agrégation temporelle glissante transformée en variable : c'est une <em>feature</em> construite
+      sur un agrégat. (5) vient d'une source météo extérieure : <em>enrichissement</em>, puis
+      feature. (6) vient du plan promotionnel interne, joint par référence et date :
+      <em>transformation</em> (jointure entre sources), puis feature.</p>
+
+    <p><strong>(b) Encodages.</strong> Jour de la semaine : 7 colonnes ; mois : 12 colonnes ;
+      magasin : 120 colonnes ; total <strong>7 + 12 + 120 = 139 colonnes</strong>. Les 120 colonnes
+      du magasin pèsent lourd pour peu d'information chacune : c'est là que la
+      <em>sélection</em> de features ou un encodage plus compact (par région, par taille de magasin)
+      se justifie.</p>
+
+    <p><strong>(c) Variable inacceptable.</strong> (7) : les ventes réelles du lendemain sont
+      justement ce qu'on cherche à prédire et ne sont pas connues le soir J. En test, le modèle
+      paraît parfait ; en production, la variable est vide. C'est une <strong>fuite de
+      données</strong>.</p>
+
+    <p><strong>(d) Fenêtre de la moyenne.</strong> Non : la moyenne doit porter sur J−6 à J (les
+      7 jours connus le soir J), jamais sur J+1. Règle de l'étape 5 : n'utiliser que l'information
+      disponible au moment de la décision. La température <em>prévue</em> (5) respecte cette règle ;
+      la température <em>observée</em> le lendemain ne la respecterait pas.</p>
+  </div>
+</div>
+
+<h3 id="n34-s13">13. Exercices d'entraînement</h3>
+
+<div class="box b-app long">
+  <div class="box-t">À VOUS — entraînement (sans corrigé)</div>
+  <div class="box-b">
+    <ol>
+      <li>Donnez la définition du processing selon le support et expliquez le mot « précis ».</li>
+      <li>Citez les cinq opérations du support avec, pour chacune, un exemple tiré de
+        l'enseigne.</li>
+      <li>Expliquez la différence entre une jointure de transformation et un enrichissement par
+        référentiel.</li>
+      <li>Expliquez pourquoi l'agrégation et les features viennent en dernier dans la chaîne.</li>
+      <li>Donnez deux raisons d'écrire la version préparée à côté du brut plutôt qu'à sa place.</li>
+      <li>Définissez une fuite de données et donnez un exemple dans un modèle de prévision.</li>
+    </ol>
+  </div>
+</div>
+
+<h3 id="n34-s14">14. Exercices à difficulté croissante</h3>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-facile">Facile</span> &nbsp; EXERCICE 14.1</div>
+  <div class="box-b">
+    <p>Pour les mesures des chambres froides, rangez chaque opération dans sa famille :
+      (a) convertir les degrés Fahrenheit d'un ancien capteur en Celsius ; (b) écarter les mesures à
+      −999 °C (code d'erreur) ; (c) ajouter le nom du magasin et sa ville ; (d) calculer la
+      température maximale par heure ; (e) créer la variable « minutes au-dessus de 4 °C sur les
+      24 dernières heures » pour un modèle de panne.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-moyen">Moyen</span> &nbsp; EXERCICE 14.2</div>
+  <div class="box-b">
+    <p>Le CRM compte 400 000 fiches (N31) : 15 % sans ville, 6 % avec un téléphone mal formaté,
+      2 % de doublons. (a) Après suppression des doublons, combien de fiches restent ? (b) Pour la
+      campagne SMS, faut-il supprimer les fiches sans ville ? Et pour le tableau de bord « clients par
+      région » ? (c) Proposez, pour les fiches sans ville, un enrichissement à partir des tickets
+      (magasin le plus fréquenté) et dites ce qu'il risque de fausser.</p>
+  </div>
+</div>
+
+<div class="box b-app">
+  <div class="box-t"><span class="chip chip-difficile">Difficile</span> &nbsp; EXERCICE 14.3</div>
+  <div class="box-b">
+    <p>À partir des mêmes tickets bruts, l'enseigne prépare trois sorties : (A) le tableau de bord
+      des ventes par région ; (B) les features du modèle de réassort ; (C) un corpus de fiches
+      produits pour l'assistant des vendeurs. (a) Pour chacune, écrivez la chaîne d'opérations
+      (nettoyage → … → sortie). (b) Quelles étapes sont communes et peuvent être faites une seule
+      fois ? (c) Pour chaque sortie, nommez le consommateur final et le délai dans lequel il doit la
+      recevoir. (d) Que reste-t-il à définir pour que ces versions préparées produisent réellement
+      une décision ou une action ?</p>
+  </div>
+</div>
+
+<div class="box b-note">
+  <div class="box-t">TRANSITION — vers N35</div>
+  <div class="box-b">
+    <p>La donnée est désormais nettoyée, reliée, enrichie, résumée en KPI ou codée en features. Il
+      reste la dernière question : qui s'en sert, et pour produire quoi — tableau de bord, analyse,
+      modèle, assistant ? C'est la couche Analytics / AI, objet de N35.</p>
+  </div>
+</div>

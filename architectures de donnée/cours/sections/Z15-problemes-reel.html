@@ -1,0 +1,438 @@
+<h1 class="chapitre saut" id="cloture"><span class="num">Clôture</span>Problèmes du réel, banque d'exercices et corrigés</h1>
+
+<h2 id="k-s15">15. Problèmes du réel</h2>
+
+<p>Les trente-cinq notions ont été vues une à une. Un vrai projet ne les présente jamais séparément :
+  il faut, sur le même cas, choisir les sources à capter, le mode d'ingestion, le stockage, les
+  traitements, les consommateurs et la gouvernance, en tenant compte du volume, de la latence et du
+  coût. Les quatre problèmes ci-dessous reprennent l'étude de cas du support (p. 51-56) — dont le
+  sous-titre résume l'esprit : comprendre la transformation <em>par les contraintes</em> — puis
+  reviennent à l'enseigne de la section 2. Chaque énoncé est suivi d'un corrigé détaillé.</p>
+
+<p><strong>Méthode commune.</strong> Pour chaque problème : (1) lister ce qui existe (sources,
+  usages) ; (2) nommer les contraintes, chiffres à l'appui ; (3) déduire chaque couche de ces
+  contraintes, jamais d'une préférence technologique ; (4) vérifier qu'aucune copie n'est faite sans
+  raison et que la gouvernance couvre toute la chaîne.</p>
+
+<!-- ============================ PROBLÈME 1 ============================ -->
+
+<div class="box b-domaine long">
+  <div class="box-t">PROBLÈME 1 — Entreprise e-commerce : de l'architecture traditionnelle à l'architecture moderne (p. 52-54)</div>
+  <div class="box-b">
+    <p>Une entreprise de e-commerce dispose de <strong>sept sources</strong> : ERP, CRM, site web,
+      application mobile, paiement, avis clients, logs. Ses <strong>usages actuels</strong> sont le
+      reporting mensuel, les KPI ventes et l'analyse clients. La direction veut ajouter trois
+      <strong>nouveaux usages</strong> : un dashboard quotidien, la recommandation de produits et la
+      détection de fraude quasi temps réel.</p>
+
+    <p>Aujourd'hui, l'architecture est traditionnelle (p. 53) : les applications métiers (ERP, CRM,
+      site, application mobile, autres applications) écrivent dans <strong>une base de données
+      relationnelle</strong> centralisée (type Oracle, SQL Server, MySQL), à données structurées,
+      interrogée en SQL ; le reporting (rapports standards, tableaux de bord, analyses descriptives)
+      lit directement cette base.</p>
+
+    <p>Données complémentaires : l'historique d'un an pèse <strong>3 000 Go</strong> bruts ; le
+      stockage coûte <strong>0,25 DH par Go et par mois</strong>.</p>
+
+    <p><strong>Question du support :</strong> « Quelle architecture faut-il construire pour supporter
+      ces usages sans multiplier les copies ? »</p>
+    <ol>
+      <li>Expliquez les trois problèmes potentiels de l'architecture actuelle et rattachez chacun aux
+        notions du cours.</li>
+      <li>Classez les sept sources selon leur structure et proposez, pour chacune, un mode
+        d'ingestion.</li>
+      <li>Proposez une architecture en cinq couches et placez-y chacun des six usages.</li>
+      <li>Si chaque usage reliait lui-même chaque source, combien de liaisons faudrait-il ? Combien
+        avec l'architecture en couches ?</li>
+      <li>Si chacun des six usages gardait sa propre copie complète de l'historique, quel serait le
+        coût mensuel ? Comparez avec un socle partagé (3 000 Go bruts + 800 Go conformes + 500 Go de
+        versions prêtes à l'usage).</li>
+      <li>Que contient la gouvernance transverse, et pourquoi doit-elle couvrir toutes les couches ?</li>
+    </ol>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ DU PROBLÈME 1</div>
+  <div class="box-b">
+    <p><strong>1. Les trois problèmes potentiels (p. 53).</strong></p>
+    <ul>
+      <li><em>« Le reporting peut dépendre directement de la base transactionnelle. »</em> Les
+        requêtes analytiques (balayage de millions de lignes) et les transactions (écritures courtes
+        et nombreuses) se disputent la même base : c'est le conflit OLTP / OLAP de N16 à N19. Plus
+        le dashboard devient quotidien, plus il charge la base qui encaisse les commandes.</li>
+      <li><em>« Les nouvelles sources ne trouvent pas naturellement leur place. »</em> Les événements
+        du site et de l'application, les logs et les avis clients sont semi-structurés ou non
+        structurés (N2) : ils n'entrent pas dans un schéma relationnel fixe, donc on ne les charge
+        pas. C'est la limite qui a fait naître le Data Lake (N11).</li>
+      <li><em>« L'IA nécessite davantage de données préparées. »</em> La recommandation et la fraude
+        demandent un historique long, des features et des labels (N29) ; la base opérationnelle ne
+        garde que ce qui sert aux transactions et ne prépare rien.</li>
+    </ul>
+
+    <p><strong>2. Sources : structure et ingestion.</strong> Le mode d'ingestion découle de la
+      fréquence à laquelle la source change et de la latence exigée par ses consommateurs (N32).</p>
+    <table class="long">
+      <thead>
+        <tr><th>Source</th><th>Structure</th><th>Ingestion</th><th>Raison</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ERP</td><td>structurée</td><td>CDC</td><td>tables qui changent par lignes ; on ne recopie que les modifications</td></tr>
+        <tr><td>CRM</td><td>structurée</td><td>CDC</td><td>même logique ; les suppressions (droit à l'effacement) doivent suivre</td></tr>
+        <tr><td>Site web</td><td>semi-structurée (événements JSON)</td><td>streaming</td><td>la recommandation exploite la session en cours</td></tr>
+        <tr><td>Application mobile</td><td>semi-structurée (événements JSON)</td><td>streaming</td><td>idem</td></tr>
+        <tr><td>Paiement</td><td>structurée</td><td>streaming</td><td>la fraude doit être détectée avant validation</td></tr>
+        <tr><td>Avis clients</td><td>non structurée (texte, photos)</td><td>batch quotidien (API)</td><td>aucun usage ne demande la seconde</td></tr>
+        <tr><td>Logs</td><td>semi-structurée</td><td>batch horaire (fichiers)</td><td>volume élevé, usage technique et analytique différé</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>3. Architecture en cinq couches (p. 54).</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Couche</th><th>Contenu dans ce cas</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Sources</td><td>ERP, CRM, site web, application mobile, paiement, avis clients, logs</td></tr>
+        <tr><td>Ingestion</td><td>CDC (ERP, CRM), streaming (site, application, paiement), batch (avis, logs), connecteurs</td></tr>
+        <tr><td>Storage</td><td>Data Lake pour le brut de toutes les sources ; Lakehouse / Data Warehouse pour les données conformes (ventes, clients, produits) ; base opérationnelle pour servir scores et recommandations ; gestion des métadonnées</td></tr>
+        <tr><td>Processing</td><td>nettoyage (doublons clients), transformation (ventes conformes), enrichissement (paiement + profil client), agrégation (KPI du jour), features (fraude, recommandation), orchestration</td></tr>
+        <tr><td>Analytics / AI</td><td>BI, Analytics, Machine Learning, alertes temps réel</td></tr>
+      </tbody>
+    </table>
+
+    <p>Placement des six usages :</p>
+    <ul>
+      <li><strong>Reporting mensuel</strong> et <strong>KPI ventes</strong> : BI, sur les agrégats
+        construits à partir des ventes conformes ;</li>
+      <li><strong>Dashboard quotidien</strong> : BI, alimenté par un traitement batch nocturne
+        (prêt à 8 h) — le streaming n'apporte rien à un écran lu une fois par jour ;</li>
+      <li><strong>Analyse clients</strong> : Analytics (exploration) sur les tables conformes clients
+        et ventes ;</li>
+      <li><strong>Recommandation</strong> : ML ; modèle entraîné sur l'historique du lake, features
+        calculées la nuit, complétées par les événements de la session reçus en streaming ;</li>
+      <li><strong>Fraude quasi temps réel</strong> : ML + alertes ; le paiement est lu en streaming,
+        enrichi du profil client, scoré, puis la décision est servie par la base opérationnelle.</li>
+    </ul>
+
+    <p><strong>4. Nombre de liaisons.</strong> Point à point, chaque usage relie chaque source :
+      7 × 6 = <strong>42 liaisons</strong> à construire et à maintenir. Avec les couches, chaque
+      source entre une fois et chaque usage lit le socle une fois : 7 + 6 = <strong>13
+      liaisons</strong>. C'est le passage de S × C à S + C vu en N30. Ajouter une huitième source
+      coûte alors une liaison au lieu de six.</p>
+
+    <p><strong>5. Coût des copies.</strong></p>
+    <ul>
+      <li>Six copies complètes : 6 × 3 000 = 18 000 Go ; 18 000 × 0,25 = <strong>4 500 DH par
+        mois</strong>.</li>
+      <li>Socle partagé : 3 000 + 800 + 500 = 4 300 Go ; 4 300 × 0,25 = <strong>1 075 DH par
+        mois</strong>.</li>
+      <li>Économie : 4 500 − 1 075 = 3 425 DH par mois, soit 3 425 × 12 = <strong>41 100 DH par
+        an</strong>.</li>
+    </ul>
+    <p>L'argent n'est pas le seul gain : avec six copies, il existe six définitions possibles du
+      « chiffre d'affaires » et six dates de fraîcheur. Avec un socle, la version conforme est
+      unique ; seules les versions prêtes à l'usage (agrégats, features) sont propres à chaque
+      consommateur (N35).</p>
+
+    <p><strong>6. Gouvernance transverse.</strong> Le support la résume en six mots :
+      <em>catalogue, qualité, sécurité, accès, lineage, observabilité</em> (N26). Elle est
+      transverse parce qu'un défaut se crée dans une couche et se voit dans une autre : un doublon
+      client créé à l'ingestion fausse la recommandation en couche 5 ; une donnée de paiement mal
+      protégée dans le lake expose l'entreprise même si le dashboard est correct. Exemples concrets
+      ici : numéro de carte tokenisé dès l'ingestion et jamais stocké en clair ; accès aux avis
+      clients restreint s'ils contiennent des données personnelles ; lineage permettant de propager
+      une demande d'effacement du CRM jusqu'aux features.</p>
+  </div>
+</div>
+
+<!-- ============================ PROBLÈME 2 ============================ -->
+
+<div class="box b-domaine long">
+  <div class="box-t">PROBLÈME 2 — La grille de décision appliquée chiffres en main (p. 55)</div>
+  <div class="box-b">
+    <p>Le support propose sept questions à poser avant toute décision d'architecture :</p>
+    <ol>
+      <li>Quel est le volume quotidien et sa croissance ?</li>
+      <li>Quel est le délai acceptable entre production et utilisation ?</li>
+      <li>Quelles sources sont structurées, semi-structurées ou non structurées ?</li>
+      <li>Quelles données doivent être conservées brutes ?</li>
+      <li>Quels consommateurs ont besoin de données fraîches ?</li>
+      <li>Quelles contraintes de sécurité, confidentialité et conformité ?</li>
+      <li>Quel compromis coût / performance / flexibilité / simplicité ?</li>
+    </ol>
+    <p>On reprend l'entreprise du problème 1 avec les mesures suivantes :</p>
+    <ul>
+      <li>événements du site et de l'application : 25 millions par jour, 1 Ko chacun ;</li>
+      <li>logs : 60 Go par jour ;</li>
+      <li>avis clients : 3 000 par jour, dont 10 % avec une photo de 2 Mo ;</li>
+      <li>ERP, CRM et paiement réunis : 1,4 Go par jour ;</li>
+      <li>croissance de l'ensemble : 35 % par an ;</li>
+      <li>besoins de délai : reporting mensuel disponible à J+5 ; dashboard à 8 h pour la veille ;
+        recommandation pendant la session (quelques secondes) ; fraude avant validation du paiement
+        (moins de 1 s).</li>
+    </ul>
+    <p>Répondez aux sept questions, chiffres à l'appui, et tirez de chaque réponse une décision
+      d'architecture.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ DU PROBLÈME 2</div>
+  <div class="box-b">
+    <p><strong>Q1 — Volume et croissance.</strong></p>
+    <ul>
+      <li>Événements : 25 000 000 × 1 Ko = 25 000 000 Ko = 25 Go par jour.</li>
+      <li>Photos d'avis : 3 000 × 10 % = 300 photos ; 300 × 2 Mo = 600 Mo = 0,6 Go par jour.</li>
+      <li>Total : 25 + 60 + 0,6 + 1,4 = <strong>87 Go par jour</strong>, soit 87 × 365 = 31 755 Go
+        ≈ <strong>31,8 To par an</strong>.</li>
+      <li>Dans trois ans : 1,35³ = 2,460375 ; 87 × 2,460375 ≈ <strong>214 Go par jour</strong>.</li>
+    </ul>
+    <p><em>Décision :</em> un stockage objet à séparation stockage / calcul (lake, lakehouse),
+      extensible par ajout de nœuds (scale-out, N15) ; la base relationnelle unique ne peut pas
+      absorber ce volume ni ces formats.</p>
+
+    <p><strong>Q2 — Délai acceptable.</strong> On applique le critère de N22 : le mode convient si
+      <em>temps de réaction exigé ≥ période de collecte + durée de traitement</em>.</p>
+    <table class="long">
+      <thead>
+        <tr><th>Usage</th><th>Délai exigé</th><th>Mode retenu</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Reporting mensuel</td><td>J+5</td><td>batch mensuel</td></tr>
+        <tr><td>Dashboard quotidien</td><td>prêt à 8 h</td><td>batch nocturne (fenêtre de plusieurs heures)</td></tr>
+        <tr><td>Recommandation</td><td>quelques secondes</td><td>features nocturnes + événements de session en streaming</td></tr>
+        <tr><td>Fraude</td><td>&lt; 1 s</td><td>streaming de bout en bout</td></tr>
+      </tbody>
+    </table>
+    <p><em>Décision :</em> deux chemins coexistent, un chemin batch pour la majorité des usages et
+      un chemin streaming réservé aux deux usages qui ne peuvent pas attendre.</p>
+
+    <p><strong>Q3 — Structure des sources.</strong> Structurées : ERP, CRM, paiement (1,4 Go/j).
+      Semi-structurées : événements, logs (85 Go/j). Non structurées : texte et photos des avis
+      (0,6 Go/j et plus). Le volume non relationnel vaut (85 + 0,6) ÷ 87 ≈ 98,4 % du
+      total. <em>Décision :</em> stockage brut au format d'origine dans le
+      lake ; mise en tables seulement de ce que les usages réclament (N11, N12).</p>
+
+    <p><strong>Q4 — Données à conserver brutes.</strong></p>
+    <ul>
+      <li>Événements du site et de l'application : oui, car les futurs modèles de recommandation
+        voudront d'autres features que celles d'aujourd'hui (N34 : toute transformation perd de
+        l'information).</li>
+      <li>Paiements : oui, pour l'audit, pour rejouer un modèle de fraude et pour construire les
+        labels (N29).</li>
+      <li>Avis clients : oui, le texte est un corpus réutilisable (analyse de sentiment, GenAI).</li>
+      <li>Logs : brut sur 90 jours puis seulement agrégés : 60 Go/j × 365 ≈ 21,9 To par an pour un
+        usage surtout technique ; le compromis coût l'emporte.</li>
+    </ul>
+
+    <p><strong>Q5 — Consommateurs de données fraîches.</strong> Seuls la fraude (seconde) et la
+      recommandation (session) en ont besoin. Le dashboard quotidien veut des données <em>de la
+      veille</em>, ce qui n'est pas du temps réel. <em>Décision :</em> on ne paie le coût du
+      streaming (état, doublons, heure d'événement, N21) que pour ces deux flux.</p>
+
+    <p><strong>Q6 — Sécurité et conformité.</strong> Données de paiement : tokenisation à
+      l'ingestion, jamais de numéro de carte dans le lake. Données personnelles du CRM : consentement,
+      droit à l'effacement propagé par le lineage. Avis clients : masquage des noms et adresses
+      avant tout usage GenAI. Accès par rôle à chaque niveau (brut, conforme, prêt à l'usage).</p>
+
+    <p><strong>Q7 — Compromis.</strong> Tout passer en streaming serait plus « performant » mais
+      plus cher et plus complexe sans bénéfice pour quatre usages sur six. Un lakehouse unique pour
+      le brut et le conforme est plus simple qu'un lake et un warehouse séparés ; on garde un
+      warehouse seulement si la BI exige des performances que le lakehouse n'atteint pas. La
+      flexibilité vient du brut conservé ; la simplicité, du nombre limité de chemins.</p>
+
+    <p><strong>Bilan.</strong> Chaque question a produit une décision ; aucune n'a été prise par
+      goût pour une technologie. C'est la règle de N6 : l'architecte décide à partir des
+      contraintes, et sait dire pourquoi.</p>
+  </div>
+</div>
+
+<!-- ============================ PROBLÈME 3 ============================ -->
+
+<div class="box b-domaine long">
+  <div class="box-t">PROBLÈME 3 — TD : architecture IoT / Edge (p. 56)</div>
+  <div class="box-b">
+    <p>Énoncé du support :</p>
+    <ul>
+      <li><strong>20 000 capteurs</strong> : température, vibration, énergie ;</li>
+      <li>certaines alertes doivent être traitées en <strong>moins de 2 secondes</strong> ;</li>
+      <li>les historiques sont conservés pour analyse et ML ;</li>
+      <li>certains sites peuvent <strong>perdre temporairement la connexion cloud</strong> ;</li>
+      <li>concevoir : Edge + ingestion + streaming + stockage + processing + analytics ;</li>
+      <li>bonus : que doit rester local pendant une coupure ?</li>
+    </ul>
+    <p>Hypothèses chiffrées : les capteurs sont répartis sur <strong>40 sites</strong> de
+      500 capteurs ; chaque capteur envoie <strong>une mesure toutes les 5 s</strong>, de
+      <strong>200 octets</strong>. Un aller vers le cloud et retour coûte en temps normal 1,5 s
+      (réseau 0,3 s aller + 0,3 s retour, file d'ingestion 0,5 s, traitement 0,4 s). Une coupure peut
+      durer jusqu'à <strong>6 heures</strong>. La liaison montante d'un site est de 10 Mbit/s.</p>
+    <ol>
+      <li>Calculez le débit global (mesures par seconde), le volume par jour et par an.</li>
+      <li>L'alerte critique peut-elle être calculée dans le cloud ? Justifiez avec le budget de 2 s.</li>
+      <li>Concevez l'architecture couche par couche.</li>
+      <li>Quelle taille de tampon local faut-il pour une coupure de 6 h sur un site ? Combien de
+        temps pour rattraper le retard après reconnexion ?</li>
+      <li>Quels pièges de traitement apparaissent au retour de la connexion ?</li>
+      <li>Bonus : que doit rester local pendant une coupure ?</li>
+    </ol>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ DU PROBLÈME 3</div>
+  <div class="box-b">
+    <p><strong>1. Débit et volume.</strong></p>
+    <ul>
+      <li>Débit : 20 000 ÷ 5 = <strong>4 000 mesures par seconde</strong>.</li>
+      <li>Par jour : 4 000 × 86 400 = 345 600 000 mesures ; × 200 octets = 69 120 000 000 octets
+        = <strong>69,12 Go par jour</strong>.</li>
+      <li>Par an : 69,12 × 365 = 25 228,8 Go ≈ <strong>25,2 To par an</strong>, à conserver pour
+        l'analyse et le ML.</li>
+    </ul>
+
+    <p><strong>2. L'alerte critique dans le cloud ?</strong> En temps normal, 1,5 s &lt; 2 s : cela
+      passe, mais avec seulement 0,5 s de marge, qu'un pic de trafic ou une file chargée suffit à
+      consommer. Pendant une coupure, le délai devient infini : l'alerte n'arrive jamais. Une
+      exigence « moins de 2 s » qui doit tenir <em>aussi</em> quand le cloud est inaccessible ne peut
+      donc pas dépendre du cloud. <em>Décision :</em> la détection critique se fait sur une
+      passerelle <strong>Edge</strong> par site. Budget local : capteur → passerelle 0,05 s,
+      détection 0,1 s, action (alarme, arrêt machine) 0,2 s, soit 0,35 s, avec une large marge.</p>
+
+    <p><strong>3. Architecture couche par couche.</strong></p>
+    <table class="long">
+      <thead>
+        <tr><th>Couche</th><th>Rôle dans ce TD</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Sources</td><td>20 000 capteurs (température, vibration, énergie), un référentiel des machines et des sites</td></tr>
+        <tr><td>Edge (par site)</td><td>réception des mesures, règles et modèle d'alerte critique, action locale, tampon horodaté, agrégats locaux</td></tr>
+        <tr><td>Ingestion</td><td>streaming des mesures vers le cloud via un journal rejouable ; envoi par lots du tampon après coupure ; batch quotidien du référentiel</td></tr>
+        <tr><td>Streaming</td><td>fenêtres glissantes par capteur (moyenne, écart sur 1 min), détection d'anomalies non critiques, alertes de flotte (plusieurs sites), capteurs muets</td></tr>
+        <tr><td>Storage</td><td>lake : mesures brutes partitionnées par date et site ; données conformes et agrégats horaires en lakehouse ; base opérationnelle : dernier état de chaque capteur</td></tr>
+        <tr><td>Processing</td><td>nettoyage (valeurs hors plage, doublons), enrichissement (machine, ligne, site), agrégation horaire et journalière, features de maintenance prédictive</td></tr>
+        <tr><td>Analytics / AI</td><td>BI (consommation d'énergie par site), Analytics (causes des pannes), ML (prévision de panne à partir des vibrations), alertes</td></tr>
+        <tr><td>Gouvernance</td><td>catalogue des capteurs, qualité (fraîcheur, volume attendu par site), version du modèle déployé sur chaque passerelle (lineage), sécurité des passerelles et des flux</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>4. Tampon et rattrapage.</strong></p>
+    <ul>
+      <li>Mesures d'un site pendant 6 h : 6 × 3 600 ÷ 5 = 4 320 mesures par capteur ; × 500 =
+        2 160 000 mesures ; × 200 octets = 432 000 000 octets = <strong>432 Mo</strong>.</li>
+      <li>Un disque de 64 Go sur la passerelle suffit largement : un site produit 432 ÷ 6 = 72 Mo
+        par heure, donc 64 000 ÷ 72 ≈ 889 h, soit environ 37 jours d'autonomie.</li>
+      <li>Rattrapage : 10 Mbit/s = 1,25 Mo/s ; 432 ÷ 1,25 = 345,6 s ≈ <strong>5,8 min</strong>.
+        Le flux courant (72 Mo/h = 0,02 Mo/s) est négligeable devant la bande passante.</li>
+    </ul>
+
+    <p><strong>5. Pièges au retour de la connexion.</strong></p>
+    <ul>
+      <li><em>Heure d'événement et heure d'arrivée</em> (N21) : 2 160 000 mesures arrivent avec
+        jusqu'à 6 h de retard. Les fenêtres doivent être calculées sur l'heure de mesure, sinon le
+        cloud verra une « explosion » d'activité à la reconnexion et un trou pendant la coupure.</li>
+      <li><em>Délai de grâce</em> : une fenêtre fermée depuis des heures doit pouvoir être recalculée,
+        ou les mesures tardives doivent être marquées et traitées en batch.</li>
+      <li><em>Doublons</em> : si la passerelle renvoie un lot dont l'accusé de réception s'est perdu,
+        les mêmes mesures arrivent deux fois. L'ingestion doit être idempotente (N32) : clé
+        unique (capteur, horodatage).</li>
+      <li><em>Fausses alertes de flotte</em> : un site silencieux pendant 6 h ne doit pas déclencher
+        500 alertes « capteur muet » ; la règle d'observabilité (N26) doit distinguer un site coupé
+        d'un capteur en panne.</li>
+    </ul>
+
+    <p><strong>6. Bonus — ce qui reste local pendant une coupure.</strong></p>
+    <ul>
+      <li>les règles et le modèle d'alerte critique, dans une version figée et connue du cloud ;</li>
+      <li>les seuils propres à chaque machine et le référentiel minimal du site ;</li>
+      <li>les actions automatiques (alarme, arrêt de sécurité) ;</li>
+      <li>le tampon horodaté de toutes les mesures brutes ;</li>
+      <li>le dernier état de chaque capteur et le journal des alertes émises, pour qu'elles soient
+        synchronisées après coup.</li>
+    </ul>
+    <p>Peuvent attendre le retour de la connexion : l'entraînement des modèles, les dashboards
+      globaux, les analyses multi-sites et l'archivage. Le critère est toujours le même : ce qui ne
+      tolère pas d'attendre reste au plus près de la source.</p>
+  </div>
+</div>
+
+<!-- ============================ PROBLÈME 4 ============================ -->
+
+<div class="box b-domaine long">
+  <div class="box-t">PROBLÈME 4 — Retour à l'enseigne de la section 2 : répondre aux trois demandes</div>
+  <div class="box-b">
+    <p>On reprend l'enseigne de l'ouverture : <strong>120 magasins</strong>, un site marchand, une
+      application mobile, un programme de fidélité, un service après-vente, et une informatique
+      réduite à « applications → base de données → reporting ». La direction a formulé trois
+      demandes :</p>
+    <ol>
+      <li>le chiffre d'affaires de la veille, par région et par catégorie, disponible à 8 h ;</li>
+      <li>une vue unique du client (caisse, site, fidélité portent trois identifiants différents) ;</li>
+      <li>la prévision de la demande par produit et par magasin, à partir de trois ans d'historique,
+        alors que la base opérationnelle n'en garde que six mois.</li>
+    </ol>
+    <p>Pour chaque demande : (a) dites pourquoi l'architecture actuelle échoue ; (b) parcourez les
+      cinq couches pour y répondre ; (c) nommez les notions du cours mobilisées. Enfin (d), montrez
+      que les trois réponses partagent le même socle.</p>
+  </div>
+</div>
+
+<div class="box b-solution long">
+  <div class="box-t">CORRIGÉ DU PROBLÈME 4</div>
+  <div class="box-b">
+    <p><strong>Demande 1 — CA de la veille à 8 h.</strong></p>
+    <ul>
+      <li><em>Échec actuel :</em> le rapport du soir interroge la base des caisses et ralentit les
+        encaissements (conflit OLTP / OLAP, N16-N19).</li>
+      <li><em>Couches :</em> sources = caisses des 120 magasins et site ; ingestion = CDC ou export
+        nocturne ; storage = tickets bruts dans le lake, ventes conformes en lakehouse ;
+        processing = nettoyage, transformation, agrégation par région × catégorie × jour ;
+        consommateur = BI (dashboard).</li>
+      <li><em>Notions :</em> batch et fenêtre de traitement (N20), critère de choix (N22 : un écran
+        lu à 8 h n'a pas besoin de streaming), séparation OLTP / OLAP (N19).</li>
+    </ul>
+
+    <p><strong>Demande 2 — Vue unique du client.</strong></p>
+    <ul>
+      <li><em>Échec actuel :</em> trois identifiants, trois adresses, trois dates de mise à jour ;
+        aucune couche ne les rapproche.</li>
+      <li><em>Couches :</em> sources = caisse, site, fidélité ; ingestion = CDC pour suivre les
+        modifications d'adresse ; storage = brut conservé, table client conforme ; processing =
+        nettoyage et rapprochement des identités (règles sur téléphone, e-mail, carte de fidélité),
+        avec une table de correspondance ; consommateurs = BI, Analytics, ML.</li>
+      <li><em>Notions :</em> qualité relative à l'usage (N25), gouvernance et données personnelles
+        (N26), enrichissement et nettoyage (N34).</li>
+    </ul>
+
+    <p><strong>Demande 3 — Prévision de la demande.</strong></p>
+    <ul>
+      <li><em>Échec actuel :</em> la base opérationnelle, conçue pour aller vite, ne garde que six
+        mois ; le modèle en exige trois ans.</li>
+      <li><em>Couches :</em> storage = historique brut des ventes conservé à faible coût dans le lake
+        (niveau froid, N33) ; processing = features (ventes passées, saison, promotions, météo,
+        ruptures) ; consommateur = ML (régression), sorties servies chaque soir aux acheteurs.</li>
+      <li><em>Notions :</em> Data Lake (N11), AI-driven (N28), exigences croissantes du ML (N29 :
+        features, labels, représentativité), processing (N34).</li>
+    </ul>
+
+    <p><strong>(d) Un seul socle.</strong> Les trois réponses lisent les <em>mêmes</em> tickets
+      bruts et la <em>même</em> table client conforme. Ce qui diffère n'est que la dernière étape :
+      un agrégat pour la BI, une table d'identités pour la vue client, des features pour le ML. C'est
+      exactement la réponse à la question posée en section 2 : remplacer « applications → base →
+      reporting » par une chaîne en couches, sans multiplier les copies ni perdre le contexte, la
+      qualité et la traçabilité.</p>
+  </div>
+</div>
+
+<div class="box b-retenir">
+  <div class="box-t">À RETENIR — la démarche des problèmes du réel</div>
+  <div class="box-b">
+    <ul>
+      <li>Partir des sources et des usages, jamais d'un outil.</li>
+      <li>Chiffrer : volume, croissance, délai exigé, coût. Une décision sans chiffre est une préférence.</li>
+      <li>Le délai exigé choisit entre batch, CDC et streaming ; la coupure possible impose l'Edge.</li>
+      <li>Conserver le brut de ce que les usages futurs pourraient réclamer ; ne préparer à part que la dernière étape.</li>
+      <li>S + C liaisons plutôt que S × C : un socle partagé, gouverné de bout en bout.</li>
+    </ul>
+  </div>
+</div>

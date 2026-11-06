@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Studio vidéo Architectures de données</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Studio de rendu des vidéos : un canvas 1280×720 dessiné image par image par videos.py (mêmes couleurs que la page) */
+:root{
+  --ground:#F7F9FC; --surface:#FFFFFF; --ink:#16263D; --muted:#56657A; --line:#D5DEEA; --grid:#E6ECF4;
+  --blue:#286EBE; --blue-soft:#E8F2FE; --navy:#22497A; --gold:#C88C14; --gold-soft:#FFF7E6;
+  --green:#288C3C; --green-soft:#EBF8EB; --red:#BE3232; --red-soft:#FDEBEB; --plum:#7A3A8C; --plum-soft:#F5ECF7;
+  --axis:#5E6B7C;
+}
+html,body{margin:0;background:var(--ground)}
+canvas{display:block;width:1280px;height:720px}
+</style>
+</head>
+<body>
+<canvas id="cv" width="1280" height="720"></canvas>
+<script src="../fichiers/core.js" charset="utf-8"></script>
+<script src="../fichiers/outils.js" charset="utf-8"></script>
+<script src="../fichiers/p0.js" charset="utf-8"></script>
+<script src="../fichiers/p1.js" charset="utf-8"></script>
+<script src="../fichiers/p2.js" charset="utf-8"></script>
+<script src="../fichiers/p3.js" charset="utf-8"></script>
+<script src="../fichiers/p4.js" charset="utf-8"></script>
+<script src="../fichiers/p5.js" charset="utf-8"></script>
+<script src="../fichiers/p6.js" charset="utf-8"></script>
+<script src="../fichiers/p7.js" charset="utf-8"></script>
+<script src="../fichiers/talk.js" charset="utf-8"></script>
+<script>
+var VW = 1280, VH = 720;
+var ANI = { x: 24, y: 100, s: 1.24 };            /* zone de l'animation (720×420 logiques → 893×521) */
+var SIDE = { x: 940, y: 100, w: 316, h: 521 };    /* liste des étapes */
+var CAP = { x: 24, y: 632, w: 1232, h: 76 };      /* sous-titre */
+var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), C;
+function couleurs() { C = readColors(); C.ground = getComputedStyle(document.documentElement).getPropertyValue('--ground').trim(); }
+couleurs();
+var ALL = SCENES.map(function (d) { return [d, d.part]; });
+var PARTIE = ['Partie 0 · Les fondations', 'Partie I · L’évolution des architectures', 'Partie II · Centralisé ou distribué', 'Partie III · OLTP et OLAP', 'Partie IV · Batch et stream', 'Partie V · Valeur, qualité, gouvernance', 'Partie VI · Data-driven et AI-driven', 'Partie VII · Les cinq couches'];
+function teinte(k) { return [C.plum, C.navy, C.green, C.gold, C.blue, C.red, C.plum, C.navy][k]; }
+function find(id) { return ALL.filter(function (x) { return x[0].id === id; })[0]; }
+function strip(h) { return String(h).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' '); }
+function F(size, w, serif, it) { return (it ? 'italic ' : '') + (w || 400) + ' ' + size + 'px ' + (serif ? '"STIX Two Text",Georgia,serif' : '"Source Sans 3","Segoe UI",sans-serif'); }
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+/* découpe un texte en lignes de largeur maxw avec la police courante */
+function wrap(s, maxw) {
+  var out = [], line = '';
+  s.split(/\s+/).forEach(function (w) {
+    var t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxw && line) { out.push(line); line = w; } else line = t;
+  });
+  if (line) out.push(line);
+  return out;
+}
+/* texte qui tient dans une boîte : réduit la taille jusqu'à maxLines lignes */
+function fitText(s, x, y, maxw, size, minSize, maxLines, o) {
+  o = o || {}; var lines;
+  do { ctx.font = F(size, o.w, o.serif); lines = wrap(s, maxw); if (lines.length <= maxLines) break; size--; } while (size > minSize);
+  var lh = size * (o.lh || 1.3);
+  ctx.fillStyle = o.color || C.ink; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  var y0 = o.middle ? y - (lines.length - 1) * lh / 2 + size * .35 : y;
+  lines.forEach(function (l, i) { ctx.fillText(l, x, y0 + i * lh); });
+  return lines.length * lh;
+}
+
+/* o = { id, t, phase: 'intro' | 'main' | 'retenir', a (fondu de la phase), cap, mark, lab, prog } */
+function frame(o) {
+  var e = find(o.id), def = e[0], part = e[1], tone = teinte(part);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = C.ground; ctx.fillRect(0, 0, VW, VH);
+  /* en-tête */
+  ctx.fillStyle = C.surface; ctx.fillRect(0, 0, VW, 84);
+  ctx.fillStyle = C.line; ctx.fillRect(0, 84, VW, 1.5);
+  ctx.font = F(14, 700); var lw = ctx.measureText(def.label.toUpperCase()).width + 20;
+  ctx.fillStyle = tone; rr(30, 16, lw, 24, 4); ctx.fill();
+  ctx.fillStyle = C.surface; ctx.textBaseline = 'middle'; ctx.fillText(def.label.toUpperCase(), 40, 29);
+  ctx.fillStyle = C.muted; ctx.font = F(14, 600);
+  ctx.fillText('Architectures de données · ' + PARTIE[part], 30 + lw + 12, 29);
+  ctx.textBaseline = 'alphabetic'; ctx.fillStyle = C.navy; ctx.font = F(27, 600, true);
+  var title = def.title; while (ctx.measureText(title).width > 1180 && title.length) title = title.slice(0, -1);
+  ctx.fillText(title, 30, 71);
+
+  /* animation */
+  ctx.fillStyle = C.surface; ctx.strokeStyle = C.line; ctx.lineWidth = 1.2;
+  rr(ANI.x - 8, ANI.y - 8, 720 * ANI.s + 16, 420 * ANI.s + 16, 10); ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.translate(ANI.x, ANI.y); ctx.scale(ANI.s, ANI.s);
+  ctx.beginPath(); ctx.rect(0, 0, 720, 420); ctx.clip();
+  var G = makeG(ctx, C);
+  def.draw(G, o.t, def.init ? def.init() : {});
+  if (o.mark && o.phase === 'main') G.spot(o.mark, o.lab);
+  ctx.restore();
+
+  /* étapes */
+  var steps = typeof def.steps === 'function' ? def.steps({}) : def.steps, cur = -1;
+  if (o.phase !== 'intro') steps.forEach(function (s, i) { if (o.t >= s[0]) cur = i; });
+  ctx.font = F(13, 700); ctx.fillStyle = C.gold; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('CE QUE MONTRE L\'ANIMATION', SIDE.x, SIDE.y + 6);
+  var y = SIDE.y + 24, size = steps.length > 6 ? 14 : 15;
+  steps.forEach(function (s, i) {
+    ctx.font = F(size, i === cur ? 600 : 400);
+    var lines = wrap(strip(s[1]), SIDE.w - 44), h = lines.length * size * 1.3 + 14;
+    if (i === cur) { ctx.fillStyle = C.goldSoft; ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5; rr(SIDE.x, y, SIDE.w, h, 8); ctx.fill(); ctx.stroke(); }
+    ctx.fillStyle = i === cur ? C.gold : i < cur ? C.blue : C.grid;
+    ctx.beginPath(); ctx.arc(SIDE.x + 17, y + 17, 10, 0, 7); ctx.fill();
+    ctx.fillStyle = i <= cur ? C.surface : C.muted; ctx.font = F(12, 700); ctx.textAlign = 'center'; ctx.fillText(String(i + 1), SIDE.x + 17, y + 21);
+    ctx.textAlign = 'left'; ctx.font = F(size, i === cur ? 600 : 400); ctx.fillStyle = i <= cur ? C.ink : C.muted;
+    lines.forEach(function (l, k) { ctx.fillText(l, SIDE.x + 36, y + 7 + size + k * size * 1.3); });
+    y += h + 6;
+  });
+
+  /* sous-titre */
+  if (o.cap) {
+    ctx.fillStyle = C.surface; ctx.strokeStyle = C.line; ctx.lineWidth = 1.5; rr(CAP.x, CAP.y, CAP.w, CAP.h, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = C.navy; rr(CAP.x, CAP.y, 7, CAP.h, 3); ctx.fill();
+    fitText(o.cap, CAP.x + 26, CAP.y + CAP.h / 2, CAP.w - 50, 23, 17, 2, { middle: true, lh: 1.32 });
+  }
+
+  /* ouverture : carte titre */
+  if (o.phase === 'intro' && o.a > 0) {
+    ctx.save(); ctx.globalAlpha = o.a;
+    ctx.fillStyle = 'rgba(247,249,252,.93)'; ctx.fillRect(0, 86, VW, VH - 86);
+    ctx.fillStyle = C.surface; ctx.strokeStyle = tone; ctx.lineWidth = 3; rr(190, 210, 900, 230, 18); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = tone; ctx.font = F(17, 700); ctx.textAlign = 'center'; ctx.fillText(def.label.toUpperCase(), 640, 262);
+    ctx.textAlign = 'left'; ctx.font = F(34, 600, true);
+    var tl = wrap(def.title, 820); ctx.fillStyle = C.navy; ctx.textAlign = 'center';
+    tl.forEach(function (l, i) { ctx.fillText(l, 640, 318 + i * 44 - (tl.length - 1) * 10); });
+    ctx.font = F(15, 600); ctx.fillStyle = C.muted; ctx.fillText('Explication du prof · Architectures de données modernes', 640, 412);
+    ctx.textAlign = 'left'; ctx.restore();
+  }
+  /* « À retenir » */
+  if (o.phase === 'retenir' && o.a > 0) {
+    ctx.save(); ctx.globalAlpha = o.a;
+    ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(ANI.x - 8, ANI.y - 8, 720 * ANI.s + 16, 420 * ANI.s + 16);
+    var rt = strip(def.retenir).replace(/^./, function (c) { return c.toUpperCase(); });
+    ctx.font = F(26); var nl = wrap(rt, 730).length, bh = 110 + nl * 36, by = ANI.y + 260 - bh / 2;
+    ctx.fillStyle = C.greenSoft; ctx.strokeStyle = C.green; ctx.lineWidth = 3; rr(74, by, 793, bh, 16); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = C.green; ctx.font = F(24, 700); ctx.fillText('À retenir', 106, by + 46);
+    fitText(rt, 106, by + 90, 730, 26, 18, 6, { lh: 1.38 });
+    ctx.restore();
+  }
+  /* progression */
+  ctx.fillStyle = C.blue; ctx.fillRect(0, VH - 4, VW * (o.prog || 0), 4);
+}
+window.shot = function (o, q) { frame(o); return cv.toDataURL('image/jpeg', q || .9); };
+window.shots = function (list, q) { return list.map(function (o) { return window.shot(o, q); }); };
+window.CARDS = ALL.map(function (x) { var d = x[0]; return { id: d.id, label: d.label, title: d.title, dur: d.dur, retenir: strip(d.retenir), narr: (TALK[d.id] || []) }; });
+document.fonts.ready.then(function () { couleurs(); window.PRET = true; });
+</script>
+</body>
+</html>
